@@ -8,8 +8,11 @@ so the same code runs locally and on EC2 — only the env values change.
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+_INSECURE_SECRET_DEFAULT = "django-insecure-dev-key-change-me-in-production"
 
 # --- Environment ------------------------------------------------------------
 env = environ.Env()
@@ -21,10 +24,7 @@ if env_file.exists():
 ENV = env("ENV", default="local")
 IS_PRODUCTION = ENV == "production"
 
-SECRET_KEY = env(
-    "DJANGO_SECRET_KEY",
-    default="django-insecure-dev-key-change-me-in-production",
-)
+SECRET_KEY = env("DJANGO_SECRET_KEY", default=_INSECURE_SECRET_DEFAULT)
 DEBUG = env.bool("DJANGO_DEBUG", default=not IS_PRODUCTION)
 
 ALLOWED_HOSTS = env.list(
@@ -125,6 +125,12 @@ CORS_ALLOWED_ORIGINS = env.list(
 )
 
 # --- DRF --------------------------------------------------------------------
+# Throttling protects the (unauthenticated) Gemini-backed endpoints from abuse
+# that would burn the API budget. Rates are configurable via .env.
+# NOTE: throttle counters use Django's cache. The default LocMemCache is
+# per-process, so with multiple gunicorn workers the effective limit is
+# rate × workers. For accurate limits in production, configure a shared cache
+# (Redis/Memcached).
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
@@ -132,10 +138,28 @@ REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": env("THROTTLE_ANON", default="60/min"),
+        "generate": env("THROTTLE_GENERATE", default="20/min"),
+    },
 }
 
 # --- Production hardening ---------------------------------------------------
 if IS_PRODUCTION:
+    # Fail fast on misconfiguration rather than silently running insecure.
+    if DEBUG:
+        raise ImproperlyConfigured(
+            "DJANGO_DEBUG must be False in production. Set ENV=production and "
+            "DJANGO_DEBUG=false in the server .env."
+        )
+    if SECRET_KEY == _INSECURE_SECRET_DEFAULT:
+        raise ImproperlyConfigured(
+            "DJANGO_SECRET_KEY must be set to a unique secret value in production."
+        )
+
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

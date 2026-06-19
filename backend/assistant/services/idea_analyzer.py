@@ -23,6 +23,7 @@ _ANALYSIS_SCHEMA = {
         "extra_info_teaser": {"type": "string"},
         "concept_teaser": {"type": "string"},
         "practice_teaser": {"type": "string"},
+        "creative_teaser": {"type": "string"},
     },
     "required": ["story", "extra_info"],
 }
@@ -57,6 +58,9 @@ Return JSON with:
   teasing line. If extra_info is false, return "".
 - "concept_teaser" (string): a teaser for the single most powerful idea in the verses.
 - "practice_teaser" (string): a teaser for today's practice, framed as a tempting dare.
+- "creative_teaser" (string): a teaser for a fun, universal video about the everyday
+  life lesson behind the verse — secular, for everyone, with NO mention of Buddhism,
+  scripture, or the verse itself.
 
 CRITICAL: Do not stretch to find a story or fact. It is completely normal and
 expected for many days to have NEITHER. Only flag them when the material clearly,
@@ -93,18 +97,41 @@ def _heuristic(dc: DayContent) -> dict:
         "extra_info_teaser": "A surprising detail from the texts." if has_info else "",
         "concept_teaser": "Explain the idea behind today's verses.",
         "practice_teaser": "Invite viewers to today's practice.",
+        "creative_teaser": "An everyday take on today's lesson — for everyone.",
     }
 
 
+# Analysis is deterministic per day and the source repo is static between pulls,
+# so cache results to avoid a fresh Gemini call on every day-detail request.
+_analysis_cache: dict[int, dict] = {}
+
+
+def clear_cache() -> None:
+    """Drop cached analyses (call after the source repo is updated)."""
+    _analysis_cache.clear()
+
+
 def analyze(dc: DayContent) -> dict:
-    """Return the raw analysis dict (booleans + teasers)."""
+    """Return the raw analysis dict (booleans + teasers), cached per day."""
+    cached = _analysis_cache.get(dc.day)
+    if cached is not None:
+        return cached
+
     if not gemini.is_configured():
-        return _heuristic(dc)
+        # Heuristic is deterministic; safe to cache.
+        result = _heuristic(dc)
+        _analysis_cache[dc.day] = result
+        return result
+
     try:
-        return gemini.generate_json(_analysis_prompt(dc), schema=_ANALYSIS_SCHEMA)
+        result = gemini.generate_json(_analysis_prompt(dc), schema=_ANALYSIS_SCHEMA)
     except Exception:
-        # Never let analysis failure break the day endpoint.
+        # Never let analysis failure break the day endpoint — and don't cache a
+        # transient failure, so the next request can retry the LLM.
         return _heuristic(dc)
+
+    _analysis_cache[dc.day] = result
+    return result
 
 
 def available_ideas(dc: DayContent) -> list[dict]:
@@ -113,6 +140,7 @@ def available_ideas(dc: DayContent) -> list[dict]:
     teasers = {
         "concept": analysis.get("concept_teaser") or IDEAS["concept"]["blurb"],
         "practice": analysis.get("practice_teaser") or IDEAS["practice"]["blurb"],
+        "creative": analysis.get("creative_teaser") or IDEAS["creative"]["blurb"],
         "testimony": IDEAS["testimony"]["blurb"],
         "story": analysis.get("story_teaser") or IDEAS["story"]["blurb"],
         "extra_info": analysis.get("extra_info_teaser") or IDEAS["extra_info"]["blurb"],
@@ -121,5 +149,5 @@ def available_ideas(dc: DayContent) -> list[dict]:
     for key, meta in IDEAS.items():
         present = meta["always"] or bool(analysis.get(key))
         if present:
-            result.append({"key": key, "label": meta["label"], "teaser": teasers[key]})
+            result.append({"key": key, "label": meta["label"], "teaser": teasers.get(key) or meta["blurb"]})
     return result

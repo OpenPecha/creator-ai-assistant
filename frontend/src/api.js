@@ -21,8 +21,12 @@ async function request(path, options = {}) {
 export const api = {
   health: () => request("/health/"),
   getDay: (day) => request(`/days/${day}/`),
+  verseSummary: (payload) =>
+    request("/verse-summary/", { method: "POST", body: JSON.stringify(payload) }),
   generateScript: (payload) =>
     request("/script/", { method: "POST", body: JSON.stringify(payload) }),
+  generateStructure: (payload) =>
+    request("/structure/", { method: "POST", body: JSON.stringify(payload) }),
   generateAudio: (payload) =>
     request("/audio/", { method: "POST", body: JSON.stringify(payload) }),
 };

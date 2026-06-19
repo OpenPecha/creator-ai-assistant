@@ -30,6 +30,9 @@ _DASHES = "–—-"
 _RANGE_RE = re.compile(rf"(\d+)\.(\d+)\s*[{_DASHES}]\s*(?:(\d+)\.)?(\d+)")
 _SINGLE_RE = re.compile(r"(\d+)\.(\d+)")
 
+# Any Tibetan-script character (used to drop the Tibetan lines from the verse block).
+_TIBETAN_RE = re.compile(r"[ༀ-࿿]")
+
 
 class ContentError(Exception):
     """Raised when source content cannot be located or parsed."""
@@ -51,6 +54,7 @@ class DayContent:
     plan_markdown: str              # the day-plan file contents
     plan_file: str                  # repo-relative path used
     verse_syntheses: list[VerseSynthesis] = field(default_factory=list)
+    verses_text: list[str] = field(default_factory=list)  # English translation, one entry per verse
     is_variant: bool = False        # True if no exact N.md and a variant was used
 
     @property
@@ -61,6 +65,49 @@ class DayContent:
             if vs.available:
                 parts.append(f"### Verse {vs.verse_id}\n\n{vs.text}")
         return "\n\n---\n\n".join(parts)
+
+    @property
+    def verse_block(self) -> str:
+        """The English verse text, verses separated by a blank line."""
+        return "\n\n".join(self.verses_text)
+
+
+def extract_today_verses(plan_markdown: str) -> list[str]:
+    """Pull the English verse translation from the '## Today's Verses' section.
+
+    Each day plan has a "## Today's Verses" section with blockquotes that pair the
+    Tibetan root text with its English translation. We keep only the English lines,
+    grouped one entry per verse.
+    """
+    verses: list[str] = []
+    current: list[str] = []
+    in_section = False
+
+    for line in plan_markdown.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            if in_section:
+                break  # reached the next section
+            low = stripped.lower()
+            in_section = "today" in low and "verse" in low
+            continue
+        if not in_section:
+            continue
+        if stripped == "":
+            # blank line = boundary between verses
+            if current:
+                verses.append("\n".join(current))
+                current = []
+            continue
+        if stripped.startswith(">"):
+            text = stripped.lstrip(">").strip()
+            if not text or _TIBETAN_RE.search(text):
+                continue  # skip the intra-verse separator and Tibetan lines
+            current.append(text)
+
+    if current:
+        verses.append("\n".join(current))
+    return verses
 
 
 def _repo_path() -> Path:
@@ -194,15 +241,17 @@ def load_day_content(day: int) -> DayContent:
     repo = _repo_path()
 
     syntheses = [_load_verse_synthesis(vid) for vid in entry["verses"]]
+    plan_markdown = plan_path.read_text(encoding="utf-8")
 
     return DayContent(
         day=day,
         verses=entry["verses"],
         verses_label=entry["verses_label"],
         date=entry["date"],
-        plan_markdown=plan_path.read_text(encoding="utf-8"),
+        plan_markdown=plan_markdown,
         plan_file=str(plan_path.relative_to(repo)),
         verse_syntheses=syntheses,
+        verses_text=extract_today_verses(plan_markdown),
         is_variant=is_variant,
     )
 

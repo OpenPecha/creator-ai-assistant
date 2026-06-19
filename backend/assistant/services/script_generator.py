@@ -38,7 +38,26 @@ def strip_markdown(text: str) -> str:
     return t.strip()
 
 
-def generate(dc: DayContent, idea_key: str, duration_seconds: int, creator_notes: str = "") -> str:
+def _revision_block(previous: str, feedback: str) -> str:
+    return (
+        "\n\n## Revision request\n"
+        "You previously wrote this script:\n\n"
+        f'"""\n{previous.strip()[:6000]}\n"""\n\n'
+        f"The creator wants it improved: {feedback.strip()}\n\n"
+        "Rewrite the script with that change. Keep what already works and change "
+        "only what's needed. Return ONLY the full revised script."
+    )
+
+
+def generate(
+    dc: DayContent,
+    idea_key: str,
+    duration_seconds: int,
+    creator_notes: str = "",
+    *,
+    feedback: str = "",
+    previous: str = "",
+) -> str:
     if idea_key not in IDEAS:
         raise ValueError(f"Unknown idea: {idea_key!r}")
 
@@ -52,5 +71,9 @@ def generate(dc: DayContent, idea_key: str, duration_seconds: int, creator_notes
         "VERSE_SYNTHESIS": dc.synthesis_text or "(no per-verse commentary synthesis available)",
         "CREATOR_NOTES": creator_notes.strip() or "(the creator did not provide notes)",
     }
-    prompt = build_prompt(tokens, IDEAS[idea_key]["file"])
+    idea = IDEAS[idea_key]
+    shared = None if idea.get("self_contained") else "_shared.md"
+    prompt = build_prompt(tokens, idea["file"], shared=shared)
+    if feedback.strip() and previous.strip():
+        prompt += _revision_block(previous, feedback)
     return strip_markdown(gemini.generate_text(prompt))

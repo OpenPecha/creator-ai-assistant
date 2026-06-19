@@ -4,13 +4,25 @@ import "./App.css";
 
 const DURATIONS = [
   { label: "30 sec", value: 30 },
+  { label: "45 sec", value: 45 },
   { label: "60 sec", value: 60 },
   { label: "90 sec", value: 90 },
+];
+
+const OUTPUT_TYPES = [
+  { key: "script", label: "Video script", desc: "A ready-to-read spoken script." },
+  { key: "structure", label: "Video structure", desc: "A shot-by-shot plan: timed beats, on-screen visuals, and voiceover." },
+];
+
+const LANGUAGES = [
+  { key: "english", label: "English" },
+  { key: "hindi", label: "हिन्दी Hindi" },
 ];
 
 const IDEA_ICONS = {
   concept: "💡",
   practice: "🧘",
+  creative: "🎨",
   testimony: "🗣️",
   story: "📖",
   extra_info: "✨",
@@ -19,6 +31,7 @@ const IDEA_ICONS = {
 const IDEA_DESCRIPTIONS = {
   concept:    "A clear, simple explanation of today's teaching — great for educating your audience.",
   practice:   "Guide viewers through today's hands-on practice or challenge.",
+  creative:   "A fresh, universal video about the lesson behind it — for everyone, no scripture or Buddhist references.",
   testimony:  "You share your own personal experience or reflection with today's teaching.",
   story:      "Bring the teaching to life through a story or parable from the tradition.",
   extra_info: "A surprising detail, etymology, or lesser-known fact from the texts.",
@@ -57,6 +70,12 @@ export default function App() {
   const [day, setDay] = useState(null);
   const [ideaKey, setIdeaKey] = useState(null);
   const [creatorNotes, setCreatorNotes] = useState("");
+  const [pendingIdeas, setPendingIdeas] = useState(null);
+  const [otherLang, setOtherLang] = useState(null);
+  const [outputType, setOutputType] = useState("script");
+  const [duration, setDuration] = useState(null);
+  const [lastOutput, setLastOutput] = useState(null);
+  const [refineInput, setRefineInput] = useState("");
 
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
@@ -94,14 +113,67 @@ export default function App() {
     try {
       const data = await api.getDay(n);
       setDay(data.day);
+      setPendingIdeas(data.availableIdeas);
       const variantNote = data.isVariant ? " (using a draft variant)" : "";
       addMsg("assistant",
-        `Here's what I found for Day ${data.day}${variantNote}.\n\nPick the type of video you want to make:`,
-        { ideas: data.availableIdeas, dayMeta: { day: n, chapter: chapterFrom(data.versesLabel), verses: versesOnly(data.versesLabel), date: data.date } }
+        `Here's what I found for Day ${data.day}${variantNote}. Today's verses:`,
+        {
+          dayMeta: { day: n, chapter: chapterFrom(data.versesLabel), verses: versesOnly(data.versesLabel), date: data.date },
+          verseText: data.verseText,
+        }
       );
-      setStage("askIdea");
+      addMsg("assistant", "Want a quick, simple breakdown of today's verses? Pick a language:");
+      setStage("askLanguage");
     } catch (err) {
       fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const langName = (key) => (key === "hindi" ? "Hindi" : "English");
+
+  function showIdeas() {
+    addMsg("assistant", "Now, pick the type of video you want to make:", { ideas: pendingIdeas });
+    setStage("askIdea");
+  }
+
+  async function chooseLanguage(lang) {
+    const label = LANGUAGES.find((l) => l.key === lang)?.label || lang;
+    addMsg("user", label);
+    setBusy(true);
+    setStage("summarizing");
+    try {
+      const data = await api.verseSummary({ day, language: lang });
+      addMsg("assistant", "Here's a simple breakdown of today's verses:", { summaryPoints: data.points });
+      const other = lang === "hindi" ? "english" : "hindi";
+      setOtherLang(other);
+      addMsg("assistant", `Would you like this in ${langName(other)} as well?`);
+      setStage("askOtherLanguage");
+    } catch (err) {
+      fail(err);
+      setStage("askLanguage");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function chooseOtherLanguage(wantsIt) {
+    if (!wantsIt) {
+      addMsg("user", "No, continue");
+      showIdeas();
+      return;
+    }
+    addMsg("user", `Yes, in ${langName(otherLang)} too`);
+    setBusy(true);
+    setStage("summarizing");
+    try {
+      const data = await api.verseSummary({ day, language: otherLang });
+      addMsg("assistant", `Here it is in ${langName(otherLang)}:`, { summaryPoints: data.points });
+      showIdeas();
+    } catch (err) {
+      fail(err);
+      setStage("askOtherLanguage");
     } finally {
       setBusy(false);
     }
@@ -110,7 +182,14 @@ export default function App() {
   function chooseIdea(idea) {
     setIdeaKey(idea.key);
     addMsg("user", idea.label);
-    if (idea.key === "testimony") {
+    addMsg("assistant", "How would you like it?");
+    setStage("askOutputType");
+  }
+
+  function chooseOutputType(type) {
+    setOutputType(type);
+    addMsg("user", OUTPUT_TYPES.find((o) => o.key === type)?.label || type);
+    if (ideaKey === "testimony") {
       addMsg("assistant", "Perfect. Share a few notes about your own experience with today's teaching — or leave it blank and I'll write a gentle general reflection.");
       setStage("askTestimony");
     } else {
@@ -131,20 +210,50 @@ export default function App() {
     setStage("askDuration");
   }
 
-  async function chooseDuration(seconds) {
-    addMsg("user", `${seconds} seconds`);
+  async function generate({ seconds, feedback = "", previous = null, onErrorStage }) {
     setBusy(true);
     setStage("generating");
     try {
-      const data = await api.generateScript({ day, ideaKey, durationSeconds: seconds, creatorNotes });
-      addMsg("assistant", "Here's your script:", { scriptText: data.script });
+      if (outputType === "structure") {
+        const payload = { day, ideaKey, durationSeconds: seconds, creatorNotes };
+        if (feedback) { payload.feedback = feedback; payload.previous = previous; }
+        const data = await api.generateStructure(payload);
+        addMsg("assistant", feedback ? "Here's the updated structure:" : "Here's your video structure:", { structure: data.structure });
+        setLastOutput(data.structure);
+      } else {
+        const payload = { day, ideaKey, durationSeconds: seconds, creatorNotes };
+        if (feedback) { payload.feedback = feedback; payload.previous = previous; }
+        const data = await api.generateScript(payload);
+        addMsg("assistant", feedback ? "Here's the updated script:" : "Here's your script:", { scriptText: data.script });
+        setLastOutput(data.script);
+      }
       setStage("done");
     } catch (err) {
       fail(err);
-      setStage("askDuration");
+      setStage(onErrorStage);
     } finally {
       setBusy(false);
     }
+  }
+
+  function chooseDuration(seconds) {
+    setDuration(seconds);
+    addMsg("user", `${seconds} seconds`);
+    generate({ seconds, onErrorStage: "askDuration" });
+  }
+
+  function regenerate() {
+    addMsg("user", "Regenerate");
+    generate({ seconds: duration, onErrorStage: "done" });
+  }
+
+  function submitRefine(e) {
+    e?.preventDefault();
+    const fb = refineInput.trim();
+    if (!fb) return;
+    addMsg("user", fb);
+    setRefineInput("");
+    generate({ seconds: duration, feedback: fb, previous: lastOutput, onErrorStage: "done" });
   }
 
   async function makeAudio(scriptText, messageId) {
@@ -164,6 +273,12 @@ export default function App() {
     setDay(null);
     setIdeaKey(null);
     setCreatorNotes("");
+    setPendingIdeas(null);
+    setOtherLang(null);
+    setOutputType("script");
+    setDuration(null);
+    setLastOutput(null);
+    setRefineInput("");
     addMsg("assistant", "Let's make another one! Which day are you filming? (1–365)");
   }
 
@@ -190,6 +305,36 @@ export default function App() {
           </div>
         )}
 
+        {!busy && stage === "askLanguage" && (
+          <div className="choices">
+            {LANGUAGES.map((l) => (
+              <button key={l.key} className="chip" onClick={() => chooseLanguage(l.key)}>{l.label}</button>
+            ))}
+          </div>
+        )}
+
+        {!busy && stage === "askOtherLanguage" && (
+          <div className="choices">
+            <button className="chip" onClick={() => chooseOtherLanguage(true)}>Yes, in {langName(otherLang)} too</button>
+            <button className="chip chip--ghost" onClick={() => chooseOtherLanguage(false)}>No, continue</button>
+          </div>
+        )}
+
+        {!busy && stage === "askOutputType" && (
+          <div className="ideas">
+            {OUTPUT_TYPES.map((o) => (
+              <button key={o.key} className="idea-card" onClick={() => chooseOutputType(o.key)}>
+                <span className="idea-card__icon">{o.key === "structure" ? "🎬" : "📝"}</span>
+                <span className="idea-card__body">
+                  <span className="idea-card__label">{o.label}</span>
+                  <span className="idea-card__desc">{o.desc}</span>
+                </span>
+                <span className="idea-card__arrow">›</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {!busy && stage === "askDuration" && (
           <div className="choices">
             {DURATIONS.map((d) => (
@@ -200,7 +345,8 @@ export default function App() {
 
         {!busy && stage === "done" && (
           <div className="choices">
-            <button className="chip chip--ghost" onClick={restart}>↻ Make another video</button>
+            <button className="chip" onClick={regenerate}>↻ Regenerate</button>
+            <button className="chip chip--ghost" onClick={restart}>+ Make another video</button>
           </div>
         )}
       </main>
@@ -244,15 +390,95 @@ export default function App() {
           </form>
         )}
 
-        {(stage === "askIdea" || stage === "askDuration" || stage === "generating" || stage === "done") && (
+        {stage === "done" && (
+          <form onSubmit={submitRefine} className="composer__form">
+            <textarea
+              ref={inputRef}
+              rows={2}
+              placeholder={`Ask for a change — e.g. "make the hook punchier" or "shorten the opening"…`}
+              value={refineInput}
+              onChange={(e) => setRefineInput(e.target.value)}
+              disabled={busy}
+            />
+            <div className="composer__actions">
+              <button type="submit" className="send-btn" disabled={busy || !refineInput.trim()}>
+                <SendIcon />
+              </button>
+            </div>
+          </form>
+        )}
+
+        {(stage === "askLanguage" || stage === "askOtherLanguage" || stage === "summarizing" || stage === "askIdea" || stage === "askOutputType" || stage === "askDuration" || stage === "generating") && (
           <p className="composer__hint">
+            {stage === "askLanguage" && "Choose a language above"}
+            {stage === "askOtherLanguage" && "Choose an option above"}
+            {stage === "summarizing" && "Summarizing today's verses…"}
             {stage === "askIdea" && "Choose a video idea above"}
+            {stage === "askOutputType" && "Choose script or structure above"}
             {stage === "askDuration" && "Choose a duration above"}
-            {stage === "generating" && "Generating your script…"}
-            {stage === "done" && "Script ready — copy, edit, or generate audio above"}
+            {stage === "generating" && (outputType === "structure" ? "Building your video structure…" : "Generating your script…")}
           </p>
         )}
       </footer>
+    </div>
+  );
+}
+
+function structureToText(s) {
+  const lines = [`Core theme: ${s.coreTheme}`, `Concept: "${s.concept}"`, ""];
+  (s.sections || []).forEach((sec) => {
+    lines.push(`[${sec.label} · ${sec.timeRange}]`);
+    lines.push("On screen:");
+    (sec.visuals || []).forEach((v) => lines.push(`  - ${v}`));
+    lines.push(`Voiceover: ${sec.voiceover}`);
+    lines.push("");
+  });
+  return lines.join("\n").trim();
+}
+
+function StructureView({ structure }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(structureToText(structure));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+
+  return (
+    <div className="structure">
+      <div className="structure__meta">
+        <div className="structure__row">
+          <span className="structure__key">Core theme</span>
+          <span className="structure__val">{structure.coreTheme}</span>
+        </div>
+        <div className="structure__row">
+          <span className="structure__key">Concept</span>
+          <span className="structure__val structure__concept">"{structure.concept}"</span>
+        </div>
+      </div>
+
+      {(structure.sections || []).map((sec, i) => (
+        <div key={i} className="beat">
+          <div className="beat__head">
+            <span className="beat__label">{sec.label}</span>
+            <span className="beat__time">{sec.timeRange}</span>
+          </div>
+          <div className="beat__block">
+            <span className="beat__tag">On screen</span>
+            <ul className="beat__visuals">
+              {(sec.visuals || []).map((v, j) => <li key={j}>{v}</li>)}
+            </ul>
+          </div>
+          <div className="beat__block">
+            <span className="beat__tag">Voiceover</span>
+            <p className="beat__vo">{sec.voiceover}</p>
+          </div>
+        </div>
+      ))}
+
+      <div className="script__actions">
+        <button className="chip" onClick={copy}>{copied ? "✓ Copied" : "Copy structure"}</button>
+      </div>
     </div>
   );
 }
@@ -294,6 +520,22 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
 
       <div className="bubble__text">{msg.content}</div>
 
+      {msg.verseText && (
+        <div className="verse-block">
+          {msg.verseText.split("\n\n").map((v, i) => (
+            <p key={i} className="verse-block__verse">{v}</p>
+          ))}
+        </div>
+      )}
+
+      {msg.summaryPoints && (
+        <ul className="summary-points">
+          {msg.summaryPoints.map((p, i) => (
+            <li key={i}>{p}</li>
+          ))}
+        </ul>
+      )}
+
       {msg.ideas && (
         <div className="ideas">
           {msg.ideas.map((idea) => (
@@ -309,6 +551,8 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
           ))}
         </div>
       )}
+
+      {msg.structure && <StructureView structure={msg.structure} />}
 
       {msg.scriptText && (
         <div className="script">

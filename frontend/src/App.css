@@ -169,6 +169,51 @@ body {
   40%           { transform: scale(1.1); opacity: 1; }
 }
 
+/* ── Verse block ── */
+.verse-block {
+  margin-top: 12px;
+  padding: 14px 18px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-hover);
+  border-radius: var(--radius-sm);
+}
+.verse-block__verse {
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  font-style: italic;
+  white-space: pre-wrap;
+}
+.verse-block__verse + .verse-block__verse { margin-top: 12px; }
+
+/* ── Verse summary points ── */
+.summary-points {
+  margin-top: 12px;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.summary-points li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.summary-points li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
 /* ── Idea cards ── */
 .ideas { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 
@@ -304,6 +349,83 @@ body {
   font-weight: 500;
 }
 .script__audio a:hover { text-decoration: underline; }
+
+/* ── Video structure (storyboard) ── */
+.structure { margin-top: 12px; }
+
+.structure__meta {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.structure__row { display: flex; flex-direction: column; gap: 2px; }
+.structure__key {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+.structure__val { font-size: 0.9rem; color: var(--ink); }
+.structure__concept { font-style: italic; color: var(--ink-soft); }
+
+.beat {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: var(--surface);
+}
+.beat__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.beat__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.beat__time {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+.beat__block { margin-top: 8px; }
+.beat__tag {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-muted);
+  margin-bottom: 4px;
+}
+.beat__visuals {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.beat__visuals li { font-size: 0.86rem; color: var(--ink-soft); line-height: 1.5; }
+.beat__vo {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
 
 /* ── Composer ── */
 .composer {
