@@ -1,0 +1,22 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Seed of Life: fill union of 7 circles with red to create the natural flower boundary -->
+  <g fill="#C41717" stroke="none">
+    <circle cx="50"   cy="50"    r="22"/>
+    <circle cx="72"   cy="50"    r="22"/>
+    <circle cx="61"   cy="30.95" r="22"/>
+    <circle cx="39"   cy="30.95" r="22"/>
+    <circle cx="28"   cy="50"    r="22"/>
+    <circle cx="39"   cy="69.05" r="22"/>
+    <circle cx="61"   cy="69.05" r="22"/>
+  </g>
+  <!-- White strokes creating the mandala line pattern -->
+  <g fill="none" stroke="white" stroke-width="2.2">
+    <circle cx="50"   cy="50"    r="22"/>
+    <circle cx="72"   cy="50"    r="22"/>
+    <circle cx="61"   cy="30.95" r="22"/>
+    <circle cx="39"   cy="30.95" r="22"/>
+    <circle cx="28"   cy="50"    r="22"/>
+    <circle cx="39"   cy="69.05" r="22"/>
+    <circle cx="61"   cy="69.05" r="22"/>
+  </g>
+</svg>
