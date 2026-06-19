@@ -30,19 +30,38 @@ _ANALYSIS_SCHEMA = {
 
 def _analysis_prompt(dc: DayContent) -> str:
     return f"""Analyze the source material for Day {dc.day} (verses {dc.verses_label}) of a
-Buddhist video series. Decide which short-video ideas it can genuinely support.
+Buddhist short-video series. Decide which video ideas it can genuinely support,
+and write an irresistible one-line teaser for each — the hook a creator would put
+on the thumbnail.
+
+Teaser craft (this matters):
+- Make a creator think "ooh, I want to make THAT." Curiosity, a bold claim, a
+  surprise, or a relatable sting — not a dry summary.
+- Specific and human. No "explore the concept of" or "learn about" openers. No
+  clichés. Talk like a real person, max ~12 words.
+- Base every teaser on what's actually in the source. Tease, don't fabricate.
 
 Return JSON with:
-- "story" (bool): true ONLY if the material contains a narrative, parable, sūtra
-  anecdote, or vivid analogy that could anchor a story video.
-- "story_teaser" (string): if story is true, one short line naming/teasing it.
-- "extra_info" (bool): true ONLY if there is a surprising detail, scholastic
-  distinction, etymology, or lesser-known fact worth a "fun fact" video.
-- "extra_info_teaser" (string): if extra_info is true, one short teasing line.
-- "concept_teaser" (string): one short line teasing the core concept of the verses.
-- "practice_teaser" (string): one short line teasing today's practice challenge.
+- "story" (bool): true ONLY if the material contains an ACTUAL self-contained
+  story you could retell — a sūtra narrative with characters and events, a named
+  parable, or a teacher's illustrative anecdote. A passing simile ("like a candle")
+  or a one-word comparison is NOT a story. When in doubt, return false.
+- "story_teaser" (string): only if story is true — a teasing line hinting at the
+  story without spoiling it. If story is false, return "".
+- "extra_info" (bool): true ONLY if there's a genuinely surprising, concrete fact
+  a viewer wouldn't already assume — a scholastic distinction, an etymology, a
+  scriptural cross-reference, a historical detail. General explanation of the
+  verse's meaning does NOT count (that's the Concept video). When in doubt,
+  return false.
+- "extra_info_teaser" (string): only if extra_info is true — a "wait, what?"
+  teasing line. If extra_info is false, return "".
+- "concept_teaser" (string): a teaser for the single most powerful idea in the verses.
+- "practice_teaser" (string): a teaser for today's practice, framed as a tempting dare.
 
-Be honest — only flag story/extra_info as true if the material really supports it.
+CRITICAL: Do not stretch to find a story or fact. It is completely normal and
+expected for many days to have NEITHER. Only flag them when the material clearly,
+unmistakably supports a whole video on it. A weak or forced option is worse than
+no option — default to false.
 
 --- DAY PLAN ---
 {dc.plan_markdown}
@@ -53,15 +72,25 @@ Be honest — only flag story/extra_info as true if the material really supports
 
 
 def _heuristic(dc: DayContent) -> dict:
+    """Conservative fallback when Gemini is unavailable.
+
+    Requires strong, specific signals — better to hide a borderline option than
+    to offer a forced one.
+    """
     text = (dc.plan_markdown + "\n" + dc.synthesis_text).lower()
-    story_markers = ["sūtra", "sutra", "story", "parable", "analogy", "like a", "once ", "tells"]
-    info_markers = ["distinction", "etymolog", "literally means", "originally", "scholastic",
-                    "cites", "citation", "in fact", "technically"]
+    # Story: needs an explicit narrative source, not just a simile.
+    story_markers = ["sūtra", "sutra", "parable", "jātaka", "jataka", "tells the story",
+                     "the story of", "a story", "once, ", "there was a"]
+    # Extra info: needs an explicit scholastic/etymological/citation signal.
+    info_markers = ["distinction between", "etymolog", "literally means",
+                    "the term ", "scholastic", "commentators note", "cross-reference"]
+    has_story = any(m in text for m in story_markers)
+    has_info = any(m in text for m in info_markers)
     return {
-        "story": any(m in text for m in story_markers),
-        "story_teaser": "A story or analogy from today's verses.",
-        "extra_info": any(m in text for m in info_markers),
-        "extra_info_teaser": "A surprising detail from the texts.",
+        "story": has_story,
+        "story_teaser": "A story from today's verses." if has_story else "",
+        "extra_info": has_info,
+        "extra_info_teaser": "A surprising detail from the texts." if has_info else "",
         "concept_teaser": "Explain the idea behind today's verses.",
         "practice_teaser": "Invite viewers to today's practice.",
     }

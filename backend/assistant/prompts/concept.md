@@ -1,14 +1,19 @@
-# Idea: Concept — explain the verses
+# Idea: Concept — make one big idea click
 
-Write a script that explains the core idea behind today's verses so a complete
-beginner understands it.
+Take the single most powerful idea in today's verses and make a total beginner
+*feel* it click — that little "oh… OH" moment.
 
-- Open with a relatable hook or a small everyday situation that the concept speaks to.
-- Explain ONE central concept from the verses — not everything. Pick the single
-  most important point and make it clear.
-- Use the verses themselves as the anchor: paraphrase what Śāntideva is saying in
-  plain words. You may quote a short line if it lands well.
-- Close by connecting the concept back to the viewer's own life in one sentence.
+- **Find the one idea.** Not three, not "everything Śāntideva covers" — the one
+  that would change how someone sees their day. Build the whole script around it.
+- **Open with the itch.** A relatable moment, a question they've quietly asked
+  themselves, or a wrong assumption everyone makes. Make them think "wait, that's
+  me." THEN bring in what Śāntideva says.
+- **Translate, don't quote-dump.** Put his point in words a 15-year-old gets. A
+  short quoted line is great IF it hits harder than your paraphrase — otherwise
+  say it your way.
+- **Use a everyday metaphor** the source supports or that's obviously fair to the
+  idea — something visual they'll remember at 3pm tomorrow.
+- **Land it personally.** Close by turning the idea back on the viewer's own life
+  in one clean line. Don't moralize. Let them finish the thought themselves.
 
-Keep it about the meaning. Do not turn it into a practice instruction — that is a
-different video.
+Stay on meaning, not instructions — leave the "what to do" to the practice video.

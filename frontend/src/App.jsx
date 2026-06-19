@@ -16,8 +16,26 @@ const IDEA_ICONS = {
   extra_info: "✨",
 };
 
+const IDEA_DESCRIPTIONS = {
+  concept:    "A clear, simple explanation of today's teaching — great for educating your audience.",
+  practice:   "Guide viewers through today's hands-on practice or challenge.",
+  testimony:  "You share your own personal experience or reflection with today's teaching.",
+  story:      "Bring the teaching to life through a story or parable from the tradition.",
+  extra_info: "A surprising detail, etymology, or lesser-known fact from the texts.",
+};
+
 let msgId = 0;
 const nextId = () => ++msgId;
+
+// Extract the chapter number from a verse label like "1.6–1.8" or "Prologue, 1.1–1.3".
+const chapterFrom = (label) => {
+  const m = String(label || "").match(/(\d+)\.\d+/);
+  return m ? m[1] : "—";
+};
+
+// Strip the chapter prefix so "1.15–1.16" shows as "15–16".
+const versesOnly = (label) =>
+  String(label || "").replace(/(\d+)\.(\d+)/g, "$2");
 
 function SendIcon() {
   return (
@@ -79,7 +97,7 @@ export default function App() {
       const variantNote = data.isVariant ? " (using a draft variant)" : "";
       addMsg("assistant",
         `Here's what I found for Day ${data.day}${variantNote}.\n\nPick the type of video you want to make:`,
-        { ideas: data.availableIdeas, dayMeta: { day: n, verses: data.versesLabel, date: data.date } }
+        { ideas: data.availableIdeas, dayMeta: { day: n, chapter: chapterFrom(data.versesLabel), verses: versesOnly(data.versesLabel), date: data.date } }
       );
       setStage("askIdea");
     } catch (err) {
@@ -258,6 +276,11 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
           </div>
           <div className="day-badge__divider" />
           <div className="day-badge__item">
+            <span className="day-badge__label">Chapter</span>
+            <span className="day-badge__value">{msg.dayMeta.chapter}</span>
+          </div>
+          <div className="day-badge__divider" />
+          <div className="day-badge__item">
             <span className="day-badge__label">Verses</span>
             <span className="day-badge__value">{msg.dayMeta.verses}</span>
           </div>
@@ -278,7 +301,8 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
               <span className="idea-card__icon">{IDEA_ICONS[idea.key] || "▸"}</span>
               <span className="idea-card__body">
                 <span className="idea-card__label">{idea.label}</span>
-                <span className="idea-card__teaser">{idea.teaser}</span>
+                <span className="idea-card__desc">{IDEA_DESCRIPTIONS[idea.key]}</span>
+                <span className="idea-card__teaser">Today: {idea.teaser}</span>
               </span>
               <span className="idea-card__arrow">›</span>
             </button>

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from . import gemini
 from .content_loader import DayContent
 from .ideas import IDEAS, build_prompt
@@ -12,6 +14,28 @@ WORDS_PER_SECOND = 2.5
 
 def target_words(duration_seconds: int) -> int:
     return max(20, round(duration_seconds * WORDS_PER_SECOND))
+
+
+def strip_markdown(text: str) -> str:
+    """Remove markdown formatting so the script is clean spoken plain text.
+
+    The model is told not to use markdown, but occasionally slips in emphasis.
+    This is the reliable safety net.
+    """
+    t = text
+    # Bold/italic: **word**, *word*, __word__, _word_ -> word
+    t = re.sub(r"\*\*(.+?)\*\*", r"\1", t)
+    t = re.sub(r"(?<!\w)\*(?!\s)(.+?)(?<!\s)\*(?!\w)", r"\1", t)
+    t = re.sub(r"__(.+?)__", r"\1", t)
+    t = re.sub(r"(?<!\w)_(?!\s)(.+?)(?<!\s)_(?!\w)", r"\1", t)
+    # Inline code / backticks
+    t = t.replace("`", "")
+    # Leading heading hashes and list bullets at line starts
+    t = re.sub(r"(?m)^\s{0,3}#{1,6}\s+", "", t)
+    t = re.sub(r"(?m)^\s*[-*+]\s+", "", t)
+    # Any stray remaining asterisks/underscores used as emphasis
+    t = t.replace("*", "")
+    return t.strip()
 
 
 def generate(dc: DayContent, idea_key: str, duration_seconds: int, creator_notes: str = "") -> str:
@@ -29,4 +53,4 @@ def generate(dc: DayContent, idea_key: str, duration_seconds: int, creator_notes
         "CREATOR_NOTES": creator_notes.strip() or "(the creator did not provide notes)",
     }
     prompt = build_prompt(tokens, IDEAS[idea_key]["file"])
-    return gemini.generate_text(prompt)
+    return strip_markdown(gemini.generate_text(prompt))

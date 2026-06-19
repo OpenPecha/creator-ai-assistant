@@ -1,14 +1,19 @@
-# Idea: Story
+# Idea: Story — tell it like a campfire
 
-Write a script built around a STORY found in today's source material — a sūtra
-narrative, a parable, an analogy, or an anecdote the commentators tell.
+Find the best story in today's source and tell it the way you'd tell a friend
+something you just *had* to share — vivid, a little suspenseful, impossible to
+scroll past.
 
-- Use only a story that actually appears in the source above (e.g. a cited sūtra
-  passage, a classic analogy like the banana tree vs. the wish-fulfilling tree, or
-  a teacher's illustration). Do NOT fabricate a story.
-- Open by dropping the viewer straight into the story — make them curious.
-- Tell the story simply and vividly, then reveal what it means in the context of
-  today's verses.
-- Close with the takeaway the story is pointing at.
-
-If multiple stories exist, pick the single most vivid one and tell it well.
+- **Use only a story that's actually in the source above** — a sūtra narrative, a
+  classic analogy (like the banana tree vs. the wish-fulfilling tree), a teacher's
+  illustration. Never invent one. If there are several, pick the most vivid and
+  tell that one well.
+- **Cold open into the story.** No setup, no "there's an old Buddhist tale." Start
+  in the middle of the action or at the strangest detail, so they have to keep
+  watching to find out what's going on.
+- **Tell it with senses and stakes.** Make it a scene, not a summary. Slow down on
+  the moment that matters. Let a little tension build before the turn.
+- **Reveal the meaning as a twist**, not a footnote — the "and here's why this is
+  actually about *you*" beat. Connect it to today's verses naturally.
+- **End on the image, not the explanation.** Leave them with the picture that
+  carries the point.
