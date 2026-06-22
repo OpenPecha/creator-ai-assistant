@@ -67,6 +67,7 @@ export default function App() {
   const [duration, setDuration] = useState(null);
   const [lastOutput, setLastOutput] = useState(null);
   const [refineInput, setRefineInput] = useState("");
+  const [idleZen, setIdleZen] = useState(false);
 
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
@@ -88,6 +89,24 @@ export default function App() {
   useEffect(() => {
     if (!busy) setTimeout(() => inputRef.current?.focus(), 50);
   }, [busy, stage]);
+
+  // Idle Zen: after 60s of no interaction, invite a quiet breathing pause.
+  // The moment the user moves — mouse, key, scroll, touch — it fades away.
+  useEffect(() => {
+    let timer;
+    const arm = () => {
+      clearTimeout(timer);
+      setIdleZen(false);
+      timer = setTimeout(() => setIdleZen(true), 60_000);
+    };
+    const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "wheel"];
+    events.forEach((e) => window.addEventListener(e, arm, { passive: true }));
+    arm();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((e) => window.removeEventListener(e, arm));
+    };
+  }, []);
 
   const fail = (err) => addMsg("assistant", `Something went wrong: ${err.message}`, { error: true });
 
@@ -411,6 +430,14 @@ export default function App() {
           </p>
         )}
       </footer>
+
+      {idleZen && (
+        <div className="zen" onClick={() => setIdleZen(false)} role="presentation">
+          <div className="zen__breath" />
+          <p className="zen__cue">breathe</p>
+          <p className="zen__hint">take a breath — move to return</p>
+        </div>
+      )}
     </div>
   );
 }

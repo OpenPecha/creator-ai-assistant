@@ -546,7 +546,7 @@ body {
 /* hide native number spinners */
 .composer__form input[type=number]::-webkit-inner-spin-button,
 .composer__form input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-.composer__form input[type=number] { -moz-appearance: textfield; }
+.composer__form input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
 .composer__actions {
   display: flex;
@@ -618,4 +618,57 @@ body {
   width: 1px;
   background: #bfdbfe;
   flex-shrink: 0;
+}
+
+/* Idle Zen — a quiet breathing pause after 60s of stillness. */
+.zen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  cursor: pointer;
+  background: rgba(247, 246, 243, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: zen-in 1.6s ease forwards;
+}
+@keyframes zen-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.zen__breath {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, #dbeafe 0%, #bfdbfe 60%, #93c5fd 100%);
+  box-shadow: 0 0 50px 10px rgba(147, 197, 253, 0.45);
+  animation: zen-breathe 8s ease-in-out infinite;
+}
+@keyframes zen-breathe {
+  0%, 100% { transform: scale(0.55); opacity: 0.6; }   /* exhale, rest */
+  50%      { transform: scale(1.15); opacity: 1; }      /* full inhale */
+}
+.zen__cue {
+  font-size: 1.1rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #2563eb;
+  margin: 0;
+  animation: zen-cue 8s ease-in-out infinite;
+}
+@keyframes zen-cue {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 0.9; }
+}
+.zen__hint {
+  position: absolute;
+  bottom: 36px;
+  font-size: 0.8rem;
+  color: var(--accent-light);
+  letter-spacing: 0.02em;
+  margin: 0;
 }
