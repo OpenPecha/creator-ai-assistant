@@ -110,7 +110,7 @@ export default function App() {
         `Here's what I found for Day ${data.day}${variantNote}. Today's verses:`,
         {
           dayMeta: { day: n, chapter: chapterFrom(data.versesLabel), verses: versesOnly(data.versesLabel), date: data.date },
-          verseText: data.verseText,
+          verseLines: data.verseLines,
         }
       );
       addMsg("assistant", "Want a quick, simple breakdown of today's verses? Pick a language:");
@@ -624,13 +624,21 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
 
       <div className="bubble__text">{msg.content}</div>
 
-      {msg.verseText && (
-        <div className="verse-block">
-          {msg.verseText.split("\n\n").map((v, i) => (
-            <p key={i} className="verse-block__verse">{v}</p>
-          ))}
-        </div>
-      )}
+      {(() => {
+        const lines = msg.verseLines
+          || (msg.verseText ? msg.verseText.split("\n\n").map((t) => ({ n: "", text: t })) : null);
+        if (!lines || !lines.length) return null;
+        return (
+          <div className="verse-block">
+            {lines.map((v, i) => (
+              <div key={i} className="verse-line">
+                {v.n ? <span className="verse-line__num">{v.n}</span> : <span className="verse-line__dot" />}
+                <p className="verse-line__text">{v.text}</p>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
 
       {msg.summaryPoints && (
         <ul className="summary-points">

@@ -172,20 +172,50 @@ body {
 /* ── Verse block ── */
 .verse-block {
   margin-top: 12px;
-  padding: 14px 18px;
-  background: var(--bg);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--border-hover);
   border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
 }
-.verse-block__verse {
-  font-size: 0.92rem;
+.verse-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+}
+.verse-line + .verse-line { border-top: 1px solid var(--border); }
+.verse-line__num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin-top: 1px;
+  border-radius: 10px;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  color: #2563eb;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.verse-line__dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  margin-top: 11px;
+  margin-left: 9px;
+  margin-right: 9px;
+  border-radius: 50%;
+  background: var(--border-hover);
+}
+.verse-line__text {
+  flex: 1;
+  font-size: 0.93rem;
   line-height: 1.7;
-  color: var(--ink-soft);
-  font-style: italic;
+  color: var(--ink);
   white-space: pre-wrap;
 }
-.verse-block__verse + .verse-block__verse { margin-top: 12px; }
 
 /* ── Verse summary points ── */
 .summary-points {
