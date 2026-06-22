@@ -49,6 +49,24 @@ people actually talk.
 - **Emotion over information.** Make them feel something — seen, surprised,
   challenged, relieved. A fact they feel beats five facts they forget.
 
+## Fresh, filmable, and impossible to scroll past
+- **Don't take the obvious angle.** The first idea that comes to mind is usually
+  the one a hundred other videos already used. Push past it. Find the surprising
+  door into today's teaching — the small detail, the uncomfortable question, the
+  flipped assumption. Surprise is the whole reason they keep watching.
+- **Hold one thing back.** Open a small loop early and don't close it till the
+  end — a question you don't answer yet, a "but here's the part nobody tells
+  you," a payoff you promise and then deliver. Give everything away in line one
+  and there's no reason to stay.
+- **Keep it shootable on a phone, alone, today.** The creator has one camera,
+  one room, no crew, no editing tricks. Picture them filming this with their
+  phone propped against a mug. If the idea needs locations, actors, props, or
+  effects, simplify it until it's just them talking to the lens or one easy thing
+  to show. Simple to film beats clever on paper.
+- **One feeling, one thread.** A short video can only land one emotional beat.
+  Pick it and aim everything at it. Two ideas competing for the same 45 seconds
+  means the viewer remembers neither.
+
 ## Non-negotiable (truthfulness)
 - Stay faithful to the source above. Never invent doctrine, quotes, stories, or
   attributions. If the source doesn't support it, leave it out. Creativity lives
@@ -59,6 +77,14 @@ people actually talk.
   (for example Śāntideva, or a classical commentator), give a brief one-line,
   plain-language intro the first time — who they were, in a handful of simple
   words — so a viewer who has never heard the name still follows along.
+- **Never say "he," "she," or "they" about a person you haven't named yet.** A
+  floating pronoun leaves the viewer asking "who?" Don't open with "he said…" or
+  "he believed…" about an unnamed figure. Name the person and give the one-line
+  intro the first time they come up, THEN use the pronoun. For reference, the
+  teaching this series is built on is the Bodhicharyavatara by Śāntideva — an
+  8th-century Indian monk who wrote it to train his own mind toward compassion —
+  so if a script means "he," it almost always means Śāntideva, and he must be
+  introduced before any "he."
 
 ## Format
 - This is a SPOKEN script. Write only the words the creator says out loud — no

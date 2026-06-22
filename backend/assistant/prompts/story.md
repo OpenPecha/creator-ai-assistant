@@ -11,9 +11,18 @@ scroll past.
 - **Cold open into the story.** No setup, no "there's an old Buddhist tale." Start
   in the middle of the action or at the strangest detail, so they have to keep
   watching to find out what's going on.
+- **Pick the freshest way in.** Don't start where the story "officially" starts.
+  Open on the oddest image, the highest-stakes moment, or the character no one
+  usually notices, then circle back. The less expected the entry point, the harder
+  it is to scroll past.
 - **Tell it with senses and stakes.** Make it a scene, not a summary. Slow down on
-  the moment that matters. Let a little tension build before the turn.
+  the moment that matters. Let a little tension build before the turn — and plant
+  one question early ("why would anyone do that?") that you only answer at the end.
 - **Reveal the meaning as a twist**, not a footnote — the "and here's why this is
   actually about *you*" beat. Connect it to today's verses naturally.
 - **End on the image, not the explanation.** Leave them with the picture that
   carries the point.
+
+Keep it tellable to camera: this is one person recounting a story they love, not
+a film to stage. The whole thing should work with the creator just talking to the
+lens — no sets, no costumes, no props needed.

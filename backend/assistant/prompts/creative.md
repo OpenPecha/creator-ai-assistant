@@ -16,8 +16,16 @@ relate to — any background, any belief, no belief at all.
 - Pull out the underlying human lesson (for example: small good acts add up; you're
   not stuck with your past; starting tiny beats waiting for perfect) and build a
   simple, creative video around THAT.
+- **Find a fresh angle on it.** Skip the version everyone's seen. Flip the lesson,
+  come at it sideways, or open on the moment it bites in real life — the goal is
+  for the viewer to think "huh, never heard it put that way." If your first idea
+  feels familiar, push for the second or third.
+- **Hook in the first line and hold one thing back.** Open with the boldest or
+  most surprising line, then leave a small question hanging that the last line
+  answers — give them a reason to stay to the end.
 - Keep it SIMPLE and DOABLE for one creator with a phone — no crew, no effects, no
-  fancy production. Something they could film today.
+  fancy production. Picture them filming it alone, propping their phone against a
+  mug. If it needs actors, locations, or props, simplify until it doesn't.
 - Make it land for everyone, not a niche audience.
 
 ## Voice

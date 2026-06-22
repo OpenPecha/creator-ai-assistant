@@ -20,3 +20,12 @@ that makes someone pause the video and go "okay I did NOT know that."
   understanding or practice — the "so what" that turns trivia into insight.
 - **Keep it playful and a touch mischievous** — like you're letting them in on a
   secret. Curiosity is the whole game here.
+- **Withhold the reveal for a beat.** Tease that there's a secret ("there's a word
+  in here that changes the whole meaning") before you drop it, so they stay for the
+  payoff instead of bouncing once they've got the fact.
+- **Go for the freshest gem, not the famous one.** Skip the fact people have heard
+  a dozen times; dig for the detail even fans of this teaching would be surprised
+  by. The more unexpected, the more shareable.
+
+Keep it filmable as one person leaning in to tell you something cool — just the
+creator and the camera. No graphics or props required; the surprise does the work.

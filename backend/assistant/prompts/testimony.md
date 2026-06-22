@@ -13,6 +13,10 @@ testimonial."
 - **Open on the honest, unflattering moment.** Real testimony starts with the
   mess — the snap, the doubt, the time it didn't work — not the victory. That's
   what makes people trust it.
+- **Start with the line they'd never post.** The freshest, most stop-worthy
+  opener is the small confession most people keep to themselves — "I used to fake
+  being calm," "I almost didn't try this." Drop it in the first breath, raw and
+  specific, and the viewer leans in because it feels true.
 - **Keep the texture of real speech.** Small hesitations, a plain detail, an
   imperfect ending. If it sounds too clean, it sounds fake. Let it breathe.
 - **Tie it to today's verse or practice** — show how the teaching actually showed
@@ -22,3 +26,7 @@ testimonial."
 - **If the notes are thin,** write a gentle, genuinely relatable reflection in the
   first person that they can easily make their own — true and human, but never
   fabricating specific events.
+
+This is the easiest format to film — just the creator, talking straight to the
+camera about something real. Keep it that simple; it needs nothing but their face
+and their honesty.
