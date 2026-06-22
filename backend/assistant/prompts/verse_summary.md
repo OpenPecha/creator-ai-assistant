@@ -6,21 +6,25 @@ Bodhicharyavatara.
 Read ONLY the verse text below. Don't bring in outside stories, history, or
 teachings.
 
-Your job: pull out the KEY POINTS of the verse and list them as short, clear bullet
-points — like quick notes someone would jot down. Just say what the verse points
-at, point by point.
-
-What NOT to do:
-- Do NOT explain, interpret, or add "why it matters." Just the points themselves.
-- Do NOT go line by line restating each line. Consolidate into the real key points.
-- Do NOT pad with wind-up like "this verse says…" or "it means that…".
+Your job: explain the verse simply — break it into its key ideas and put each one
+in clear, plain words a beginner instantly gets. Like a friend explaining what the
+verse is really saying, one idea at a time.
 
 How to write each point:
-- Short and direct — a key point, not a sentence of explanation. A few words up to
-  one short line.
+- One clear idea per point, said in plain everyday words. Don't just label the
+  idea — give its real meaning simply, so the reader actually understands it.
+- Keep it short and easy: usually one line, two at most. Warm and direct.
 - Small, everyday words a 12-year-old gets. No jargon, no Sanskrit. If the verse
   uses a special term, put it in plain words.
-- Faithful to the verse — don't add anything it doesn't actually say.
+- No Buddhist lingo and no lofty or poetic epithets. Don't write things like
+  "enlightened heroes," "great beings," "awakened ones," or "bodhisattvas." Just
+  describe in plain, ordinary words who or what is meant — for example "people who
+  devote themselves to helping everyone" — so a complete newcomer follows without
+  knowing any Buddhist vocabulary.
+- Faithful to the verse — explain only what it actually says. Don't add outside
+  stories, history, or teachings.
+- Don't go line by line restating the verse, and don't pad with wind-up like
+  "this verse says…" — just give the idea directly.
 - Aim for 3 to 5 points. Plain text only — no markdown, asterisks, or symbols.
 
 Write every point in {{LANGUAGE}}.

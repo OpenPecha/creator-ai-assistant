@@ -415,6 +415,29 @@ export default function App() {
   );
 }
 
+// Force a real file download. The <a download> attribute is ignored for
+// cross-origin URLs (the audio is served from the backend origin), so we fetch
+// the file as a blob and download that instead — which keeps it on-page.
+async function downloadAudio(url, filename) {
+  const name = filename || url.split("/").pop() || "audio.wav";
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    // Last resort if the fetch fails: open the file directly.
+    window.open(url, "_blank", "noopener");
+  }
+}
+
 // Normalize a section to a list of options (handles older single-option shape).
 function sectionOptions(sec) {
   if (Array.isArray(sec.options) && sec.options.length) return sec.options;
@@ -438,11 +461,24 @@ function structureToText(s, sel = {}) {
 function StructureView({ structure }) {
   const [copied, setCopied] = useState(false);
   const [sel, setSel] = useState({});   // section index -> chosen option index
+  const [vo, setVo] = useState({});      // "beat:option" -> { url, loading, error }
 
   const copy = () => {
     navigator.clipboard.writeText(structureToText(structure, sel));
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
+  };
+
+  const makeVO = async (key, text) => {
+    const line = (text || "").trim();
+    if (!line) return;
+    setVo((v) => ({ ...v, [key]: { ...v[key], loading: true, error: null } }));
+    try {
+      const data = await api.generateAudio({ script: line });
+      setVo((v) => ({ ...v, [key]: { url: data.audioUrl, loading: false, error: null } }));
+    } catch (err) {
+      setVo((v) => ({ ...v, [key]: { ...v[key], loading: false, error: err.message } }));
+    }
   };
 
   return (
@@ -499,6 +535,46 @@ function StructureView({ structure }) {
             <div className="beat__block">
               <span className="beat__tag">Voiceover</span>
               <p className="beat__vo">{opt.voiceover}</p>
+              {(() => {
+                const key = `${i}:${idx}`;
+                const state = vo[key] || {};
+                const hasText = !!(opt.voiceover || "").trim();
+                return (
+                  <div className="beat__audio">
+                    {!state.url && (
+                      <button
+                        type="button"
+                        className="chip"
+                        disabled={!hasText || state.loading}
+                        onClick={() => makeVO(key, opt.voiceover)}
+                      >
+                        {state.loading ? "Generating…" : "🔊 Generate audio"}
+                      </button>
+                    )}
+                    {state.url && (
+                      <div className="script__audio">
+                        <audio controls src={state.url} />
+                        <button
+                          type="button"
+                          className="chip"
+                          onClick={() => downloadAudio(state.url, `voiceover-${sec.label || "beat"}-${idx + 1}.wav`)}
+                        >
+                          ↓ Download
+                        </button>
+                        <button
+                          type="button"
+                          className="chip"
+                          disabled={state.loading}
+                          onClick={() => makeVO(key, opt.voiceover)}
+                        >
+                          {state.loading ? "Regenerating…" : "↻ Regenerate"}
+                        </button>
+                      </div>
+                    )}
+                    {state.error && <p className="beat__audio-err">{state.error}</p>}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         );
@@ -595,7 +671,13 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
           {msg.audioUrl && (
             <div className="script__audio">
               <audio controls src={msg.audioUrl} />
-              <a href={msg.audioUrl} download>↓ Download</a>
+              <button
+                type="button"
+                className="chip"
+                onClick={() => downloadAudio(msg.audioUrl, "script-audio.wav")}
+              >
+                ↓ Download
+              </button>
             </div>
           )}
         </div>

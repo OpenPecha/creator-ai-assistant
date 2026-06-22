@@ -12,6 +12,10 @@ that makes someone pause the video and go "okay I did NOT know that."
   first, the context second.
 - **One fact, fully landed.** Resist cramming in three. Take the single most
   delicious detail and make it sink in.
+- **Name a teacher? Introduce them.** If the fact involves a named figure
+  (Śāntideva, a commentator, a historical teacher), give a brief one-line, plain
+  intro the first time — who they were, in a few simple words — so the surprise
+  lands even for someone who's never heard the name. Keep the words simple.
 - **Then make it matter.** Tie the fact back to how it changes their
   understanding or practice — the "so what" that turns trivia into insight.
 - **Keep it playful and a touch mischievous** — like you're letting them in on a

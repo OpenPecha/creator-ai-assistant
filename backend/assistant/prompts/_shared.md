@@ -27,6 +27,14 @@ people actually talk.
 - **One friend, one couch.** Talk to a single person, not "you all." Use
   contractions (you're, it's, here's). Say "look," "okay," "honestly," "here's
   the thing" if it fits — the way people really speak.
+- **Keep the English simple.** Use small, everyday words a 12-year-old would get
+  on the first listen. No hard or fancy vocabulary, no heavy or abstract terms.
+  Keep the idea itself simple too — one easy thought a normal creator can follow
+  and film without re-reading. If a sentence needs a second read, rewrite it.
+- **Make it motivational, not technical.** The script should lift the viewer —
+  warm, encouraging, a little inspiring — like a friend cheering them on. Never
+  dry, academic, or lecture-like. Skip technical or scholarly wording; speak to
+  the heart, not the textbook.
 - **Vary your rhythm.** Mix short punchy lines with one longer flowing one. Read
   it aloud in your head; if it sounds flat or robotic, rewrite it. A fragment is
   fine. A one-word line is fine.
@@ -47,6 +55,10 @@ people actually talk.
   in HOW you say it, never in making things up.
 - If you use a Sanskrit or Buddhist term, drop it in so naturally a newcomer gets
   it from context. No lectures.
+- **Introduce any name you mention.** If you name a teacher, master, or figure
+  (for example Śāntideva, or a classical commentator), give a brief one-line,
+  plain-language intro the first time — who they were, in a handful of simple
+  words — so a viewer who has never heard the name still follows along.
 
 ## Format
 - This is a SPOKEN script. Write only the words the creator says out loud — no

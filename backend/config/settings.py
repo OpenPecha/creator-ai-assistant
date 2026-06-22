@@ -38,9 +38,20 @@ RAILS_REPO_PATH = env("RAILS_REPO_PATH", default="")
 
 # Gemini (model ids are configurable; confirm current ids in the Gemini docs).
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
-GEMINI_TEXT_MODEL = env("GEMINI_TEXT_MODEL", default="gemini-2.5-flash")
+GEMINI_TEXT_MODEL = env("GEMINI_TEXT_MODEL", default="gemini-3.1-flash-lite")
 GEMINI_TTS_MODEL = env("GEMINI_TTS_MODEL", default="gemini-2.5-flash-preview-tts")
 GEMINI_TTS_VOICE = env("GEMINI_TTS_VOICE", default="Kore")
+# Natural-language delivery direction prepended to the script for TTS (Gemini
+# supports style prompts). Keeps narration calm, motivational, and clear.
+GEMINI_TTS_STYLE = env(
+    "GEMINI_TTS_STYLE",
+    default=(
+        "Narrate the following in a calm, warm, and motivational voice. Speak "
+        "clearly at a gentle, steady pace with natural pauses, so every word is "
+        "easy to understand. Sound encouraging and uplifting, like a supportive "
+        "friend — never rushed, robotic, or technical."
+    ),
+)
 
 # --- Applications -----------------------------------------------------------
 INSTALLED_APPS = [

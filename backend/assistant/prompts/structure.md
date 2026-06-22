@@ -36,10 +36,17 @@ show on screen and what to say out loud.
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:
-  - visuals: 2 to 5 short, concrete shot ideas — real, filmable things (people,
-    places, actions), not abstract concepts.
+  - visuals: concrete, filmable things (people, places, actions), not abstract
+    concepts. Offer BOTH formats across the three options — at least one as a
+    single continuous scene (one shot or scenario that just plays out) and at
+    least one as a montage (several quick shots cut together) — so the creator can
+    pick whichever they prefer. Neither is the default; choose per option whatever
+    serves that beat best.
   - voiceover: one or two natural spoken lines. Plain, warm, and human — the way a
-    real person talks. No clichés, no jargon, no markdown.
+    real person talks. Keep it MOTIVATIONAL and uplifting, never technical or
+    academic. Use simple, everyday words a 12-year-old gets on the first listen.
+    If a teacher or figure is named, work in a brief one-line plain intro so a
+    newcomer follows along. No clichés, no jargon, no markdown.
 
 ## Rules
 - Stay faithful to the source. Never invent doctrine, quotes, or stories.

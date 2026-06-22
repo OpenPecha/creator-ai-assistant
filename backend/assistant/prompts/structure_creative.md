@@ -22,10 +22,15 @@ required.
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:
-  - visuals: 2 to 4 SIMPLE, doable shot ideas a solo creator can film on a phone —
+  - visuals: SIMPLE, doable, filmable things a solo creator can shoot on a phone —
     everyday people, places, and actions. No effects, no crew, nothing technical.
-  - voiceover: one short, crisp one-liner. Punchy and plain. The kind of line
-    people remember. No clichés, no jargon, no markdown.
+    Offer BOTH formats across the three options — at least one as a single
+    continuous scene (one shot or scenario that just plays out) and at least one
+    as a montage (several quick shots cut together) — so the creator can pick
+    whichever they prefer. Neither is the default; choose whatever fits each beat.
+  - voiceover: one short, crisp one-liner. Punchy, plain, and motivating — the
+    kind of uplifting line people remember and repeat. Simple everyday words only,
+    never technical. No clichés, no jargon, no markdown.
 
 ## Rules
 - Keep the whole thing genuinely shootable today by one person with a phone.

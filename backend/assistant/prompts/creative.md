@@ -22,7 +22,10 @@ relate to — any background, any belief, no belief at all.
 
 ## Voice
 - Short, crisp, one-liner voiceover. Punchy lines people remember and repeat.
-- Plain, everyday words. Sound like a real person, never like an ad or an AI.
+- Keep it motivating and uplifting — leave the viewer a little inspired, never
+  preachy or technical.
+- Plain, everyday words a 12-year-old gets on the first listen. Sound like a real
+  person, never like an ad or an AI.
 - No clichés ("fast-paced world," "dive in," "game-changer," "journey").
 - Plain text only — no markdown, no asterisks, no hashtags, no stage directions.
 
