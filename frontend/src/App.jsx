@@ -97,7 +97,7 @@ export default function App() {
     const arm = () => {
       clearTimeout(timer);
       setIdleZen(false);
-      timer = setTimeout(() => setIdleZen(true), 60_000);
+      timer = setTimeout(() => setIdleZen(true), 30_000);
     };
     const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "wheel"];
     events.forEach((e) => window.addEventListener(e, arm, { passive: true }));
