@@ -19,7 +19,9 @@ required.
   ~the first fifth), Middle (develop it, ~three fifths), End (land it + a light
   call to action, ~the last fifth). Give each a timeRange in seconds that adds up
   to the total — for example "0–6 sec".
-- For each beat:
+- For each beat, give THREE distinct options — three genuinely different ways to
+  shoot that beat (different angle, imagery, or approach, not small rewordings of
+  the same idea). Each option has:
   - visuals: 2 to 4 SIMPLE, doable shot ideas a solo creator can film on a phone —
     everyday people, places, and actions. No effects, no crew, nothing technical.
   - voiceover: one short, crisp one-liner. Punchy and plain. The kind of line

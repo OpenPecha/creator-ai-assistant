@@ -26,10 +26,20 @@ _SCHEMA = {
                 "properties": {
                     "label": {"type": "string"},
                     "timeRange": {"type": "string"},
-                    "visuals": {"type": "array", "items": {"type": "string"}},
-                    "voiceover": {"type": "string"},
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "visuals": {"type": "array", "items": {"type": "string"}},
+                                "voiceover": {"type": "string"},
+                            },
+                            "required": ["visuals", "voiceover"],
+                        },
+                        "minItems": 1,
+                    },
                 },
-                "required": ["label", "timeRange", "visuals", "voiceover"],
+                "required": ["label", "timeRange", "options"],
             },
         },
     },
@@ -87,6 +97,7 @@ def generate(
     data["coreTheme"] = strip_markdown(data.get("coreTheme", ""))
     data["concept"] = strip_markdown(data.get("concept", ""))
     for s in data.get("sections", []):
-        s["voiceover"] = strip_markdown(s.get("voiceover", ""))
-        s["visuals"] = [strip_markdown(v) for v in s.get("visuals", []) if v and v.strip()]
+        for opt in s.get("options", []):
+            opt["voiceover"] = strip_markdown(opt.get("voiceover", ""))
+            opt["visuals"] = [strip_markdown(v) for v in opt.get("visuals", []) if v and v.strip()]
     return data

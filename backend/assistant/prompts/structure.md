@@ -33,7 +33,9 @@ show on screen and what to say out loud.
   about the first fifth), Middle (develop the idea, about three fifths), End (land
   it plus a gentle call to action, about the last fifth). Give each beat a
   timeRange in seconds that adds up to the total — for example "0–8 sec".
-- For each beat:
+- For each beat, give THREE distinct options — three genuinely different ways to
+  shoot that beat (different angle, imagery, or approach, not small rewordings of
+  the same idea). Each option has:
   - visuals: 2 to 5 short, concrete shot ideas — real, filmable things (people,
     places, actions), not abstract concepts.
   - voiceover: one or two natural spoken lines. Plain, warm, and human — the way a

@@ -28,15 +28,6 @@ const IDEA_ICONS = {
   extra_info: "✨",
 };
 
-const IDEA_DESCRIPTIONS = {
-  concept:    "A clear, simple explanation of today's teaching — great for educating your audience.",
-  practice:   "Guide viewers through today's hands-on practice or challenge.",
-  creative:   "A fresh, universal video about the lesson behind it — for everyone, no scripture or Buddhist references.",
-  testimony:  "You share your own personal experience or reflection with today's teaching.",
-  story:      "Bring the teaching to life through a story or parable from the tradition.",
-  extra_info: "A surprising detail, etymology, or lesser-known fact from the texts.",
-};
-
 let msgId = 0;
 const nextId = () => ++msgId;
 
@@ -424,13 +415,21 @@ export default function App() {
   );
 }
 
-function structureToText(s) {
+// Normalize a section to a list of options (handles older single-option shape).
+function sectionOptions(sec) {
+  if (Array.isArray(sec.options) && sec.options.length) return sec.options;
+  return [{ visuals: sec.visuals || [], voiceover: sec.voiceover || "" }];
+}
+
+function structureToText(s, sel = {}) {
   const lines = [`Core theme: ${s.coreTheme}`, `Concept: "${s.concept}"`, ""];
-  (s.sections || []).forEach((sec) => {
+  (s.sections || []).forEach((sec, i) => {
+    const options = sectionOptions(sec);
+    const opt = options[Math.min(sel[i] || 0, options.length - 1)];
     lines.push(`[${sec.label} · ${sec.timeRange}]`);
     lines.push("On screen:");
-    (sec.visuals || []).forEach((v) => lines.push(`  - ${v}`));
-    lines.push(`Voiceover: ${sec.voiceover}`);
+    (opt.visuals || []).forEach((v) => lines.push(`  - ${v}`));
+    lines.push(`Voiceover: ${opt.voiceover}`);
     lines.push("");
   });
   return lines.join("\n").trim();
@@ -438,8 +437,10 @@ function structureToText(s) {
 
 function StructureView({ structure }) {
   const [copied, setCopied] = useState(false);
+  const [sel, setSel] = useState({});   // section index -> chosen option index
+
   const copy = () => {
-    navigator.clipboard.writeText(structureToText(structure));
+    navigator.clipboard.writeText(structureToText(structure, sel));
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
@@ -457,24 +458,51 @@ function StructureView({ structure }) {
         </div>
       </div>
 
-      {(structure.sections || []).map((sec, i) => (
-        <div key={i} className="beat">
-          <div className="beat__head">
-            <span className="beat__label">{sec.label}</span>
-            <span className="beat__time">{sec.timeRange}</span>
+      {(structure.sections || []).some((s) => sectionOptions(s).length > 1) && (
+        <p className="structure__hint">Each part has a few options — tap the numbers to compare and mix.</p>
+      )}
+
+      {(structure.sections || []).map((sec, i) => {
+        const options = sectionOptions(sec);
+        const idx = Math.min(sel[i] || 0, options.length - 1);
+        const opt = options[idx];
+
+        return (
+          <div key={i} className="beat">
+            <div className="beat__head">
+              <span className="beat__label">{sec.label}</span>
+              <span className="beat__time">{sec.timeRange}</span>
+            </div>
+            {options.length > 1 && (
+              <div className="beat__options">
+                <span className="beat__options-label">Option</span>
+                <div className="beat__opts">
+                  {options.map((_, k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      className={`beat__opt ${k === idx ? "beat__opt--active" : ""}`}
+                      onClick={() => setSel((s) => ({ ...s, [i]: k }))}
+                    >
+                      {k + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="beat__block">
+              <span className="beat__tag">On screen</span>
+              <ul className="beat__visuals">
+                {(opt.visuals || []).map((v, j) => <li key={j}>{v}</li>)}
+              </ul>
+            </div>
+            <div className="beat__block">
+              <span className="beat__tag">Voiceover</span>
+              <p className="beat__vo">{opt.voiceover}</p>
+            </div>
           </div>
-          <div className="beat__block">
-            <span className="beat__tag">On screen</span>
-            <ul className="beat__visuals">
-              {(sec.visuals || []).map((v, j) => <li key={j}>{v}</li>)}
-            </ul>
-          </div>
-          <div className="beat__block">
-            <span className="beat__tag">Voiceover</span>
-            <p className="beat__vo">{sec.voiceover}</p>
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       <div className="script__actions">
         <button className="chip" onClick={copy}>{copied ? "✓ Copied" : "Copy structure"}</button>
@@ -543,8 +571,7 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
               <span className="idea-card__icon">{IDEA_ICONS[idea.key] || "▸"}</span>
               <span className="idea-card__body">
                 <span className="idea-card__label">{idea.label}</span>
-                <span className="idea-card__desc">{IDEA_DESCRIPTIONS[idea.key]}</span>
-                <span className="idea-card__teaser">Today: {idea.teaser}</span>
+                <span className="idea-card__teaser">{idea.teaser}</span>
               </span>
               <span className="idea-card__arrow">›</span>
             </button>

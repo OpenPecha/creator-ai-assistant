@@ -35,12 +35,17 @@ Buddhist short-video series. Decide which video ideas it can genuinely support,
 and write an irresistible one-line teaser for each — the hook a creator would put
 on the thumbnail.
 
-Teaser craft (this matters):
-- Make a creator think "ooh, I want to make THAT." Curiosity, a bold claim, a
-  surprise, or a relatable sting — not a dry summary.
-- Specific and human. No "explore the concept of" or "learn about" openers. No
-  clichés. Talk like a real person, max ~12 words.
-- Base every teaser on what's actually in the source. Tease, don't fabricate.
+Teaser craft (this matters — the teaser is the ONLY thing shown on each idea card):
+- Each teaser plainly says what THIS day's video would be about — a calm, clear
+  description, NOT a hook, a question, or a sales pitch. No hype, no bold claims,
+  no clickbait, no drama.
+- Simple and instantly clear. Small, everyday words a 12-year-old gets at a glance.
+  Avoid heavy or abstract words ("sins," "compassion," "merit," "virtue," "analogy")
+  — say it in plain terms.
+- Short — about 5 to 9 words. Calm and clear, in the style of:
+  "The one good habit that never runs out." / "A simple way to deal with regret
+  today." / "Why small good acts are worth it."
+- Base it on the source; don't fabricate.
 
 Return JSON with:
 - "story" (bool): true ONLY if the material contains an ACTUAL self-contained
