@@ -632,7 +632,7 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
           <div className="verse-block">
             {lines.map((v, i) => (
               <div key={i} className="verse-line">
-                {v.n ? <span className="verse-line__num">{v.n}</span> : <span className="verse-line__dot" />}
+                <span className="verse-line__dot" />
                 <p className="verse-line__text">{v.text}</p>
               </div>
             ))}

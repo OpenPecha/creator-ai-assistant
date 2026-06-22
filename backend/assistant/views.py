@@ -49,13 +49,12 @@ def day_detail(request, day: int):
     except ContentError as exc:
         return Response({"error": str(exc)}, status=status.HTTP_404_NOT_FOUND)
 
-    # Pair each verse's English text with its verse number (e.g. "1-6" -> "6").
-    # Fall back to no numbers if the counts don't line up.
-    if len(dc.verses) == len(dc.verses_text):
-        verse_lines = [{"n": vid.split("-")[-1], "text": t}
-                       for vid, t in zip(dc.verses, dc.verses_text)]
-    else:
-        verse_lines = [{"n": "", "text": t} for t in dc.verses_text]
+    # Pair each verse text with its verse number (e.g. "1-6" -> "6").
+    # Best-effort: use schedule IDs for as many texts as available; leave extras blank.
+    verse_lines = [
+        {"n": dc.verses[i].split("-")[-1] if i < len(dc.verses) else "", "text": t}
+        for i, t in enumerate(dc.verses_text)
+    ]
 
     return Response({
         "day": dc.day,
