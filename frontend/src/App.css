@@ -728,35 +728,36 @@ body {
 
 .blessing {
   position: fixed;
-  top: 72px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
+  inset: 0;
+  z-index: 110;
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #fff;
-  border: 1px solid #bfdbfe;
-  border-radius: 999px;
-  padding: 10px 22px;
-  box-shadow: 0 4px 20px rgba(37,99,235,0.12);
-  animation: blessing-in 0.4s var(--ease) forwards, blessing-out 0.5s var(--ease) 2.5s forwards;
-  white-space: nowrap;
+  justify-content: center;
+  background: rgba(247, 246, 243, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  animation: blessing-in 1.2s var(--ease) forwards, blessing-out 0.8s ease 2.3s forwards;
 }
-.blessing__lotus { font-size: 1.2rem; }
 .blessing__text {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: #1e3a5f;
-  letter-spacing: 0.01em;
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--ink);
+  letter-spacing: 0.12em;
+  text-align: center;
+  animation: blessing-word 1.2s var(--ease) forwards;
 }
 @keyframes blessing-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 @keyframes blessing-out {
   from { opacity: 1; }
   to   { opacity: 0; }
+}
+@keyframes blessing-word {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Tablet ── */
