@@ -17,7 +17,7 @@ from .services import (
     structure_generator,
     verse_summary,
 )
-from .services.content_loader import ContentError, get_day_content
+from .services.content_loader import ContentError, get_day_content, released_progress
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +35,15 @@ class GenerateRateThrottle(AnonRateThrottle):
 
 @api_view(["GET"])
 def health(request):
-    return Response({
+    payload = {
         "status": "ok",
         "gemini_configured": gemini.is_configured(),
-    })
+    }
+    try:
+        payload["progress"] = released_progress()
+    except ContentError:
+        payload["progress"] = None
+    return Response(payload)
 
 
 @api_view(["GET"])

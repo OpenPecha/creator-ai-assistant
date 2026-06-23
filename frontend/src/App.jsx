@@ -68,6 +68,7 @@ export default function App() {
   const [lastOutput, setLastOutput] = useState(null);
   const [refineInput, setRefineInput] = useState("");
   const [idleZen, setIdleZen] = useState(false);
+  const [progress, setProgress] = useState(null);
 
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
@@ -80,6 +81,9 @@ export default function App() {
     if (greeted.current) return;
     greeted.current = true;
     addMsg("assistant", "Hi! I'm here to help you script your next Bodhisattva Challenge video. 🙏\n\nWhich day of the plan are you filming? Just tell me the day number (1–365).");
+    api.health()
+      .then((h) => { if (h?.progress) setProgress(h.progress); })
+      .catch(() => { /* progress is best-effort */ });
   }, []);
 
   useEffect(() => {
@@ -115,6 +119,12 @@ export default function App() {
     const n = parseInt(dayInput, 10);
     if (!n || n < 1 || n > 365) {
       addMsg("assistant", "Please enter a day number between 1 and 365.");
+      return;
+    }
+    if (progress?.released && n > progress.released) {
+      addMsg("user", `Day ${n}`);
+      addMsg("assistant", `Day ${n} hasn't been released yet — the plan is live through Day ${progress.released} so far. Pick any day from 1 to ${progress.released}.`);
+      setDayInput("");
       return;
     }
     addMsg("user", `Day ${n}`);
@@ -300,6 +310,23 @@ export default function App() {
           <h1>WeBuddhist Creator Assistant</h1>
           <p>Bodhisattva Challenge · Video script generator</p>
         </div>
+        {progress?.released > 0 && (
+          <div
+            className="progress-pill"
+            title={`The plan started ${progress.startDate}. A new day unlocks every day.`}
+          >
+            <div className="progress-pill__top">
+              <span className="progress-pill__label">Days available</span>
+              <span className="progress-pill__count">{progress.released} / {progress.total}</span>
+            </div>
+            <div className="progress-pill__bar">
+              <div
+                className="progress-pill__fill"
+                style={{ width: `${Math.max(2, (progress.released / progress.total) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="chat" ref={scrollRef}>

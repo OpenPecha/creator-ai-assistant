@@ -14,10 +14,12 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from datetime import date, datetime
 from functools import lru_cache
 from pathlib import Path
 
 from django.conf import settings
+from django.utils import timezone
 
 # Relative paths inside the rails repo.
 _PLAN_ROOT = "3-TRANSFORMATIONS/Plans/the-bodhisattva-challenge/en"
@@ -192,6 +194,46 @@ def get_schedule() -> dict[int, dict]:
     if not schedule:
         raise ContentError(f"No schedule rows parsed from {schedule_file}")
     return schedule
+
+
+def _parse_anchor_date(date_str: str) -> date | None:
+    """Parse Day 1's full date (e.g. 'May 31, 2026') into a date object.
+
+    Later schedule rows omit the year (e.g. 'Jun 1'), but Day 1 carries the
+    year, so it serves as the anchor for the whole 365-day arc.
+    """
+    for fmt in ("%b %d, %Y", "%B %d, %Y"):
+        try:
+            return datetime.strptime(date_str.strip(), fmt).date()
+        except ValueError:
+            continue
+    return None
+
+
+def released_progress() -> dict:
+    """How many days of the plan are live as of the server's local date.
+
+    The schedule runs one verse-day per calendar day starting from Day 1's
+    anchor date, so released = (today - anchor) + 1, clamped to [0, total].
+    """
+    schedule = get_schedule()
+    total = max(schedule)
+    anchor = _parse_anchor_date(schedule[1]["date"]) if 1 in schedule else None
+    today = timezone.localdate()
+
+    if anchor is None:
+        # Anchor unparseable — report the full plan rather than guessing.
+        return {"released": total, "total": total, "started": True, "today": today.isoformat()}
+
+    released = (today - anchor).days + 1
+    released = max(0, min(released, total))
+    return {
+        "released": released,
+        "total": total,
+        "started": released > 0,
+        "today": today.isoformat(),
+        "startDate": anchor.isoformat(),
+    }
 
 
 def find_day_file(day: int) -> tuple[Path, bool]:
