@@ -72,6 +72,7 @@ export default function App() {
   const [logoBlessing, setLogoBlessing] = useState(false);
   const logoTaps = useRef(0);
   const logoTimer = useRef(null);
+  const blessingShownAt = useRef(0);
 
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
@@ -297,6 +298,7 @@ export default function App() {
     clearTimeout(logoTimer.current);
     if (logoTaps.current >= 5) {
       logoTaps.current = 0;
+      blessingShownAt.current = Date.now();
       setLogoBlessing(true);
       setTimeout(() => setLogoBlessing(false), 3000);
     } else {
@@ -475,7 +477,7 @@ export default function App() {
       </footer>
 
       {logoBlessing && (
-        <div className="blessing" onClick={() => setLogoBlessing(false)}>
+        <div className="blessing" onClick={() => { if (Date.now() - blessingShownAt.current > 1000) setLogoBlessing(false); }}>
           <p className="blessing__text">May all beings be happy</p>
         </div>
       )}
