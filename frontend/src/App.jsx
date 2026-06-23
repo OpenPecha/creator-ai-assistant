@@ -69,6 +69,9 @@ export default function App() {
   const [refineInput, setRefineInput] = useState("");
   const [idleZen, setIdleZen] = useState(false);
   const [progress, setProgress] = useState(null);
+  const [logoBlessing, setLogoBlessing] = useState(false);
+  const logoTaps = useRef(0);
+  const logoTimer = useRef(null);
 
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
@@ -288,6 +291,18 @@ export default function App() {
     }
   }
 
+  function tapLogo() {
+    logoTaps.current += 1;
+    clearTimeout(logoTimer.current);
+    if (logoTaps.current >= 5) {
+      logoTaps.current = 0;
+      setLogoBlessing(true);
+      setTimeout(() => setLogoBlessing(false), 3000);
+    } else {
+      logoTimer.current = setTimeout(() => { logoTaps.current = 0; }, 1200);
+    }
+  }
+
   function restart() {
     setStage("askDay");
     setDay(null);
@@ -305,7 +320,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <img src="/logo.png" width="32" height="32" alt="WeBuddhist" />
+        <img src="/logo.png" width="32" height="32" alt="WeBuddhist" onClick={tapLogo} className={`logo-tap${logoBlessing ? " logo-tap--spin" : ""}`} />
         <div className="header__text">
           <h1>WeBuddhist Creator Assistant</h1>
           <p>Bodhisattva Challenge · Video script generator</p>
@@ -457,6 +472,13 @@ export default function App() {
           </p>
         )}
       </footer>
+
+      {logoBlessing && (
+        <div className="blessing">
+          <span className="blessing__lotus">🪷</span>
+          <span className="blessing__text">May all beings be happy</span>
+        </div>
+      )}
 
       {idleZen && (
         <div className="zen" onClick={() => setIdleZen(false)} role="presentation">
