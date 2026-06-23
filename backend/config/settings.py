@@ -40,16 +40,19 @@ RAILS_REPO_PATH = env("RAILS_REPO_PATH", default="")
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 GEMINI_TEXT_MODEL = env("GEMINI_TEXT_MODEL", default="gemini-3.1-flash-lite")
 GEMINI_TTS_MODEL = env("GEMINI_TTS_MODEL", default="gemini-2.5-flash-preview-tts")
-GEMINI_TTS_VOICE = env("GEMINI_TTS_VOICE", default="Kore")
+GEMINI_TTS_VOICE = env("GEMINI_TTS_VOICE", default="Charon")
 # Natural-language delivery direction prepended to the script for TTS (Gemini
-# supports style prompts). Keeps narration calm, motivational, and clear.
+# supports style prompts). Keeps narration upbeat, warm, and clear for
+# short-form social video (TikTok / Instagram Reels).
 GEMINI_TTS_STYLE = env(
     "GEMINI_TTS_STYLE",
     default=(
-        "Narrate the following in a calm, warm, and motivational voice. Speak "
-        "clearly at a gentle, steady pace with natural pauses, so every word is "
-        "easy to understand. Sound encouraging and uplifting, like a supportive "
-        "friend — never rushed, robotic, or technical."
+        "Narrate the following in a neutral American accent. Upbeat, warm, and "
+        "confident — the pace of someone excited to share something good, not a "
+        "slow meditation. Speak at a brisk, natural TikTok pace with punchy "
+        "delivery: short sentences land crisply, emphasis is clear, energy stays "
+        "high but never frantic. No dramatic pauses. Sound like a real person, "
+        "not a narrator."
     ),
 )
 
