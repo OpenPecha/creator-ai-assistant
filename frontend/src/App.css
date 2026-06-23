@@ -737,6 +737,8 @@ body {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
   animation: blessing-in 1.2s var(--ease) forwards, blessing-out 0.8s ease 2.3s forwards;
 }
 .blessing__text {
