@@ -37,9 +37,6 @@ ALLOWED_HOSTS = env.list(
 # The backend fetches files directly from GitHub so no local clone is needed.
 GITHUB_REPO = env("GITHUB_REPO", default="")
 GITHUB_BRANCH = env("GITHUB_BRANCH", default="main")
-# Optional — raises GitHub API rate limit from 60 to 5000 req/hour.
-# Only the Git Trees API is called (once per server start); raw file fetches
-# are not subject to the API rate limit regardless.
 GITHUB_TOKEN = env("GITHUB_TOKEN", default="")
 
 # Gemini (model ids are configurable; confirm current ids in the Gemini docs).

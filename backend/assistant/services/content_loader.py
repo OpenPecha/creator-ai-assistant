@@ -1,9 +1,9 @@
 """
 Load day-plan content from the bodhisattvacharyavatara-rails GitHub repo.
 
-On first use, ONE call to the GitHub Git Trees API fetches the full repo file
-list and caches it. All subsequent file reads use raw.githubusercontent.com,
-which has no meaningful rate limit. No local clone is required.
+Every request fetches fresh content directly from raw.githubusercontent.com.
+No local clone, no cache, no stale data — new content pushed to GitHub is
+available immediately on the next request.
 """
 
 from __future__ import annotations
@@ -11,7 +11,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
-from functools import lru_cache
 
 import requests as _requests
 
@@ -28,6 +27,9 @@ _DASHES = "–—-"
 _RANGE_RE = re.compile(rf"(\d+)\.(\d+)\s*[{_DASHES}]\s*(?:(\d+)\.)?(\d+)")
 _SINGLE_RE = re.compile(r"(\d+)\.(\d+)")
 _TIBETAN_RE = re.compile(r"[ༀ-࿿]")
+
+# Common variant suffixes to probe if the exact day file isn't found.
+_VARIANT_SUFFIXES = ["-A", "-B", "-option-1", "-option-2", "-new", "-Final", "-final"]
 
 
 class ContentError(Exception):
@@ -79,18 +81,33 @@ def _github_config() -> tuple[str, str]:
 
 
 def _auth_headers() -> dict:
-    token = getattr(settings, "GITHUB_TOKEN", "")
     headers = {"Accept": "application/vnd.github+json"}
+    token = getattr(settings, "GITHUB_TOKEN", "")
     if token:
         headers["Authorization"] = f"Bearer {token}"
     return headers
 
 
-def _fetch_raw(path: str) -> str:
+def _list_github_dir(path: str) -> list[str]:
+    """Return directory entry names via the GitHub Contents API."""
+    repo, branch = _github_config()
+    url = f"https://api.github.com/repos/{repo}/contents/{path}?ref={branch}"
+    try:
+        r = _requests.get(url, timeout=15, headers=_auth_headers())
+    except _requests.RequestException as exc:
+        raise ContentError(f"Network error listing {path}: {exc}") from exc
+    if r.status_code == 404:
+        return []
+    r.raise_for_status()
+    data = r.json()
+    return [item["name"] for item in data] if isinstance(data, list) else []
+
+
+def _fetch_raw(path: str) -> str | None:
     """Fetch a file from the repo via raw.githubusercontent.com.
 
-    raw.githubusercontent.com is not subject to the GitHub API rate limit,
-    so this is safe to call per-file without worrying about quotas.
+    Returns None on 404 (file doesn't exist) so callers can try fallback paths.
+    Raises ContentError on network errors or unexpected HTTP errors.
     """
     repo, branch = _github_config()
     url = f"https://raw.githubusercontent.com/{repo}/{branch}/{path}"
@@ -99,29 +116,9 @@ def _fetch_raw(path: str) -> str:
     except _requests.RequestException as exc:
         raise ContentError(f"Network error fetching {path}: {exc}") from exc
     if r.status_code == 404:
-        raise ContentError(f"File not found in repo: {path}")
+        return None
     r.raise_for_status()
     return r.text
-
-
-@lru_cache(maxsize=1)
-def _get_repo_file_index() -> frozenset[str]:
-    """Fetch the full repo file tree in ONE GitHub API call and cache it.
-
-    Uses the Git Trees API with `recursive=1` so we get every path in the repo
-    at once. Subsequent lookups are local dict lookups — zero extra API calls.
-    """
-    repo, branch = _github_config()
-    url = f"https://api.github.com/repos/{repo}/git/trees/{branch}?recursive=1"
-    try:
-        r = _requests.get(url, timeout=30, headers=_auth_headers())
-    except _requests.RequestException as exc:
-        raise ContentError(f"Network error fetching repo tree: {exc}") from exc
-    r.raise_for_status()
-    data = r.json()
-    if "tree" not in data:
-        raise ContentError(f"Unexpected GitHub tree response: {data.get('message', data)}")
-    return frozenset(item["path"] for item in data["tree"] if item.get("type") == "blob")
 
 
 # ── Content parsing ───────────────────────────────────────────────────────────
@@ -191,10 +188,11 @@ def expand_verses(label: str) -> list[str]:
 
 # ── Schedule ──────────────────────────────────────────────────────────────────
 
-@lru_cache(maxsize=1)
 def get_schedule() -> dict[int, dict]:
-    """Parse the schedule markdown table into {day: {verses_label, date, verses}}."""
+    """Fetch and parse the schedule markdown table from GitHub."""
     text = _fetch_raw(_SCHEDULE)
+    if text is None:
+        raise ContentError("schedule.md not found in the GitHub repo.")
     schedule: dict[int, dict] = {}
     for line in text.splitlines():
         line = line.strip()
@@ -210,7 +208,7 @@ def get_schedule() -> dict[int, dict]:
             "verses": expand_verses(cells[1]),
         }
     if not schedule:
-        raise ContentError("No schedule rows parsed from schedule.md")
+        raise ContentError("No schedule rows parsed from schedule.md.")
     return schedule
 
 
@@ -246,32 +244,36 @@ def released_progress() -> dict:
 
 # ── Day file lookup ───────────────────────────────────────────────────────────
 
-def _find_day_path(day: int) -> tuple[str, bool]:
-    """Return (repo-relative path, is_variant) for the day-plan file.
+def _find_day_path(day: int, verses: list[str]) -> tuple[str, bool]:
+    """Find the day-plan file path in the GitHub repo.
 
-    Uses the cached file index (built from one Git Trees API call) so this
-    function itself makes zero network requests.
+    Lists the Days directory once per request to find the correct
+    Chapter folder (which may have a suffix like 'Chapter-1 D1-D14'),
+    then probes for the exact file or common variant names.
     """
-    index = _get_repo_file_index()
+    chapter = int(verses[0].split("-")[0]) if verses else 1
 
-    # All day-plan files live somewhere under _DAYS_DIR.
-    prefix = f"{_DAYS_DIR}/"
-    day_files = [p for p in index if p.startswith(prefix) and p.endswith(".md")]
+    # Find the chapter directory — name starts with "Chapter-{chapter}".
+    all_dirs = _list_github_dir(_DAYS_DIR)
+    chapter_dir = next(
+        (d for d in all_dirs if d.startswith(f"Chapter-{chapter}")),
+        None,
+    )
+    if chapter_dir is None:
+        raise ContentError(f"No Chapter-{chapter} directory found under Days/ in the repo.")
 
-    # Exact match: any Chapter-*/N.md
-    filename = f"{day}.md"
-    exact = [p for p in day_files if p.rsplit("/", 1)[-1] == filename]
-    if exact:
-        return sorted(exact)[0], False
+    base = f"{_DAYS_DIR}/{chapter_dir}"
 
-    # Variant match: N-*.md or day_N_*.md
-    variants = [
-        p for p in day_files
-        if p.rsplit("/", 1)[-1].startswith(f"{day}-")
-        or p.rsplit("/", 1)[-1].startswith(f"day_{day}_")
-    ]
-    if variants:
-        return sorted(variants)[0], True
+    # Exact match.
+    exact = f"{base}/{day}.md"
+    if _fetch_raw(exact) is not None:
+        return exact, False
+
+    # Variant suffixes.
+    for suffix in _VARIANT_SUFFIXES:
+        path = f"{base}/{day}{suffix}.md"
+        if _fetch_raw(path) is not None:
+            return path, True
 
     raise ContentError(f"No day-plan file found for Day {day} in the GitHub repo.")
 
@@ -280,22 +282,21 @@ def _find_day_path(day: int) -> tuple[str, bool]:
 
 def _load_verse_synthesis(verse_id: str) -> VerseSynthesis:
     path = f"{_VERSES_DIR}/{verse_id}.md"
-    try:
-        text = _fetch_raw(path)
-        return VerseSynthesis(verse_id=verse_id, text=text, available=True)
-    except ContentError:
-        return VerseSynthesis(verse_id=verse_id, text="", available=False)
+    text = _fetch_raw(path)
+    return VerseSynthesis(verse_id=verse_id, text=text or "", available=text is not None)
 
 
-def load_day_content(day: int) -> DayContent:
-    """Gather everything needed to generate a script for `day`."""
+def get_day_content(day: int) -> DayContent:
+    """Fetch everything needed to generate a script for `day` from GitHub."""
     schedule = get_schedule()
     if day not in schedule:
         raise ContentError(f"Day {day} is not in the schedule (valid range 1–{max(schedule)}).")
 
     entry = schedule[day]
-    plan_path, is_variant = _find_day_path(day)
+    plan_path, is_variant = _find_day_path(day, entry["verses"])
     plan_markdown = _fetch_raw(plan_path)
+    if plan_markdown is None:
+        raise ContentError(f"Day plan file disappeared after lookup: {plan_path}")
     syntheses = [_load_verse_synthesis(vid) for vid in entry["verses"]]
 
     return DayContent(
@@ -311,13 +312,5 @@ def load_day_content(day: int) -> DayContent:
     )
 
 
-@lru_cache(maxsize=128)
-def get_day_content(day: int) -> DayContent:
-    return load_day_content(day)
-
-
 def clear_cache() -> None:
-    """Drop all caches (e.g. after a repo push webhook)."""
-    get_schedule.cache_clear()
-    get_day_content.cache_clear()
-    _get_repo_file_index.cache_clear()
+    pass  # no-op — no cache to clear
