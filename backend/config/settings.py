@@ -33,8 +33,14 @@ ALLOWED_HOSTS = env.list(
 )
 
 # --- Project-specific config ------------------------------------------------
-# Path to the local clone of the bodhisattvacharyavatara-rails repo.
-RAILS_REPO_PATH = env("RAILS_REPO_PATH", default="")
+# GitHub repo that holds the Bodhisattva Challenge content ("owner/repo-name").
+# The backend fetches files directly from GitHub so no local clone is needed.
+GITHUB_REPO = env("GITHUB_REPO", default="")
+GITHUB_BRANCH = env("GITHUB_BRANCH", default="main")
+# Optional — raises GitHub API rate limit from 60 to 5000 req/hour.
+# Only the Git Trees API is called (once per server start); raw file fetches
+# are not subject to the API rate limit regardless.
+GITHUB_TOKEN = env("GITHUB_TOKEN", default="")
 
 # Gemini (model ids are configurable; confirm current ids in the Gemini docs).
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")

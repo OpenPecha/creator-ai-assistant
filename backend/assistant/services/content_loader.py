@@ -1,13 +1,9 @@
 """
-Load day-plan content from a local clone of the bodhisattvacharyavatara-rails repo.
+Load day-plan content from the bodhisattvacharyavatara-rails GitHub repo.
 
-A "Day N" of the 365-day Bodhisattva Challenge maps to:
-  - a verse list + date, from the English schedule table
-  - a day-plan markdown file (6-section format)
-  - per-verse commentary synthesis files (rich prose: stories, fun facts, concepts)
-
-This module is pure file IO + parsing — no network, no LLM. Results are cached
-in-memory per day since the source repo is static between manual `git pull`s.
+On first use, ONE call to the GitHub Git Trees API fetches the full repo file
+list and caches it. All subsequent file reads use raw.githubusercontent.com,
+which has no meaningful rate limit. No local clone is required.
 """
 
 from __future__ import annotations
@@ -16,7 +12,8 @@ import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from functools import lru_cache
-from pathlib import Path
+
+import requests as _requests
 
 from django.conf import settings
 from django.utils import timezone
@@ -27,12 +24,9 @@ _SCHEDULE = f"{_PLAN_ROOT}/assets/schedule.md"
 _DAYS_DIR = f"{_PLAN_ROOT}/Days"
 _VERSES_DIR = "3-TRANSFORMATIONS/Translations/en-ai/Verses"
 
-# en-dash / em-dash / hyphen used in "1.12–1.14" ranges.
 _DASHES = "–—-"
 _RANGE_RE = re.compile(rf"(\d+)\.(\d+)\s*[{_DASHES}]\s*(?:(\d+)\.)?(\d+)")
 _SINGLE_RE = re.compile(r"(\d+)\.(\d+)")
-
-# Any Tibetan-script character (used to drop the Tibetan lines from the verse block).
 _TIBETAN_RE = re.compile(r"[ༀ-࿿]")
 
 
@@ -42,26 +36,25 @@ class ContentError(Exception):
 
 @dataclass
 class VerseSynthesis:
-    verse_id: str          # e.g. "1-12"
-    text: str              # full markdown of the synthesis file
-    available: bool        # whether a synthesis file exists
+    verse_id: str
+    text: str
+    available: bool
 
 
 @dataclass
 class DayContent:
     day: int
-    verses: list[str]               # verse ids, e.g. ["1-12", "1-13", "1-14"]
-    verses_label: str               # raw schedule label, e.g. "1.12–1.14"
+    verses: list[str]
+    verses_label: str
     date: str
-    plan_markdown: str              # the day-plan file contents
-    plan_file: str                  # repo-relative path used
+    plan_markdown: str
+    plan_file: str
     verse_syntheses: list[VerseSynthesis] = field(default_factory=list)
-    verses_text: list[str] = field(default_factory=list)  # English translation, one entry per verse
-    is_variant: bool = False        # True if no exact N.md and a variant was used
+    verses_text: list[str] = field(default_factory=list)
+    is_variant: bool = False
 
     @property
     def synthesis_text(self) -> str:
-        """Concatenated synthesis prose for the LLM, with verse headers."""
         parts = []
         for vs in self.verse_syntheses:
             if vs.available:
@@ -70,17 +63,71 @@ class DayContent:
 
     @property
     def verse_block(self) -> str:
-        """The English verse text, verses separated by a blank line."""
         return "\n\n".join(self.verses_text)
 
 
-def extract_today_verses(plan_markdown: str) -> list[str]:
-    """Pull the English verse translation from the '## Today's Verses' section.
+# ── GitHub helpers ────────────────────────────────────────────────────────────
 
-    Each day plan has a "## Today's Verses" section with blockquotes that pair the
-    Tibetan root text with its English translation. We keep only the English lines,
-    grouped one entry per verse.
+def _github_config() -> tuple[str, str]:
+    repo = getattr(settings, "GITHUB_REPO", "")
+    if not repo:
+        raise ContentError(
+            "GITHUB_REPO is not set. Add GITHUB_REPO=owner/repo-name to backend/.env."
+        )
+    branch = getattr(settings, "GITHUB_BRANCH", "main")
+    return repo, branch
+
+
+def _auth_headers() -> dict:
+    token = getattr(settings, "GITHUB_TOKEN", "")
+    headers = {"Accept": "application/vnd.github+json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
+def _fetch_raw(path: str) -> str:
+    """Fetch a file from the repo via raw.githubusercontent.com.
+
+    raw.githubusercontent.com is not subject to the GitHub API rate limit,
+    so this is safe to call per-file without worrying about quotas.
     """
+    repo, branch = _github_config()
+    url = f"https://raw.githubusercontent.com/{repo}/{branch}/{path}"
+    try:
+        r = _requests.get(url, timeout=15)
+    except _requests.RequestException as exc:
+        raise ContentError(f"Network error fetching {path}: {exc}") from exc
+    if r.status_code == 404:
+        raise ContentError(f"File not found in repo: {path}")
+    r.raise_for_status()
+    return r.text
+
+
+@lru_cache(maxsize=1)
+def _get_repo_file_index() -> frozenset[str]:
+    """Fetch the full repo file tree in ONE GitHub API call and cache it.
+
+    Uses the Git Trees API with `recursive=1` so we get every path in the repo
+    at once. Subsequent lookups are local dict lookups — zero extra API calls.
+    """
+    repo, branch = _github_config()
+    url = f"https://api.github.com/repos/{repo}/git/trees/{branch}?recursive=1"
+    try:
+        r = _requests.get(url, timeout=30, headers=_auth_headers())
+    except _requests.RequestException as exc:
+        raise ContentError(f"Network error fetching repo tree: {exc}") from exc
+    r.raise_for_status()
+    data = r.json()
+    if "tree" not in data:
+        raise ContentError(f"Unexpected GitHub tree response: {data.get('message', data)}")
+    return frozenset(item["path"] for item in data["tree"] if item.get("type") == "blob")
+
+
+# ── Content parsing ───────────────────────────────────────────────────────────
+
+def extract_today_verses(plan_markdown: str) -> list[str]:
+    """Pull English verse translations from the '## Today's Verses' section."""
     verses: list[str] = []
     current: list[str] = []
     in_section = False
@@ -89,14 +136,13 @@ def extract_today_verses(plan_markdown: str) -> list[str]:
         stripped = line.strip()
         if stripped.startswith("## "):
             if in_section:
-                break  # reached the next section
+                break
             low = stripped.lower()
             in_section = "today" in low and "verse" in low
             continue
         if not in_section:
             continue
         if stripped == "":
-            # blank line = boundary between verses
             if current:
                 verses.append("\n".join(current))
                 current = []
@@ -104,7 +150,7 @@ def extract_today_verses(plan_markdown: str) -> list[str]:
         if stripped.startswith(">"):
             text = stripped.lstrip(">").strip()
             if not text or _TIBETAN_RE.search(text):
-                continue  # skip the intra-verse separator and Tibetan lines
+                continue
             current.append(text)
 
     if current:
@@ -112,36 +158,15 @@ def extract_today_verses(plan_markdown: str) -> list[str]:
     return verses
 
 
-def _repo_path() -> Path:
-    raw = settings.RAILS_REPO_PATH
-    if not raw:
-        raise ContentError(
-            "RAILS_REPO_PATH is not set. Point it at your local clone of the "
-            "bodhisattvacharyavatara-rails repo (see backend/.env.example)."
-        )
-    path = Path(raw)
-    if not path.exists():
-        raise ContentError(f"RAILS_REPO_PATH does not exist: {path}")
-    return path
-
-
 def expand_verses(label: str) -> list[str]:
     """Expand a schedule verse label into verse ids.
 
-    Examples:
-      "1.12–1.14"        -> ["1-12", "1-13", "1-14"]
-      "Prologue, 1.1–1.3" -> ["1-1", "1-2", "1-3"]
-      "2.1–2.3"          -> ["2-1", "2-2", "2-3"]
-      "1.4–1.5"          -> ["1-4", "1-5"]
-
-    Ranges are assumed to stay within one chapter (true for this schedule).
-    Non-verse tokens like "Prologue" are ignored.
+    "1.12–1.14" -> ["1-12", "1-13", "1-14"]
     """
     ids: list[str] = []
     seen: set[str] = set()
-
-    # Handle ranges first, then any standalone single verses not in a range.
     consumed_spans: list[tuple[int, int]] = []
+
     for m in _RANGE_RE.finditer(label):
         chapter = int(m.group(1))
         start = int(m.group(2))
@@ -154,7 +179,6 @@ def expand_verses(label: str) -> list[str]:
         consumed_spans.append(m.span())
 
     for m in _SINGLE_RE.finditer(label):
-        # Skip if this single match falls inside a range we already expanded.
         if any(s <= m.start() < e for s, e in consumed_spans):
             continue
         vid = f"{int(m.group(1))}-{int(m.group(2))}"
@@ -165,43 +189,32 @@ def expand_verses(label: str) -> list[str]:
     return ids
 
 
+# ── Schedule ──────────────────────────────────────────────────────────────────
+
 @lru_cache(maxsize=1)
 def get_schedule() -> dict[int, dict]:
     """Parse the schedule markdown table into {day: {verses_label, date, verses}}."""
-    schedule_file = _repo_path() / _SCHEDULE
-    if not schedule_file.exists():
-        raise ContentError(f"Schedule file not found: {schedule_file}")
-
+    text = _fetch_raw(_SCHEDULE)
     schedule: dict[int, dict] = {}
-    for line in schedule_file.read_text(encoding="utf-8").splitlines():
+    for line in text.splitlines():
         line = line.strip()
         if not line.startswith("|"):
             continue
         cells = [c.strip() for c in line.strip("|").split("|")]
-        if len(cells) < 3:
+        if len(cells) < 3 or not cells[0].isdigit():
             continue
-        day_cell = cells[0]
-        if not day_cell.isdigit():
-            continue  # header row or separator
-        day = int(day_cell)
-        verses_label = cells[1]
-        date = cells[2]
+        day = int(cells[0])
         schedule[day] = {
-            "verses_label": verses_label,
-            "date": date,
-            "verses": expand_verses(verses_label),
+            "verses_label": cells[1],
+            "date": cells[2],
+            "verses": expand_verses(cells[1]),
         }
     if not schedule:
-        raise ContentError(f"No schedule rows parsed from {schedule_file}")
+        raise ContentError("No schedule rows parsed from schedule.md")
     return schedule
 
 
 def _parse_anchor_date(date_str: str) -> date | None:
-    """Parse Day 1's full date (e.g. 'May 31, 2026') into a date object.
-
-    Later schedule rows omit the year (e.g. 'Jun 1'), but Day 1 carries the
-    year, so it serves as the anchor for the whole 365-day arc.
-    """
     for fmt in ("%b %d, %Y", "%B %d, %Y"):
         try:
             return datetime.strptime(date_str.strip(), fmt).date()
@@ -211,18 +224,13 @@ def _parse_anchor_date(date_str: str) -> date | None:
 
 
 def released_progress() -> dict:
-    """How many days of the plan are live as of the server's local date.
-
-    The schedule runs one verse-day per calendar day starting from Day 1's
-    anchor date, so released = (today - anchor) + 1, clamped to [0, total].
-    """
+    """How many days of the plan are live as of the server's local date."""
     schedule = get_schedule()
     total = max(schedule)
     anchor = _parse_anchor_date(schedule[1]["date"]) if 1 in schedule else None
     today = timezone.localdate()
 
     if anchor is None:
-        # Anchor unparseable — report the full plan rather than guessing.
         return {"released": total, "total": total, "started": True, "today": today.isoformat()}
 
     released = (today - anchor).days + 1
@@ -236,40 +244,47 @@ def released_progress() -> dict:
     }
 
 
-def find_day_file(day: int) -> tuple[Path, bool]:
-    """Locate the day-plan file for `day` under any Chapter-* folder.
+# ── Day file lookup ───────────────────────────────────────────────────────────
 
-    Returns (path, is_variant). Prefers an exact `N.md`; otherwise falls back to
-    the first variant (`N-*.md` / `day_N_*.md`) and flags it.
+def _find_day_path(day: int) -> tuple[str, bool]:
+    """Return (repo-relative path, is_variant) for the day-plan file.
+
+    Uses the cached file index (built from one Git Trees API call) so this
+    function itself makes zero network requests.
     """
-    days_dir = _repo_path() / _DAYS_DIR
-    if not days_dir.exists():
-        raise ContentError(f"Days directory not found: {days_dir}")
+    index = _get_repo_file_index()
 
-    # Exact match: <N>.md in any chapter folder.
-    exact = sorted(days_dir.glob(f"Chapter-*/{day}.md"))
+    # All day-plan files live somewhere under _DAYS_DIR.
+    prefix = f"{_DAYS_DIR}/"
+    day_files = [p for p in index if p.startswith(prefix) and p.endswith(".md")]
+
+    # Exact match: any Chapter-*/N.md
+    filename = f"{day}.md"
+    exact = [p for p in day_files if p.rsplit("/", 1)[-1] == filename]
     if exact:
-        return exact[0], False
+        return sorted(exact)[0], False
 
-    # Variant fallback: N-option-*.md, N-new.md, N-Final.md, day_N_option_*.md
-    variants = sorted(
-        list(days_dir.glob(f"Chapter-*/{day}-*.md"))
-        + list(days_dir.glob(f"Chapter-*/day_{day}_*.md"))
-    )
+    # Variant match: N-*.md or day_N_*.md
+    variants = [
+        p for p in day_files
+        if p.rsplit("/", 1)[-1].startswith(f"{day}-")
+        or p.rsplit("/", 1)[-1].startswith(f"day_{day}_")
+    ]
     if variants:
-        return variants[0], True
+        return sorted(variants)[0], True
 
-    raise ContentError(
-        f"No day-plan file found for Day {day} under {days_dir} "
-        f"(looked for {day}.md and variants)."
-    )
+    raise ContentError(f"No day-plan file found for Day {day} in the GitHub repo.")
 
+
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def _load_verse_synthesis(verse_id: str) -> VerseSynthesis:
-    path = _repo_path() / _VERSES_DIR / f"{verse_id}.md"
-    if path.exists():
-        return VerseSynthesis(verse_id=verse_id, text=path.read_text(encoding="utf-8"), available=True)
-    return VerseSynthesis(verse_id=verse_id, text="", available=False)
+    path = f"{_VERSES_DIR}/{verse_id}.md"
+    try:
+        text = _fetch_raw(path)
+        return VerseSynthesis(verse_id=verse_id, text=text, available=True)
+    except ContentError:
+        return VerseSynthesis(verse_id=verse_id, text="", available=False)
 
 
 def load_day_content(day: int) -> DayContent:
@@ -279,11 +294,9 @@ def load_day_content(day: int) -> DayContent:
         raise ContentError(f"Day {day} is not in the schedule (valid range 1–{max(schedule)}).")
 
     entry = schedule[day]
-    plan_path, is_variant = find_day_file(day)
-    repo = _repo_path()
-
+    plan_path, is_variant = _find_day_path(day)
+    plan_markdown = _fetch_raw(plan_path)
     syntheses = [_load_verse_synthesis(vid) for vid in entry["verses"]]
-    plan_markdown = plan_path.read_text(encoding="utf-8")
 
     return DayContent(
         day=day,
@@ -291,20 +304,20 @@ def load_day_content(day: int) -> DayContent:
         verses_label=entry["verses_label"],
         date=entry["date"],
         plan_markdown=plan_markdown,
-        plan_file=str(plan_path.relative_to(repo)),
+        plan_file=plan_path,
         verse_syntheses=syntheses,
         verses_text=extract_today_verses(plan_markdown),
         is_variant=is_variant,
     )
 
 
-# Cache assembled DayContent objects (cheap to rebuild, but avoids re-reading files).
 @lru_cache(maxsize=128)
 def get_day_content(day: int) -> DayContent:
     return load_day_content(day)
 
 
 def clear_cache() -> None:
-    """Drop caches after the source repo is updated."""
+    """Drop all caches (e.g. after a repo push webhook)."""
     get_schedule.cache_clear()
     get_day_content.cache_clear()
+    _get_repo_file_index.cache_clear()
