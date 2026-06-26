@@ -744,6 +744,7 @@ function getMockVerseContent(idx) {
 function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
   const t = useUI();
   const [open, setOpen] = useState(false);
+  const cardRef = useRef(null);
   const content = getMockVerseContent(idx);
 
   // Each tab is a video idea. Content-backed ideas (Story/Concept/Challenge/
@@ -765,14 +766,20 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
     if (!open && tabs.length > 0 && !tabs.includes(activeTab)) {
       setActiveTab(tabs[0]);
     }
-    setOpen(!open);
+    const opening = !open;
+    setOpen(opening);
+    if (opening) {
+      setTimeout(() => {
+        cardRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 180);
+    }
   }
 
   const activeIdea = ideaObj(activeTab);
   const activeItems = itemsFor(activeTab);
 
   return (
-    <div className={`vcard${open ? " vcard--open" : ""}`}>
+    <div ref={cardRef} className={`vcard${open ? " vcard--open" : ""}`}>
       <button className="vcard__header" onClick={handleToggle} aria-expanded={open}>
         <span className="vcard__num">
           <span className="vcard__num-label">{t.verseLabel}</span>
