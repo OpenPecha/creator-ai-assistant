@@ -19,7 +19,7 @@ from django.utils import timezone
 
 # Relative paths inside the rails repo.
 _PLAN_ROOT = "3-TRANSFORMATIONS/Plans/the-bodhisattva-challenge/en"
-_SCHEDULE = f"{_PLAN_ROOT}/assets/schedule.md"
+_SCHEDULE = f"{_PLAN_ROOT}/assets/schedule-corrected.md"
 _DAYS_DIR = f"{_PLAN_ROOT}/Days"
 _VERSES_DIR = "3-TRANSFORMATIONS/Translations/en-ai/Verses"
 
