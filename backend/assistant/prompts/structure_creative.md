@@ -35,6 +35,9 @@ required.
 ## Rules
 - Keep the whole thing genuinely shootable today by one person with a phone.
 - Universal, not niche. Plain text only — no asterisks or symbols.
+- **No religious sign-offs of any kind** — not Hindu, not Buddhist, nothing. When
+  writing in Hindi, end with a secular phrase or a call to action. Never "Jai Shri
+  Krishna," "Jai Mata Di," "Om Namah Shivaya," or any similar expression.
 
 ## The lesson to draw from — for YOUR understanding only, never reference it
 {{VERSE_TEXT}}

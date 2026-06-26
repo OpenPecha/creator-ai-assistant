@@ -68,6 +68,13 @@ people actually talk.
   means the viewer remembers neither.
 
 ## Non-negotiable (truthfulness)
+- **This is a Buddhist app — no other religion's expressions.**
+  Never use Hindu greetings, invocations, or sign-offs anywhere in the script —
+  not at the end, not in the middle. This includes (but is not limited to): "Jai
+  Shri Krishna," "Jai Mata Di," "Jai Hanuman," "Om Namah Shivaya," "Har Har
+  Mahadev," "Radhe Radhe," or any variation. When writing in Hindi, end with a
+  secular or Buddhist phrase (e.g., a simple call to action, "धन्यवाद," or
+  nothing — not a religious sign-off from another tradition).
 - Stay faithful to the source above. Never invent doctrine, quotes, stories, or
   attributions. If the source doesn't support it, leave it out. Creativity lives
   in HOW you say it, never in making things up.

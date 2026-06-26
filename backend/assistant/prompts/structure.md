@@ -49,6 +49,12 @@ show on screen and what to say out loud.
     newcomer follows along. No clichés, no jargon, no markdown.
 
 ## Rules
+- **This is a Buddhist app — no other religion's expressions.**
+  Never use Hindu greetings or sign-offs anywhere in the voiceover — not at the
+  end of a beat, not anywhere. This includes: "Jai Shri Krishna," "Jai Mata Di,"
+  "Om Namah Shivaya," "Radhe Radhe," and all similar expressions. When writing in
+  Hindi, end beats with a secular phrase, a call to action, or nothing — not a
+  religious greeting from another tradition.
 - Stay faithful to the source. Never invent doctrine, quotes, or stories.
 - The voiceover must sound spoken, not written. Plain text only — no asterisks or
   symbols.
