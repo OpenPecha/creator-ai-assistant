@@ -56,17 +56,16 @@ const IDEA_ICONS = {
     </svg>
   ),
   creative: (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11.5 2.5l2 2-7 7H4.5v-2l7-7z"/>
-      <path d="M2 13.5h4"/>
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 1.5l.65 2 2 .65-2 .65L8 6.5l-.65-2-2-.65 2-.65z"/>
+      <path d="M3 9.5l.4 1.2 1.3.4-1.3.4L3 12.9l-.4-1.3-1.3-.4 1.3-.4z"/>
+      <path d="M12.5 9l.4 1.2 1.3.4-1.3.4-.4 1.3-.4-1.3-1.3-.4 1.3-.4z"/>
     </svg>
   ),
   testimony: (
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="5.5" y="2" width="5" height="7" rx="2.5"/>
-      <path d="M3.5 8.5a4.5 4.5 0 009 0"/>
-      <line x1="8" y1="13" x2="8" y2="11"/>
-      <line x1="6" y1="13" x2="10" y2="13"/>
+      <path d="M2 8.5C2 6.3 3.3 5 5 5v1.5c-.8 0-1.5.7-1.5 1.5V8.5H5.5v3.5H2V8.5z"/>
+      <path d="M8.5 8.5C8.5 6.3 9.8 5 11.5 5V6.5C10.7 6.5 10 7.2 10 8V8.5H12V12H8.5V8.5z"/>
     </svg>
   ),
 };
@@ -119,6 +118,7 @@ const UI = {
     collapse: "Collapse",
     noBackground: "No background content yet for this verse.",
     verseLabel: "Verse",
+    whatType: "What type of video?",
     sections: { story: "Story", concept: "Concept", challenge: "Challenge", extraInfo: "Extra info" },
     tabLabels: { story: "Story", concept: "Concept", practice: "Challenge", extra_info: "Extra info", creative: "Creative", testimony: "Testimony" },
     generateThis: "Generate idea",
@@ -190,6 +190,7 @@ const UI = {
     collapse: "बंद करें",
     noBackground: "इस श्लोक के लिए अभी कोई अतिरिक्त सामग्री नहीं है।",
     verseLabel: "श्लोक",
+    whatType: "किस तरह का वीडियो?",
     sections: { story: "कहानी", concept: "मुख्य विचार", challenge: "चुनौती", extraInfo: "रोचक जानकारी" },
     tabLabels: { story: "कहानी", concept: "मुख्य विचार", practice: "चुनौती", extra_info: "रोचक जानकारी", creative: "क्रिएटिव", testimony: "आपका अनुभव" },
     generateThis: "आइडिया जनरेट करें",
@@ -513,41 +514,45 @@ export default function App() {
    <LangContext.Provider value={t}>
     <div className="app">
       <header className="app__header">
-        <img src="/logo.png" width="32" height="32" alt="WeBuddhist" onClick={tapLogo} className={`logo-tap${logoBlessing ? " logo-tap--spin" : ""}`} />
-        <div className="header__text">
-          <h1>WeBuddhist Creator Assistant</h1>
-          <p>Bodhisattva Challenge · Video script generator</p>
-        </div>
-        <div className="lang-toggle" role="group" aria-label="Language">
-          {LANGUAGES.map((l) => (
-            <button
-              key={l.key}
-              type="button"
-              className={`lang-toggle__btn${language === l.key ? " lang-toggle__btn--active" : ""}`}
-              onClick={() => changeLanguage(l.key)}
-              disabled={busy}
-            >
-              {l.label}
-            </button>
-          ))}
-        </div>
-        {progress?.released > 0 && (
-          <div
-            className="progress-pill"
-            title={`The plan started ${progress.startDate}. A new day unlocks every day.`}
-          >
-            <div className="progress-pill__top">
-              <span className="progress-pill__label">{t.daysAvailable}</span>
-              <span className="progress-pill__count">{progress.released} / {progress.total}</span>
-            </div>
-            <div className="progress-pill__bar">
-              <div
-                className="progress-pill__fill"
-                style={{ width: `${Math.max(2, (progress.released / progress.total) * 100)}%` }}
-              />
-            </div>
+        <div className="header__brand">
+          <img src="/logo.png" width="32" height="32" alt="WeBuddhist" onClick={tapLogo} className={`logo-tap${logoBlessing ? " logo-tap--spin" : ""}`} />
+          <div className="header__text">
+            <h1>WeBuddhist Creator Assistant</h1>
+            <p>Bodhisattva Challenge · Video script generator</p>
           </div>
-        )}
+        </div>
+        <div className="header__controls">
+          <div className="lang-toggle" role="group" aria-label="Language">
+            {LANGUAGES.map((l) => (
+              <button
+                key={l.key}
+                type="button"
+                className={`lang-toggle__btn${language === l.key ? " lang-toggle__btn--active" : ""}`}
+                onClick={() => changeLanguage(l.key)}
+                disabled={busy}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+          {progress?.released > 0 && (
+            <div
+              className="progress-pill"
+              title={`The plan started ${progress.startDate}. A new day unlocks every day.`}
+            >
+              <div className="progress-pill__top">
+                <span className="progress-pill__label">{t.daysAvailable}</span>
+                <span className="progress-pill__count">{progress.released} / {progress.total}</span>
+              </div>
+              <div className="progress-pill__bar">
+                <div
+                  className="progress-pill__fill"
+                  style={{ width: `${Math.max(2, (progress.released / progress.total) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </header>
 
       <main className="chat" ref={scrollRef}>
@@ -582,7 +587,24 @@ export default function App() {
           <div className="ideas">
             {OUTPUT_TYPE_KEYS.map((key) => (
               <button key={key} className="idea-card" onClick={() => chooseOutputType(key)}>
-                <span className="idea-card__icon">{key === "structure" ? "🎬" : "📝"}</span>
+                <span className="idea-card__icon">
+                  {key === "structure" ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z"/>
+                      <path d="m6.2 5.3 3.1 3.9"/>
+                      <path d="m12.4 3.4 3.1 3.9"/>
+                      <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                      <line x1="10" y1="9" x2="8" y2="9"/>
+                    </svg>
+                  )}
+                </span>
                 <span className="idea-card__body">
                   <span className="idea-card__label">{t.outputTypes[key].label}</span>
                   <span className="idea-card__desc">{t.outputTypes[key].desc}</span>
@@ -793,73 +815,61 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
 
       {open && (
         <div className="vcard__body">
-          <div className="vcard__ideas-section">
-            <p className="vcard__ideas-heading">What type of video?</p>
-            <div className="vcard__tabs">
-              {tabs.map((key) => {
-                const count = itemsFor(key).length;
-                return (
-                  <button
-                    key={key}
-                    className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
-                    onClick={() => setActiveTab(key)}
-                  >
-                    <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
-                    {t.tabLabels[key] || key}
-                    {count > 1 && <span className="vcard__tab-count">{count}</span>}
-                  </button>
-                );
-              })}
-            </div>
+          <p className="vcard__ideas-heading">{t.whatType}</p>
+          <div className="vcard__tabs">
+            {tabs.map((key) => {
+              const count = itemsFor(key).length;
+              return (
+                <button
+                  key={key}
+                  className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
+                  onClick={() => setActiveTab(key)}
+                >
+                  <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
+                  {t.tabLabels[key] || key}
+                  {count > 1 && <span className="vcard__tab-count">{count}</span>}
+                </button>
+              );
+            })}
+          </div>
 
-            {activeItems.length > 1 && (
-              <p className="vcard__items-hint">
-                {activeItems.length} options — pick one below
-              </p>
-            )}
-
-            {activeItems.length > 0 ? (
-              // Content-backed tab: each source item inside the same box.
-              <div className="vcard__items">
-                {activeItems.map((item, i) => (
-                  <div key={i} className="vcard__item">
-                    {activeItems.length > 1 && (
-                      <span className="vcard__item-num">{t.tabLabels[activeTab]} {i + 1}</span>
-                    )}
-                    <p>{item}</p>
-                    <button
-                      className="vcard__gen"
-                      disabled={busy}
-                      onClick={() =>
-                        onChooseIdea(activeIdea, {
-                          text: item,
-                          typeLabel: t.tabLabels[activeTab],
-                          label: activeItems.length > 1
-                            ? `${t.tabLabels[activeTab]} ${i + 1}`
-                            : activeIdea.label,
-                        })
-                      }
-                    >
-                      {t.generateThis} <span className="vcard__gen-arrow">›</span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              // Creative / Testimony: teaser + single generate action.
-              <div className="vcard__items">
-                <div className="vcard__item">
-                  <p>{activeIdea?.teaser}</p>
-                  <button
-                    className="vcard__gen"
-                    disabled={busy}
-                    onClick={() => onChooseIdea(activeIdea, null)}
-                  >
-                    {t.generateVideo} <span className="vcard__gen-arrow">›</span>
-                  </button>
-                </div>
-              </div>
-            )}
+          {/* The selected type's source items, each a clickable option that
+              generates a video built around it. Creative/Testimony have no
+              source content, so their single teaser becomes the option. */}
+          <div className="vcard__options">
+            {(activeItems.length > 0
+              ? activeItems.map((item, i) => ({
+                  text: item,
+                  label: activeItems.length > 1
+                    ? `${t.tabLabels[activeTab]} ${i + 1}`
+                    : activeIdea.label,
+                  focus: {
+                    text: item,
+                    typeLabel: t.tabLabels[activeTab],
+                    label: activeItems.length > 1
+                      ? `${t.tabLabels[activeTab]} ${i + 1}`
+                      : activeIdea.label,
+                  },
+                }))
+              : [{ text: activeIdea?.teaser, label: null, focus: null }]
+            ).map((opt, i) => (
+              <button
+                key={i}
+                className="vcard__option"
+                disabled={busy}
+                onClick={() => onChooseIdea(activeIdea, opt.focus)}
+              >
+                <span className="vcard__option-body">
+                  {activeItems.length > 1 && (
+                    <span className="vcard__option-label">{t.tabLabels[activeTab]} {i + 1}</span>
+                  )}
+                  <span className="vcard__option-text">{opt.text}</span>
+                </span>
+                <svg className="vcard__option-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            ))}
           </div>
         </div>
       )}
