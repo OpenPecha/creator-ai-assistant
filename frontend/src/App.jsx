@@ -28,12 +28,47 @@ const LANGUAGES = [
 const LANG_STORAGE_KEY = "wb_language";
 
 const IDEA_ICONS = {
-  concept: "💡",
-  practice: "🧘",
-  creative: "🎨",
-  testimony: "🗣️",
-  story: "📖",
-  extra_info: "✨",
+  story: (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 4.5A1.5 1.5 0 013.5 3H8v10H3.5A1.5 1.5 0 012 11.5V4.5z"/>
+      <path d="M14 4.5A1.5 1.5 0 0012.5 3H8v10h4.5A1.5 1.5 0 0014 11.5V4.5z"/>
+    </svg>
+  ),
+  concept: (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 2a4 4 0 00-2.12 7.4c.3.18.62.56.62.93V11h3v-.67c0-.37.32-.75.62-.93A4 4 0 008 2z"/>
+      <path d="M6.5 11v.5a1.5 1.5 0 003 0V11"/>
+      <line x1="6.5" y1="11" x2="9.5" y2="11"/>
+    </svg>
+  ),
+  practice: (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="6"/>
+      <circle cx="8" cy="8" r="3"/>
+      <circle cx="8" cy="8" r="0.8" fill="currentColor" stroke="none"/>
+    </svg>
+  ),
+  extra_info: (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="6"/>
+      <line x1="8" y1="7.5" x2="8" y2="11"/>
+      <circle cx="8" cy="5.2" r="0.7" fill="currentColor" stroke="none"/>
+    </svg>
+  ),
+  creative: (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11.5 2.5l2 2-7 7H4.5v-2l7-7z"/>
+      <path d="M2 13.5h4"/>
+    </svg>
+  ),
+  testimony: (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="5.5" y="2" width="5" height="7" rx="2.5"/>
+      <path d="M3.5 8.5a4.5 4.5 0 009 0"/>
+      <line x1="8" y1="13" x2="8" y2="11"/>
+      <line x1="6" y1="13" x2="10" y2="13"/>
+    </svg>
+  ),
 };
 
 // All user-facing UI text, per language. Generated content (verses, summaries,
@@ -86,8 +121,8 @@ const UI = {
     verseLabel: "Verse",
     sections: { story: "Story", concept: "Concept", challenge: "Challenge", extraInfo: "Extra info" },
     tabLabels: { story: "Story", concept: "Concept", practice: "Challenge", extra_info: "Extra info", creative: "Creative", testimony: "Testimony" },
-    generateThis: "Generate this video",
-    generateVideo: "Generate video",
+    generateThis: "Generate idea",
+    generateVideo: "Generate idea",
     // output types
     outputTypes: {
       script: { label: "Video script", desc: "A ready-to-read spoken script." },
@@ -157,8 +192,8 @@ const UI = {
     verseLabel: "श्लोक",
     sections: { story: "कहानी", concept: "मुख्य विचार", challenge: "चुनौती", extraInfo: "रोचक जानकारी" },
     tabLabels: { story: "कहानी", concept: "मुख्य विचार", practice: "चुनौती", extra_info: "रोचक जानकारी", creative: "क्रिएटिव", testimony: "आपका अनुभव" },
-    generateThis: "इससे वीडियो बनाएँ",
-    generateVideo: "वीडियो बनाएँ",
+    generateThis: "आइडिया जनरेट करें",
+    generateVideo: "आइडिया जनरेट करें",
     outputTypes: {
       script: { label: "वीडियो स्क्रिप्ट", desc: "पढ़ने के लिए तैयार, बोली जाने वाली स्क्रिप्ट।" },
       structure: { label: "वीडियो स्ट्रक्चर", desc: "शॉट-दर-शॉट प्लान: समयबद्ध बीट्स, स्क्रीन पर विज़ुअल और वॉयसओवर।" },
@@ -751,6 +786,13 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
 
       {open && (
         <div className="vcard__body">
+          <p className="vcard__ideas-heading">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+              <rect x="1" y="4" width="10" height="8" rx="1.5"/>
+              <path d="M11 7.5l4-2v5l-4-2V7.5z"/>
+            </svg>
+            Generate a video about
+          </p>
           <div className="vcard__tabs">
             {tabs.map((key) => {
               const count = itemsFor(key).length;
@@ -760,7 +802,7 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
                   className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
                   onClick={() => setActiveTab(key)}
                 >
-                  <span className="vcard__tab-icon">{IDEA_ICONS[key] || "▸"}</span>
+                  <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
                   {t.tabLabels[key] || key}
                   {count > 1 && <span className="vcard__tab-count">{count}</span>}
                 </button>

@@ -416,20 +416,30 @@ body {
   animation: fadeUp 0.18s var(--ease);
 }
 
+.vcard__ideas-heading {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
 .vcard__tabs {
   display: flex;
-  gap: 6px;
+  gap: 5px;
   margin-bottom: 12px;
   flex-wrap: wrap;
 }
 .vcard__tab {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
+  gap: 5px;
+  font-size: 0.775rem;
   font-weight: 500;
   font-family: inherit;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: none;
@@ -444,11 +454,11 @@ body {
   color: #fff;
 }
 .vcard__tab-count {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
@@ -461,7 +471,13 @@ body {
   color: #fff;
 }
 
-.vcard__tab-icon { font-size: 0.85rem; line-height: 1; }
+.vcard__tab-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+.vcard__tab--active .vcard__tab-icon { opacity: 1; }
 
 .vcard__items {
   display: flex;
@@ -492,21 +508,21 @@ body {
   margin-top: 12px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 7px 14px;
+  font-size: 0.775rem;
+  font-weight: 500;
+  padding: 5px 12px;
   border-radius: 999px;
-  border: none;
-  background: #3b82f6;
-  color: #fff;
+  border: 1px solid var(--border-hover);
+  background: var(--surface);
+  color: var(--ink-soft);
   cursor: pointer;
-  transition: opacity 0.12s var(--ease), transform 0.12s var(--ease);
+  transition: background 0.12s var(--ease), border-color 0.12s var(--ease), color 0.12s var(--ease), transform 0.12s var(--ease);
 }
-.vcard__gen:hover:not(:disabled) { opacity: 0.88; }
+.vcard__gen:hover:not(:disabled) { background: var(--surface-hover); border-color: var(--ink-muted); color: var(--ink); }
 .vcard__gen:active:not(:disabled) { transform: translateY(1px); }
-.vcard__gen:disabled { opacity: 0.5; cursor: default; }
+.vcard__gen:disabled { opacity: 0.4; cursor: default; }
 .vcard__gen-arrow { font-size: 1rem; line-height: 1; }
 
 .vcard__empty {
