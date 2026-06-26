@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from . import gemini
+from . import gemini, language as lang_service
 from .content_loader import DayContent
 from .ideas import IDEAS, build_prompt
 
@@ -49,6 +49,17 @@ def _revision_block(previous: str, feedback: str) -> str:
     )
 
 
+def _focus_block(focus: str, focus_label: str = "") -> str:
+    label = focus_label.strip() or "piece of source material"
+    return (
+        "\n\n## Primary focus — build the video around THIS\n"
+        f"The creator chose one specific {label} from today's content. Build the "
+        "entire video around it and treat it as the heart of the script. You may "
+        "use the rest of the day's context for background, but this is the subject:\n\n"
+        f'"""\n{focus.strip()[:2500]}\n"""\n'
+    )
+
+
 def generate(
     dc: DayContent,
     idea_key: str,
@@ -57,6 +68,9 @@ def generate(
     *,
     feedback: str = "",
     previous: str = "",
+    language: str = "english",
+    focus: str = "",
+    focus_label: str = "",
 ) -> str:
     if idea_key not in IDEAS:
         raise ValueError(f"Unknown idea: {idea_key!r}")
@@ -74,6 +88,9 @@ def generate(
     idea = IDEAS[idea_key]
     shared = None if idea.get("self_contained") else "_shared.md"
     prompt = build_prompt(tokens, idea["file"], shared=shared)
+    if focus.strip():
+        prompt += _focus_block(focus, focus_label)
     if feedback.strip() and previous.strip():
         prompt += _revision_block(previous, feedback)
+    prompt += lang_service.prose_directive(language)
     return strip_markdown(gemini.generate_text(prompt))

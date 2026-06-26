@@ -10,9 +10,9 @@ app remains usable offline.
 
 from __future__ import annotations
 
-from . import gemini
+from . import gemini, language as lang_service
 from .content_loader import DayContent
-from .ideas import IDEAS
+from .ideas import IDEAS, idea_blurb, idea_label
 
 _ANALYSIS_SCHEMA = {
     "type": "object",
@@ -106,9 +106,11 @@ def _heuristic(dc: DayContent) -> dict:
     }
 
 
-# Analysis is deterministic per day and the source repo is static between pulls,
-# so cache results to avoid a fresh Gemini call on every day-detail request.
-_analysis_cache: dict[int, dict] = {}
+# Analysis is deterministic per (day, language) and the source repo is static
+# between pulls, so cache results to avoid a fresh Gemini call on every
+# day-detail request. The teasers are language-specific, so the language is part
+# of the cache key.
+_analysis_cache: dict[tuple[int, str], dict] = {}
 
 
 def clear_cache() -> None:
@@ -116,43 +118,52 @@ def clear_cache() -> None:
     _analysis_cache.clear()
 
 
-def analyze(dc: DayContent) -> dict:
-    """Return the raw analysis dict (booleans + teasers), cached per day."""
-    cached = _analysis_cache.get(dc.day)
+def analyze(dc: DayContent, language: str = "english") -> dict:
+    """Return the raw analysis dict (booleans + teasers), cached per (day, language)."""
+    language = lang_service.normalize(language)
+    key = (dc.day, language)
+    cached = _analysis_cache.get(key)
     if cached is not None:
         return cached
 
     if not gemini.is_configured():
-        # Heuristic is deterministic; safe to cache.
+        # Heuristic is deterministic; safe to cache. (English-only teasers; the
+        # heuristic is a rare offline fallback so we don't translate it.)
         result = _heuristic(dc)
-        _analysis_cache[dc.day] = result
+        _analysis_cache[key] = result
         return result
 
+    prompt = _analysis_prompt(dc) + lang_service.json_directive(language)
     try:
-        result = gemini.generate_json(_analysis_prompt(dc), schema=_ANALYSIS_SCHEMA)
+        result = gemini.generate_json(prompt, schema=_ANALYSIS_SCHEMA)
     except Exception:
         # Never let analysis failure break the day endpoint — and don't cache a
         # transient failure, so the next request can retry the LLM.
         return _heuristic(dc)
 
-    _analysis_cache[dc.day] = result
+    _analysis_cache[key] = result
     return result
 
 
-def available_ideas(dc: DayContent) -> list[dict]:
+def available_ideas(dc: DayContent, language: str = "english") -> list[dict]:
     """Return the ordered list of available ideas: {key, label, teaser}."""
-    analysis = analyze(dc)
+    language = lang_service.normalize(language)
+    analysis = analyze(dc, language)
     teasers = {
-        "concept": analysis.get("concept_teaser") or IDEAS["concept"]["blurb"],
-        "practice": analysis.get("practice_teaser") or IDEAS["practice"]["blurb"],
-        "creative": analysis.get("creative_teaser") or IDEAS["creative"]["blurb"],
-        "testimony": IDEAS["testimony"]["blurb"],
-        "story": analysis.get("story_teaser") or IDEAS["story"]["blurb"],
-        "extra_info": analysis.get("extra_info_teaser") or IDEAS["extra_info"]["blurb"],
+        "concept": analysis.get("concept_teaser") or idea_blurb("concept", language),
+        "practice": analysis.get("practice_teaser") or idea_blurb("practice", language),
+        "creative": analysis.get("creative_teaser") or idea_blurb("creative", language),
+        "testimony": idea_blurb("testimony", language),
+        "story": analysis.get("story_teaser") or idea_blurb("story", language),
+        "extra_info": analysis.get("extra_info_teaser") or idea_blurb("extra_info", language),
     }
     result = []
     for key, meta in IDEAS.items():
         present = meta["always"] or bool(analysis.get(key))
         if present:
-            result.append({"key": key, "label": meta["label"], "teaser": teasers.get(key) or meta["blurb"]})
+            result.append({
+                "key": key,
+                "label": idea_label(key, language),
+                "teaser": teasers.get(key) or idea_blurb(key, language),
+            })
     return result

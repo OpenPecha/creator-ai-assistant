@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 
-from . import gemini
+from . import gemini, language as lang_service
 from .content_loader import DayContent
 from .ideas import IDEAS, load_prompt
 from .script_generator import strip_markdown
@@ -67,6 +67,9 @@ def generate(
     *,
     feedback: str = "",
     previous: dict | None = None,
+    language: str = "english",
+    focus: str = "",
+    focus_label: str = "",
 ) -> dict:
     if idea_key not in IDEAS:
         raise ValueError(f"Unknown idea: {idea_key!r}")
@@ -88,8 +91,18 @@ def generate(
     prompt = load_prompt(template_name)
     for key, value in tokens.items():
         prompt = prompt.replace("{{" + key + "}}", value)
+    if focus.strip():
+        label = focus_label.strip() or "piece of source material"
+        prompt += (
+            "\n\n## Primary focus — build the video around THIS\n"
+            f"The creator chose one specific {label} from today's content. Build the "
+            "entire storyboard around it and treat it as the heart of the video. Use "
+            "the rest of the day's context only for background:\n\n"
+            f'"""\n{focus.strip()[:2500]}\n"""\n'
+        )
     if feedback.strip() and previous:
         prompt += _revision_block(previous, feedback)
+    prompt += lang_service.json_directive(language)
 
     data = gemini.generate_json(prompt, schema=_SCHEMA)
 

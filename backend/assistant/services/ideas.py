@@ -6,22 +6,44 @@ from pathlib import Path
 
 _PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
-# key -> (label, prompt filename, always_available)
+# key -> (label, Hindi label, prompt filename, always_available, blurb, Hindi blurb)
 IDEAS: dict[str, dict] = {
-    "concept": {"label": "Concept", "file": "concept.md", "always": True,
-                "blurb": "Explain the idea behind today's verses."},
-    "practice": {"label": "Challenge / Practice", "file": "practice.md", "always": True,
-                 "blurb": "Invite viewers to do today's practice."},
-    "creative": {"label": "Creative", "file": "creative.md", "always": True,
+    "concept": {"label": "Concept", "label_hi": "मुख्य विचार", "file": "concept.md", "always": True,
+                "blurb": "Explain the idea behind today's verses.",
+                "blurb_hi": "आज के श्लोक के पीछे का विचार समझाएँ।"},
+    "practice": {"label": "Challenge / Practice", "label_hi": "अभ्यास / चुनौती", "file": "practice.md", "always": True,
+                 "blurb": "Invite viewers to do today's practice.",
+                 "blurb_hi": "दर्शकों को आज का अभ्यास करने के लिए बुलाएँ।"},
+    "creative": {"label": "Creative", "label_hi": "क्रिएटिव", "file": "creative.md", "always": True,
                  "self_contained": True,
-                 "blurb": "A fresh, universal video about the lesson behind it — for everyone, no scripture."},
-    "testimony": {"label": "Testimony", "file": "testimony.md", "always": True,
-                  "blurb": "Share your own experience (you provide the notes)."},
-    "story": {"label": "Story", "file": "story.md", "always": False,
-              "blurb": "Tell a story or parable from the source."},
-    "extra_info": {"label": "Extra info / fun fact", "file": "extra_info.md", "always": False,
-                   "blurb": "Share a surprising detail from the texts."},
+                 "blurb": "A fresh, universal video about the lesson behind it — for everyone, no scripture.",
+                 "blurb_hi": "सीख पर एक नई, सबके लिए वीडियो — बिना किसी धर्मग्रंथ के।"},
+    "testimony": {"label": "Testimony", "label_hi": "आपका अनुभव", "file": "testimony.md", "always": True,
+                  "blurb": "Share your own experience (you provide the notes).",
+                  "blurb_hi": "अपना खुद का अनुभव साझा करें (नोट्स आप देंगे)।"},
+    "story": {"label": "Story", "label_hi": "कहानी", "file": "story.md", "always": False,
+              "blurb": "Tell a story or parable from the source.",
+              "blurb_hi": "स्रोत से कोई कहानी या दृष्टांत सुनाएँ।"},
+    "extra_info": {"label": "Extra info / fun fact", "label_hi": "रोचक जानकारी", "file": "extra_info.md", "always": False,
+                   "blurb": "Share a surprising detail from the texts.",
+                   "blurb_hi": "ग्रंथों से कोई चौंकाने वाली बात बताएँ।"},
 }
+
+
+def idea_label(key: str, language: str = "english") -> str:
+    """Return an idea's display label in the chosen language (falls back to English)."""
+    meta = IDEAS[key]
+    if (language or "").lower() == "hindi":
+        return meta.get("label_hi") or meta["label"]
+    return meta["label"]
+
+
+def idea_blurb(key: str, language: str = "english") -> str:
+    """Return an idea's fallback teaser blurb in the chosen language."""
+    meta = IDEAS[key]
+    if (language or "").lower() == "hindi":
+        return meta.get("blurb_hi") or meta["blurb"]
+    return meta["blurb"]
 
 # Ideas whose presence depends on the day's content.
 CONDITIONAL_IDEAS = [k for k, v in IDEAS.items() if not v["always"]]

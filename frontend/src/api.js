@@ -20,7 +20,8 @@ async function request(path, options = {}) {
 
 export const api = {
   health: () => request("/health/"),
-  getDay: (day) => request(`/days/${day}/`),
+  getDay: (day, language = "english") =>
+    request(`/days/${day}/?language=${encodeURIComponent(language)}`),
   verseSummary: (payload) =>
     request("/verse-summary/", { method: "POST", body: JSON.stringify(payload) }),
   generateScript: (payload) =>

@@ -13,6 +13,7 @@ from .services import (
     audio_generator,
     gemini,
     idea_analyzer,
+    language as lang_service,
     script_generator,
     structure_generator,
     verse_summary,
@@ -49,6 +50,7 @@ def health(request):
 @api_view(["GET"])
 def day_detail(request, day: int):
     """Load a day's verses/plan and the video ideas its content supports."""
+    language = lang_service.normalize(request.query_params.get("language"))
     try:
         dc = get_day_content(day)
     except ContentError as exc:
@@ -70,7 +72,7 @@ def day_detail(request, day: int):
         "verseLines": verse_lines,
         "planFile": dc.plan_file,
         "isVariant": dc.is_variant,
-        "availableIdeas": idea_analyzer.available_ideas(dc),
+        "availableIdeas": idea_analyzer.available_ideas(dc, language),
     })
 
 
@@ -124,6 +126,9 @@ def generate_script(request):
     creator_notes = data.get("creatorNotes", "") or ""
     feedback = data.get("feedback", "") or ""
     previous = data.get("previous", "") or ""
+    language = lang_service.normalize(data.get("language"))
+    focus = (data.get("focus") or "")[:MAX_CREATOR_NOTES]
+    focus_label = (data.get("focusLabel") or "")[:80]
 
     if day is None or idea_key is None or duration is None:
         return Response(
@@ -156,7 +161,8 @@ def generate_script(request):
     try:
         script = script_generator.generate(
             dc, idea_key, duration, creator_notes,
-            feedback=feedback, previous=str(previous),
+            feedback=feedback, previous=str(previous), language=language,
+            focus=focus, focus_label=focus_label,
         )
     except gemini.GeminiNotConfigured as exc:
         return Response({"error": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -186,6 +192,9 @@ def generate_structure(request):
     creator_notes = data.get("creatorNotes", "") or ""
     feedback = data.get("feedback", "") or ""
     previous = data.get("previous") or None
+    language = lang_service.normalize(data.get("language"))
+    focus = (data.get("focus") or "")[:MAX_CREATOR_NOTES]
+    focus_label = (data.get("focusLabel") or "")[:80]
 
     if day is None or idea_key is None or duration is None:
         return Response(
@@ -219,6 +228,7 @@ def generate_structure(request):
         structure = structure_generator.generate(
             dc, idea_key, duration, creator_notes,
             feedback=feedback, previous=previous if isinstance(previous, dict) else None,
+            language=language, focus=focus, focus_label=focus_label,
         )
     except gemini.GeminiNotConfigured as exc:
         return Response({"error": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
