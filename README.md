@@ -6,8 +6,8 @@ for **The Bodhisattva Challenge** — a 365-day journey through Śāntideva's
 
 The creator picks a day; the app pulls that day's verses, plan, and classical
 commentary from a local clone of the source repo, gives a simple plain-language
-summary of the verse (in English or Hindi), suggests the video ideas that day's
-material can support, and generates either a ready-to-read **script** or a
+summary of the verse (in **English** or **हिन्दी Hindi**), suggests the video ideas
+that day's material can support, and generates either a ready-to-read **script** or a
 shot-by-shot **video structure**. Results can be regenerated, refined by chatting,
 and (for scripts) turned into narrated audio.
 
@@ -31,12 +31,16 @@ fills editable prompt templates ("skills") to generate everything else.
 ## The creator flow
 1. **Pick a day** (1–365).
 2. **See the day** — a Day / Chapter / Verses / Date strip plus today's verse text.
-3. **Verse summary** — choose **English** or **हिन्दी Hindi** for a few short,
-   plain-language bullet points explaining the verse; optionally get the other
-   language too.
-4. **Pick a video idea** (see below).
-5. **Choose the output** — **📝 Video script** (spoken script) or
-   **🎬 Video structure** (a storyboard: timed beats with on-screen visuals +
+3. **Verse summary** — a few short, plain-language bullet points explaining the
+   verse. The language toggle (top right) switches the entire experience between
+   **English** and **हिन्दी Hindi** — summaries, UI labels, and generated content
+   all follow the chosen language.
+4. **Pick a verse, then pick a video idea** — each verse expands into a card
+   showing the available idea types as tabs (Story, Concept, Challenge, Extra info,
+   Creative, Testimony). Each idea shows one or more specific angles as clickable
+   option cards; tapping one commits to that angle and moves forward.
+5. **Choose the output type** — **Video script** (a ready-to-read spoken script) or
+   **Video structure** (a storyboard: timed beats with on-screen visuals +
    voiceover).
 6. **Pick a duration** — 30 / 45 / 60 / 90 seconds.
 7. **Get the result**, then **↻ Regenerate** for a fresh take, or **chat to refine
@@ -44,14 +48,21 @@ fills editable prompt templates ("skills") to generate everything else.
    turned into **narrated audio**.
 
 ### Video ideas
+Each idea type has a distinct SVG tab icon and may surface multiple angles (e.g.
+two Story options appear as "Story 1" and "Story 2"):
+
 | Idea | What it does | When offered |
 |---|---|---|
+| **Story** | A story or parable from the source material | when the material contains one |
 | **Concept** | Explains the core idea of the verse | always |
-| **Challenge / Practice** | Frames today's practice as a doable dare | always |
-| **Creative** | A secular, universal video about the *lesson* behind the verse — no scripture or Buddhist references, crisp one-liners, for everyone | always |
-| **Testimony** | Shapes the creator's own notes into a first-person reflection | always |
-| **Story** | Tells a story/parable from the source | when the material contains one |
-| **Extra info / fun fact** | A surprising detail from the texts | when the material contains one |
+| **Challenge** | Frames today's practice as a doable dare | always |
+| **Extra info** | A surprising detail or fun fact from the texts | when the material contains one |
+| **Creative** | A secular, universal video about the *lesson* — no scripture or Buddhist references, for everyone | always |
+| **Testimony** | Shapes the creator's own personal notes into a first-person reflection | always |
+
+The backend decides which ideas are available for a given day via an LLM analysis
+of the source material; Story and Extra info only appear when the texts genuinely
+support them.
 
 ## Local setup
 
@@ -98,12 +109,15 @@ Open http://localhost:5173 and start with a day number (e.g. `5`).
 | GET | `/api/health/` | status + whether Gemini is configured |
 | GET | `/api/days/<n>/` | verses, chapter, date, verse text, available ideas |
 | POST | `/api/verse-summary/` | `{day, language}` → `{points}` — `language` is `english` or `hindi` |
-| POST | `/api/script/` | `{day, ideaKey, durationSeconds, creatorNotes?, feedback?, previous?}` → `{script}` |
-| POST | `/api/structure/` | `{day, ideaKey, durationSeconds, creatorNotes?, feedback?, previous?}` → `{structure}` |
+| POST | `/api/script/` | `{day, ideaKey, durationSeconds, language, focus?, creatorNotes?, feedback?, previous?}` → `{script}` |
+| POST | `/api/structure/` | `{day, ideaKey, durationSeconds, language, focus?, creatorNotes?, feedback?, previous?}` → `{structure}` |
 | POST | `/api/audio/` | `{script, voice?}` → `{audioUrl}` |
 
-`feedback` + `previous` power the chat-to-refine step (revise the prior result);
-omit them for a fresh generation.
+- `language` — `"english"` or `"hindi"`; passed to all generation endpoints so the
+  output is produced in the chosen language end-to-end.
+- `focus` — optional object `{text, typeLabel, label}` that pins generation to a
+  specific idea angle when a tab offers multiple options (e.g. Story 1 vs Story 2).
+- `feedback` + `previous` — power the chat-to-refine step; omit for a fresh generation.
 
 ## The "skills" (prompt templates)
 Every generation is driven by an editable markdown template in

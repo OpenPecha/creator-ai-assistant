@@ -1,16 +1,69 @@
-# React + Vite
+# Frontend — WeBuddhist Creator Assistant
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite single-page app. All chat state lives in the browser; the backend is
+hit only for content loading and AI generation.
 
-Currently, two official plugins are available:
+## Stack
+- **React 18** — functional components, hooks (`useState`, `useRef`, `useEffect`, `useContext`)
+- **Vite** — dev server + production build
+- **CSS custom properties** — theme tokens in `:root` (`--bg`, `--ink`, `--border`, etc.)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Key files
+| File | Role |
+|---|---|
+| `src/App.jsx` | Entire app — state machine, all components, UI text dictionaries |
+| `src/App.css` | All styles — layout, components, responsive breakpoints |
+| `public/logo.png` | Header logo |
 
-## React Compiler
+## Architecture
+Everything lives in `App.jsx`. Notable pieces:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **`UI` dictionary** — all user-facing strings keyed by language (`english` / `hindi`).
+  Add a new language by adding a key here; no other change needed.
+- **`LangContext` / `useUI()`** — passes the active language's strings down to every
+  component without prop-drilling.
+- **`IDEA_ICONS`** — inline SVG React elements keyed by idea type, used in the verse
+  card tabs.
+- **`VerseCard`** — expandable card per verse. Shows idea-type tabs; each tab
+  surfaces one or more clickable option cards. Tapping an option calls `onChooseIdea`
+  with a `focus` object describing the specific angle chosen.
+- **`getMockVerseContent()`** — placeholder that provides mock idea text per tab while
+  real per-verse content is pending from the source repo. Replace with a real fetch
+  once source files are available.
 
-## Expanding the ESLint configuration
+## State machine
+The top-level `stage` string drives which UI panel is shown:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Stage | What the user sees |
+|---|---|
+| `pickDay` | Day number input |
+| `loadingDay` | Loading spinner |
+| `pickVerse` | Verse cards with expandable idea tabs |
+| `askOutputType` | Video script vs. Video structure choice |
+| `askDuration` | Duration chips (30 / 45 / 60 / 90 s) |
+| `generating` | Loading spinner |
+| `result` | Generated script or structure + actions |
+| `refining` | Chat input for refine/regenerate |
+
+## Responsive breakpoints
+| Breakpoint | Behaviour |
+|---|---|
+| > 640px | Header on one row (brand left, controls right) |
+| ≤ 640px | Controls (language toggle + progress pill) wrap to a second row |
+| ≤ 560px | Reduced padding, smaller header text |
+| ≤ 380px | Smaller toggle buttons for very small phones |
+
+The verse idea tabs scroll horizontally with a hidden scrollbar on narrow screens.
+
+## Dev
+```bash
+npm install
+cp .env.example .env    # set VITE_API_BASE_URL=http://localhost:8001
+npm run dev             # http://localhost:5173
+```
+
+## Build
+```bash
+npm run build   # outputs dist/
+```
+Set `VITE_API_BASE_URL` to your production API origin before building.
