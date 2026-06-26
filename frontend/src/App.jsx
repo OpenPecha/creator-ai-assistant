@@ -130,6 +130,7 @@ const UI = {
     regenerating: "Regenerating…",
     regenAudio: "↻ Regenerate",
     download: "↓ Download",
+    downloading: "↓ Downloading…",
     copyStructure: "Copy structure",
     copyScript: "Copy script",
     copied: "✓ Copied",
@@ -200,6 +201,7 @@ const UI = {
     regenerating: "फिर से बन रहा है…",
     regenAudio: "↻ फिर से बनाएँ",
     download: "↓ डाउनलोड",
+    downloading: "↓ डाउनलोड हो रहा है…",
     copyStructure: "स्ट्रक्चर कॉपी करें",
     copyScript: "स्क्रिप्ट कॉपी करें",
     copied: "✓ कॉपी हो गया",
@@ -853,6 +855,12 @@ function StructureView({ structure }) {
     }
   };
 
+  const downloadVO = async (key, url, filename) => {
+    setVo((v) => ({ ...v, [key]: { ...v[key], downloading: true } }));
+    try { await downloadAudio(url, filename); }
+    finally { setVo((v) => ({ ...v, [key]: { ...v[key], downloading: false } })); }
+  };
+
   return (
     <div className="structure">
       <div className="structure__meta">
@@ -929,9 +937,10 @@ function StructureView({ structure }) {
                         <button
                           type="button"
                           className="chip"
-                          onClick={() => downloadAudio(state.url, `voiceover-${sec.label || "beat"}-${idx + 1}.wav`)}
+                          disabled={state.downloading}
+                          onClick={() => downloadVO(key, state.url, `voiceover-${sec.label || "beat"}-${idx + 1}.wav`)}
                         >
-                          {t.download}
+                          {state.downloading ? t.downloading : t.download}
                         </button>
                         <button
                           type="button"
@@ -962,11 +971,18 @@ function StructureView({ structure }) {
 function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
   const t = useUI();
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const copy = () => {
     navigator.clipboard.writeText(msg.scriptText);
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
+  };
+
+  const downloadScript = async (url, filename) => {
+    setDownloading(true);
+    try { await downloadAudio(url, filename); }
+    finally { setDownloading(false); }
   };
 
   return (
@@ -1055,9 +1071,10 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
               <button
                 type="button"
                 className="chip"
-                onClick={() => downloadAudio(msg.audioUrl, "script-audio.wav")}
+                disabled={downloading}
+                onClick={() => downloadScript(msg.audioUrl, "script-audio.wav")}
               >
-                {t.download}
+                {downloading ? t.downloading : t.download}
               </button>
             </div>
           )}
