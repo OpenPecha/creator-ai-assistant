@@ -6,18 +6,8 @@ const DURATION_VALUES = [30, 45, 60, 90];
 
 const OUTPUT_TYPE_KEYS = ["script", "structure"];
 
-// Each video idea is a tab. Content-backed ideas map to a source-content section
-// (shown in the tab so the creator can pick a specific item to build the video
-// around). Creative and Testimony have no source content. The map drives both the
-// tab ordering and which mock section feeds each tab.
-const IDEA_SECTION = {
-  story: "story",
-  concept: "concept",
-  practice: "challenge",
-  extra_info: "extraInfo",
-  creative: null,
-  testimony: null,
-};
+// Display order for idea tabs. The backend decides which keys are available for
+// a given day; the frontend just shows them in this order.
 const TAB_ORDER = ["story", "concept", "practice", "extra_info", "creative", "testimony"];
 
 const LANGUAGES = [
@@ -717,71 +707,15 @@ export default function App() {
   );
 }
 
-function getMockVerseContent(idx) {
-  // Each section is an array: [] = no content, [x] = one item, [x, y] = multiple.
-  const pool = [
-    {
-      story: [
-        "A young student once asked his teacher why meditating on kindness felt so difficult. The teacher said nothing — he simply handed the student a mirror. The student stared at it, confused. Days later, he understood: kindness begins by seeing yourself clearly.",
-        "A grandmother who survived great hardship was once asked how she stayed so kind. She said: 'I decided long ago that bitterness was too heavy to carry. I put it down.'",
-      ],
-      concept: [
-        "Bodhicitta — the wish to become enlightened for all beings — is not just a noble intention. It is the root from which every positive quality grows. Even a small seed of it transforms ordinary actions into something vast.",
-      ],
-      challenge: [
-        "Today, before responding to anyone, pause for one breath and silently wish them well. Just one breath. Notice what changes.",
-      ],
-      extraInfo: [
-        "The Bodhicharyavatara was composed by Shantideva in 8th-century India at Nalanda University — one of the ancient world's greatest centers of learning, home to over 10,000 scholars.",
-      ],
-    },
-    {
-      story: [
-        "A monk who had studied patience for years was once insulted by a rude traveler. His students expected him to remain calm. Instead, he laughed. Later they asked why. He said: 'After all those years, anger still arrived. But this time, it didn't stay.'",
-      ],
-      concept: [
-        "Mindfulness is not about having a perfectly calm mind. It is about noticing when the mind has wandered — and returning, again and again, without judgment. The return itself is the practice.",
-      ],
-      challenge: [
-        "Choose one moment today when you feel frustrated and do nothing for five seconds. Just observe the feeling without acting on it. See what happens on its own.",
-      ],
-      extraInfo: [],
-    },
-    {
-      story: [],
-      concept: [
-        "Confession in Buddhist practice is not about guilt — it is about clarity. Acknowledging harm we've caused creates the space to do differently. The past is fixed; how we move forward is not.",
-      ],
-      challenge: [
-        "Think of one action you regret from this week. Without harsh self-judgment, simply acknowledge it: 'I acted from fear' or 'I acted from anger.' Then let it go. Done.",
-      ],
-      extraInfo: [
-        "Shantideva is believed to have recited the entire Bodhicharyavatara spontaneously during an assembly at Nalanda, apparently floating in the air. Whether literal or legendary, the story captures how transformative the text felt to those who first heard it.",
-      ],
-    },
-  ];
-  return pool[idx % pool.length];
-}
 
 function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
   const t = useUI();
   const [open, setOpen] = useState(false);
   const cardRef = useRef(null);
-  const content = getMockVerseContent(idx);
 
-  // Each tab is a video idea. Content-backed ideas (Story/Concept/Challenge/
-  // Extra info) appear when this verse has source material for them; Creative
-  // and Testimony are always offered (they have no source content).
+  // Tabs come entirely from the backend's availableIdeas for this verse.
   const ideaByKey = Object.fromEntries((ideas || []).map((i) => [i.key, i]));
-  const itemsFor = (key) => {
-    const section = IDEA_SECTION[key];
-    return section ? content[section] || [] : [];
-  };
-  const ideaObj = (key) => ideaByKey[key] || { key, label: t.tabLabels[key], teaser: "" };
-
-  const tabs = TAB_ORDER.filter((key) =>
-    IDEA_SECTION[key] ? itemsFor(key).length > 0 : !!ideaByKey[key]
-  );
+  const tabs = TAB_ORDER.filter((key) => !!ideaByKey[key]);
   const [activeTab, setActiveTab] = useState(tabs[0] ?? "concept");
 
   function handleToggle() {
@@ -797,8 +731,7 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
     }
   }
 
-  const activeIdea = ideaObj(activeTab);
-  const activeItems = itemsFor(activeTab);
+  const activeIdea = ideaByKey[activeTab] || { key: activeTab, label: t.tabLabels[activeTab], teaser: "" };
 
   return (
     <div ref={cardRef} className={`vcard${open ? " vcard--open" : ""}`}>
@@ -817,59 +750,35 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
         <div className="vcard__body">
           <p className="vcard__ideas-heading">{t.whatType}</p>
           <div className="vcard__tabs">
-            {tabs.map((key) => {
-              const count = itemsFor(key).length;
-              return (
-                <button
-                  key={key}
-                  className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
-                  onClick={() => setActiveTab(key)}
-                >
-                  <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
-                  {t.tabLabels[key] || key}
-                  {count > 1 && <span className="vcard__tab-count">{count}</span>}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* The selected type's source items, each a clickable option that
-              generates a video built around it. Creative/Testimony have no
-              source content, so their single teaser becomes the option. */}
-          <div className="vcard__options">
-            {(activeItems.length > 0
-              ? activeItems.map((item, i) => ({
-                  text: item,
-                  label: activeItems.length > 1
-                    ? `${t.tabLabels[activeTab]} ${i + 1}`
-                    : activeIdea.label,
-                  focus: {
-                    text: item,
-                    typeLabel: t.tabLabels[activeTab],
-                    label: activeItems.length > 1
-                      ? `${t.tabLabels[activeTab]} ${i + 1}`
-                      : activeIdea.label,
-                  },
-                }))
-              : [{ text: activeIdea?.teaser, label: null, focus: null }]
-            ).map((opt, i) => (
+            {tabs.map((key) => (
               <button
-                key={i}
-                className="vcard__option"
-                disabled={busy}
-                onClick={() => onChooseIdea(activeIdea, opt.focus)}
+                key={key}
+                className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
+                onClick={() => setActiveTab(key)}
               >
-                <span className="vcard__option-body">
-                  {activeItems.length > 1 && (
-                    <span className="vcard__option-label">{t.tabLabels[activeTab]} {i + 1}</span>
-                  )}
-                  <span className="vcard__option-text">{opt.text}</span>
-                </span>
-                <svg className="vcard__option-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+                <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
+                {t.tabLabels[key] || key}
               </button>
             ))}
+          </div>
+
+          <div className="vcard__options">
+            <button
+              className="vcard__option"
+              disabled={busy}
+              onClick={() => onChooseIdea(activeIdea, {
+                text: activeIdea.teaser,
+                typeLabel: t.tabLabels[activeTab],
+                label: activeIdea.label,
+              })}
+            >
+              <span className="vcard__option-body">
+                <span className="vcard__option-text">{activeIdea.teaser}</span>
+              </span>
+              <svg className="vcard__option-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
           </div>
         </div>
       )}

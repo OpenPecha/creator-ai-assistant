@@ -27,9 +27,9 @@ Everything lives in `App.jsx`. Notable pieces:
 - **`VerseCard`** — expandable card per verse. Shows idea-type tabs; each tab
   surfaces one or more clickable option cards. Tapping an option calls `onChooseIdea`
   with a `focus` object describing the specific angle chosen.
-- **`getMockVerseContent()`** — placeholder that provides mock idea text per tab while
-  real per-verse content is pending from the source repo. Replace with a real fetch
-  once source files are available.
+- **`availableIdeas`** — real LLM-generated idea objects from `/api/days/<n>/`, each
+  with `key`, `label`, and `teaser`. `VerseCard` builds its tabs entirely from this
+  data; there is no mock fallback.
 
 ## State machine
 The top-level `stage` string drives which UI panel is shown:
