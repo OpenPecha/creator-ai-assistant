@@ -416,14 +416,34 @@ body {
   animation: fadeUp 0.18s var(--ease);
 }
 
+.vcard__ideas-section {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
 .vcard__ideas-heading {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.vcard__idea-teaser {
+  font-size: 0.82rem;
   color: var(--ink-soft);
-  margin-bottom: 8px;
+  line-height: 1.55;
+  font-style: italic;
+}
+
+.vcard__items-hint {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-top: 8px;
+  letter-spacing: 0.01em;
 }
 
 .vcard__tabs {
@@ -436,13 +456,13 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.775rem;
+  font-size: 0.8rem;
   font-weight: 500;
   font-family: inherit;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: none;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
   color: var(--ink-soft);
   cursor: pointer;
   transition: all 0.12s var(--ease);
@@ -482,16 +502,19 @@ body {
 .vcard__items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
 }
 .vcard__item {
   font-size: 0.875rem;
   color: var(--ink-soft);
   line-height: 1.65;
-  padding: 12px 14px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xs);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.vcard__item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 .vcard__item-num {
   display: block;

@@ -793,73 +793,74 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
 
       {open && (
         <div className="vcard__body">
-          <p className="vcard__ideas-heading">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
-              <rect x="1" y="4" width="10" height="8" rx="1.5"/>
-              <path d="M11 7.5l4-2v5l-4-2V7.5z"/>
-            </svg>
-            Generate a video about
-          </p>
-          <div className="vcard__tabs">
-            {tabs.map((key) => {
-              const count = itemsFor(key).length;
-              return (
-                <button
-                  key={key}
-                  className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
-                  onClick={() => setActiveTab(key)}
-                >
-                  <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
-                  {t.tabLabels[key] || key}
-                  {count > 1 && <span className="vcard__tab-count">{count}</span>}
-                </button>
-              );
-            })}
-          </div>
+          <div className="vcard__ideas-section">
+            <p className="vcard__ideas-heading">What type of video?</p>
+            <div className="vcard__tabs">
+              {tabs.map((key) => {
+                const count = itemsFor(key).length;
+                return (
+                  <button
+                    key={key}
+                    className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
+                    onClick={() => setActiveTab(key)}
+                  >
+                    <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
+                    {t.tabLabels[key] || key}
+                    {count > 1 && <span className="vcard__tab-count">{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
 
-          {activeItems.length > 0 ? (
-            // Content-backed tab: each source item builds its own focused video.
-            <div className="vcard__items">
-              {activeItems.map((item, i) => (
-                <div key={i} className="vcard__item">
-                  {activeItems.length > 1 && (
-                    <span className="vcard__item-num">{t.tabLabels[activeTab]} {i + 1}</span>
-                  )}
-                  <p>{item}</p>
+            {activeItems.length > 1 && (
+              <p className="vcard__items-hint">
+                {activeItems.length} options — pick one below
+              </p>
+            )}
+
+            {activeItems.length > 0 ? (
+              // Content-backed tab: each source item inside the same box.
+              <div className="vcard__items">
+                {activeItems.map((item, i) => (
+                  <div key={i} className="vcard__item">
+                    {activeItems.length > 1 && (
+                      <span className="vcard__item-num">{t.tabLabels[activeTab]} {i + 1}</span>
+                    )}
+                    <p>{item}</p>
+                    <button
+                      className="vcard__gen"
+                      disabled={busy}
+                      onClick={() =>
+                        onChooseIdea(activeIdea, {
+                          text: item,
+                          typeLabel: t.tabLabels[activeTab],
+                          label: activeItems.length > 1
+                            ? `${t.tabLabels[activeTab]} ${i + 1}`
+                            : activeIdea.label,
+                        })
+                      }
+                    >
+                      {t.generateThis} <span className="vcard__gen-arrow">›</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              // Creative / Testimony: teaser + single generate action.
+              <div className="vcard__items">
+                <div className="vcard__item">
+                  <p>{activeIdea?.teaser}</p>
                   <button
                     className="vcard__gen"
                     disabled={busy}
-                    onClick={() =>
-                      onChooseIdea(activeIdea, {
-                        text: item,
-                        typeLabel: t.tabLabels[activeTab],
-                        label: activeItems.length > 1
-                          ? `${t.tabLabels[activeTab]} ${i + 1}`
-                          : activeIdea.label,
-                      })
-                    }
+                    onClick={() => onChooseIdea(activeIdea, null)}
                   >
-                    {t.generateThis} <span className="vcard__gen-arrow">›</span>
+                    {t.generateVideo} <span className="vcard__gen-arrow">›</span>
                   </button>
                 </div>
-              ))}
-            </div>
-          ) : (
-            // Creative / Testimony (or a tab with no source content yet): one
-            // panel describing the idea, with a single generate action.
-            <div className="vcard__items">
-              <div className="vcard__item">
-                <p>{activeIdea?.teaser}</p>
-                <button
-                  className="vcard__gen"
-                  disabled={busy}
-                  onClick={() => onChooseIdea(activeIdea, null)}
-                >
-                  {t.generateVideo} <span className="vcard__gen-arrow">›</span>
-                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
