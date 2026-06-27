@@ -134,6 +134,56 @@ body {
   cursor: default;
 }
 
+.voice-toggle {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface, #f1f5f9);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.voice-toggle__btn {
+  padding: 5px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+  white-space: nowrap;
+}
+.voice-toggle__btn:hover:not(.voice-toggle__btn--active) {
+  color: var(--ink);
+}
+.voice-toggle__btn--active {
+  background: #7c3aed;
+  color: #fff;
+}
+.voice-toggle__label {
+  padding: 4px 8px 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+.voice-toggle--sm {
+  padding: 2px;
+}
+.voice-toggle--sm .voice-toggle__btn {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}
+.voice-toggle--sm .voice-toggle__label {
+  padding: 4px 6px 4px 8px;
+  font-size: 0.7rem;
+}
+
 .progress-pill {
   min-width: 150px;
   padding: 8px 14px;
@@ -679,7 +729,77 @@ body {
   color: var(--ink);
 }
 
-.script__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.script__actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.script__gen-row { display: flex; align-items: center; gap: 8px; }
+
+.audio-gen {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface, #f1f5f9);
+  padding: 3px;
+  gap: 1px;
+}
+.audio-gen__voice-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.audio-gen__voice-btn {
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+  white-space: nowrap;
+}
+.audio-gen__voice-btn:hover:not(.audio-gen__voice-btn--active) {
+  color: var(--ink);
+}
+.audio-gen__voice-btn--active {
+  background: #0ea5e9;
+  color: #fff;
+}
+.audio-gen__divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+.audio-gen__generate {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px 5px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.12s var(--ease);
+  white-space: nowrap;
+}
+.audio-gen__generate:hover:not(:disabled) {
+  background: var(--surface-hover, #e2e8f0);
+}
+.audio-gen__generate:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 
 .script__audio {
   margin-top: 12px;
@@ -1134,5 +1254,7 @@ body {
 @media (max-width: 380px) {
   .header__text h1 { font-size: 0.82rem; }
   .lang-toggle__btn { padding: 5px 10px; font-size: 0.74rem; }
+  .voice-toggle__btn { padding: 5px 10px; font-size: 0.74rem; }
   .progress-pill { padding: 6px 10px; }
 }
+

@@ -17,6 +17,9 @@ const LANGUAGES = [
 
 const LANG_STORAGE_KEY = "wb_language";
 
+const VOICES = { male: "Algenib", female: "Sulafat" };
+const VOICE_STORAGE_KEY = "wb_voice";
+
 const IDEA_ICONS = {
   story: (
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -139,6 +142,10 @@ const UI = {
     badgeChapter: "Chapter",
     badgeVerses: "Verses",
     badgeDate: "Date",
+    // voice picker
+    voiceLabel: "Voice",
+    voiceMale: "Male",
+    voiceFemale: "Female",
   },
   hindi: {
     greeting:
@@ -207,6 +214,10 @@ const UI = {
     copied: "✓ कॉपी हो गया",
     badgeDay: "दिन",
     badgeChapter: "अध्याय",
+    // voice picker
+    voiceLabel: "आवाज़",
+    voiceMale: "पुरुष",
+    voiceFemale: "महिला",
     badgeVerses: "श्लोक",
     badgeDate: "तारीख़",
   },
@@ -214,6 +225,9 @@ const UI = {
 
 const LangContext = createContext(UI.english);
 const useUI = () => useContext(LangContext);
+
+const VoiceContext = createContext({ voice: "male", changeVoice: () => {} });
+const useVoice = () => useContext(VoiceContext);
 
 let msgId = 0;
 const nextId = () => ++msgId;
@@ -255,6 +269,12 @@ export default function App() {
     return saved === "hindi" || saved === "english" ? saved : "english";
   });
   const t = UI[language];
+
+  const [voice, setVoice] = useState(() => {
+    const saved = typeof localStorage !== "undefined" && localStorage.getItem(VOICE_STORAGE_KEY);
+    return saved === "female" ? "female" : "male";
+  });
+  const changeVoice = (v) => { setVoice(v); localStorage.setItem(VOICE_STORAGE_KEY, v); };
 
   const [messages, setMessages] = useState([]);
   const [stage, setStage] = useState("askDay");
@@ -464,7 +484,7 @@ export default function App() {
   async function makeAudio(scriptText, messageId) {
     setBusy(true);
     try {
-      const data = await api.generateAudio({ script: scriptText });
+      const data = await api.generateAudio({ script: scriptText, voice: VOICES[voice] });
       setMessages((m) => m.map((msg) => msg.id === messageId ? { ...msg, audioUrl: data.audioUrl } : msg));
     } catch (err) {
       fail(err);
@@ -503,6 +523,7 @@ export default function App() {
   }
 
   return (
+   <VoiceContext.Provider value={{ voice, changeVoice }}>
    <LangContext.Provider value={t}>
     <div className="app">
       <header className="app__header">
@@ -704,8 +725,10 @@ export default function App() {
           <p className="zen__hint">take a breath — move to return</p>
         </div>
       )}
+
     </div>
    </LangContext.Provider>
+   </VoiceContext.Provider>
   );
 }
 
@@ -833,6 +856,7 @@ function structureToText(s, sel = {}) {
 
 function StructureView({ structure }) {
   const t = useUI();
+  const { voice: voiceKey, changeVoice } = useVoice();
   const [copied, setCopied] = useState(false);
   const [sel, setSel] = useState({});   // section index -> chosen option index
   const [vo, setVo] = useState({});      // "beat:option" -> { url, loading, error }
@@ -848,7 +872,7 @@ function StructureView({ structure }) {
     if (!line) return;
     setVo((v) => ({ ...v, [key]: { ...v[key], loading: true, error: null } }));
     try {
-      const data = await api.generateAudio({ script: line });
+      const data = await api.generateAudio({ script: line, voice: VOICES[voiceKey] });
       setVo((v) => ({ ...v, [key]: { url: data.audioUrl, loading: false, error: null } }));
     } catch (err) {
       setVo((v) => ({ ...v, [key]: { ...v[key], loading: false, error: err.message } }));
@@ -860,6 +884,7 @@ function StructureView({ structure }) {
     try { await downloadAudio(url, filename); }
     finally { setVo((v) => ({ ...v, [key]: { ...v[key], downloading: false } })); }
   };
+
 
   return (
     <div className="structure">
@@ -922,14 +947,40 @@ function StructureView({ structure }) {
                 return (
                   <div className="beat__audio">
                     {!state.url && (
-                      <button
-                        type="button"
-                        className="chip"
-                        disabled={!hasText || state.loading}
-                        onClick={() => makeVO(key, opt.voiceover)}
-                      >
-                        {state.loading ? t.generating : <><SpeakerIcon />{t.generateAudio}</>}
-                      </button>
+                      <div className="audio-gen" role="group">
+                        <span className="audio-gen__voice-label">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                          </svg>
+                          {t.voiceLabel}
+                        </span>
+                        <button
+                          type="button"
+                          className={`audio-gen__voice-btn${voiceKey === "male" ? " audio-gen__voice-btn--active" : ""}`}
+                          onClick={() => changeVoice("male")}
+                        >
+                          {t.voiceMale}
+                        </button>
+                        <button
+                          type="button"
+                          className={`audio-gen__voice-btn${voiceKey === "female" ? " audio-gen__voice-btn--active" : ""}`}
+                          onClick={() => changeVoice("female")}
+                        >
+                          {t.voiceFemale}
+                        </button>
+                        <span className="audio-gen__divider" aria-hidden="true" />
+                        <button
+                          type="button"
+                          className="audio-gen__generate"
+                          disabled={!hasText || state.loading}
+                          onClick={() => makeVO(key, opt.voiceover)}
+                        >
+                          <SpeakerIcon />{state.loading ? t.generating : t.generateAudio}
+                        </button>
+                      </div>
                     )}
                     {state.url && (
                       <div className="script__audio">
@@ -970,6 +1021,7 @@ function StructureView({ structure }) {
 
 function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
   const t = useUI();
+  const { voice, changeVoice } = useVoice();
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -1060,9 +1112,40 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
           <div className="script__actions">
             <button className="chip" onClick={copy}>{copied ? t.copied : t.copyScript}</button>
             {!msg.audioUrl && (
-              <button className="chip" onClick={() => onMakeAudio(msg.scriptText, msg.id)} disabled={busy}>
-                <SpeakerIcon />{t.generateAudio}
-              </button>
+              <div className="audio-gen" role="group">
+                <span className="audio-gen__voice-label">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                  {t.voiceLabel}
+                </span>
+                <button
+                  type="button"
+                  className={`audio-gen__voice-btn${voice === "male" ? " audio-gen__voice-btn--active" : ""}`}
+                  onClick={() => changeVoice("male")}
+                >
+                  {t.voiceMale}
+                </button>
+                <button
+                  type="button"
+                  className={`audio-gen__voice-btn${voice === "female" ? " audio-gen__voice-btn--active" : ""}`}
+                  onClick={() => changeVoice("female")}
+                >
+                  {t.voiceFemale}
+                </button>
+                <span className="audio-gen__divider" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="audio-gen__generate"
+                  onClick={() => onMakeAudio(msg.scriptText, msg.id)}
+                  disabled={busy}
+                >
+                  <SpeakerIcon />{t.generateAudio}
+                </button>
+              </div>
             )}
           </div>
           {msg.audioUrl && (

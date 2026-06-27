@@ -168,7 +168,7 @@ def generate_script(request):
         return Response({"error": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except ValueError as exc:
         return Response({"error": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception:  # log details server-side, return a generic message
+    except Exception:
         logger.exception("Script generation failed (day=%s, idea=%s)", day, idea_key)
         return Response({"error": "Script generation failed. Please try again."},
                         status=status.HTTP_502_BAD_GATEWAY)
@@ -266,7 +266,7 @@ def generate_audio(request):
         audio_url = audio_generator.generate(script, voice=voice)
     except gemini.GeminiNotConfigured as exc:
         return Response({"error": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
-    except Exception:  # log details server-side, return a generic message
+    except Exception:
         logger.exception("Audio generation failed")
         return Response({"error": "Audio generation failed. Please try again."},
                         status=status.HTTP_502_BAD_GATEWAY)
