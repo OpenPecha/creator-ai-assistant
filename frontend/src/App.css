@@ -1248,6 +1248,22 @@ body {
     flex: none;
   }
   .beat__audio .script__audio { flex-direction: column; align-items: stretch; }
+
+  /* Audio-gen pill: stack into a two-row card */
+  .audio-gen {
+    flex-wrap: wrap;
+    border-radius: 14px;
+    width: 100%;
+  }
+  .audio-gen__voice-label { flex: 1; }
+  .audio-gen__divider { display: none; }
+  .audio-gen__generate {
+    width: 100%;
+    justify-content: center;
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 12px 12px;
+    padding: 8px 14px;
+  }
 }
 
 /* ── Small phones ── */
