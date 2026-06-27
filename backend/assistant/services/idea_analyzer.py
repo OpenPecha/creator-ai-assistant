@@ -24,6 +24,7 @@ _ANALYSIS_SCHEMA = {
         "concept_teaser": {"type": "string"},
         "practice_teaser": {"type": "string"},
         "creative_teaser": {"type": "string"},
+        "testimony_teaser": {"type": "string"},
     },
     "required": ["story", "extra_info"],
 }
@@ -35,16 +36,18 @@ Buddhist short-video series. Decide which video ideas it can genuinely support,
 and write an irresistible one-line teaser for each — the hook a creator would put
 on the thumbnail.
 
-Teaser craft (this matters — the teaser is the ONLY thing shown on each idea card):
-- Each teaser plainly says what THIS day's video would be about — a calm, clear
-  description, NOT a hook, a question, or a sales pitch. No hype, no bold claims,
-  no clickbait, no drama.
-- Simple and instantly clear. Small, everyday words a 12-year-old gets at a glance.
-  Avoid heavy or abstract words ("sins," "compassion," "merit," "virtue," "analogy")
-  — say it in plain terms.
-- Short — about 5 to 9 words. Calm and clear, in the style of:
-  "The one good habit that never runs out." / "A simple way to deal with regret
-  today." / "Why small good acts are worth it."
+Teaser craft (this matters — the teaser is what a creator reads to decide whether
+to make this video):
+- Two sentences, 20–35 words total. First sentence names the specific angle this
+  day's video takes. Second sentence adds what the viewer walks away with, or why
+  this angle is worth a video right now.
+- Calm and plain — NOT a hook, a question, or a sales pitch. No hype, no bold
+  claims, no clickbait. Write it like a confident, clear description of what the
+  video is actually about.
+- Use simple, everyday words. Avoid heavy or abstract terms ("sins," "merit,"
+  "virtue," "analogy," "compassion") — say the same thing in plain language.
+- Be specific to THIS day's content. A generic teaser is useless; the creator
+  needs to know exactly what story, idea, or angle this particular day supports.
 - Base it on the source; don't fabricate.
 
 Return JSON with:
@@ -66,6 +69,9 @@ Return JSON with:
 - "creative_teaser" (string): a teaser for a fun, universal video about the everyday
   life lesson behind the verse — secular, for everyone, with NO mention of Buddhism,
   scripture, or the verse itself.
+- "testimony_teaser" (string): a teaser for a first-person reflection video where
+  the creator shares their own experience with today's teaching. Name the specific
+  feeling, moment, or habit this day's verse might connect to in real life.
 
 CRITICAL: Do not stretch to find a story or fact. It is completely normal and
 expected for many days to have NEITHER. Only flag them when the material clearly,
@@ -153,7 +159,7 @@ def available_ideas(dc: DayContent, language: str = "english") -> list[dict]:
         "concept": analysis.get("concept_teaser") or idea_blurb("concept", language),
         "practice": analysis.get("practice_teaser") or idea_blurb("practice", language),
         "creative": analysis.get("creative_teaser") or idea_blurb("creative", language),
-        "testimony": idea_blurb("testimony", language),
+        "testimony": analysis.get("testimony_teaser") or idea_blurb("testimony", language),
         "story": analysis.get("story_teaser") or idea_blurb("story", language),
         "extra_info": analysis.get("extra_info_teaser") or idea_blurb("extra_info", language),
     }

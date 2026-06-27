@@ -666,7 +666,7 @@ export default function App() {
           <form onSubmit={submitRefine} className="composer__form">
             <textarea
               ref={inputRef}
-              rows={2}
+              rows={1}
               placeholder={t.refinePlaceholder}
               value={refineInput}
               onChange={(e) => setRefineInput(e.target.value)}

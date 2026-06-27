@@ -60,11 +60,11 @@ body {
 
 /* ── Header ── */
 .app__header {
-  padding: 14px 28px;
+  padding: 8px 20px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   position: sticky;
@@ -516,7 +516,7 @@ body {
 }
 .vcard__option {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   width: 100%;
   text-align: left;
@@ -557,6 +557,7 @@ body {
 }
 .vcard__option-arrow {
   flex-shrink: 0;
+  margin-top: 2px;
   color: var(--ink-muted);
   transition: color 0.12s var(--ease), transform 0.12s var(--ease);
 }
@@ -829,9 +830,8 @@ body {
 
 /* ── Composer ── */
 .composer {
-  padding: 14px 24px 20px;
-  background: var(--bg);
-  border-top: 1px solid var(--border);
+  padding: 20px 24px 14px;
+  background: linear-gradient(to bottom, transparent, var(--bg) 36%);
   position: sticky;
   bottom: 0;
   z-index: 10;
@@ -839,12 +839,13 @@ body {
 
 .composer__form {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 8px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 14px 14px 10px 18px;
+  padding: 8px 8px 8px 14px;
   transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
   box-shadow: var(--shadow-sm);
 }
@@ -855,7 +856,8 @@ body {
 
 .composer__form input,
 .composer__form textarea {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   background: transparent;
   border: none;
   outline: none;
@@ -863,7 +865,7 @@ body {
   font-family: inherit;
   font-size: 0.95rem;
   line-height: 1.5;
-  padding: 0;
+  padding: 4px 0;
   resize: none;
   min-height: 28px;
   max-height: 160px;
@@ -877,8 +879,9 @@ body {
 .composer__form input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
 .composer__actions {
+  flex-shrink: 0;
   display: flex;
-  justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .send-btn {
