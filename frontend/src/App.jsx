@@ -357,14 +357,14 @@ export default function App() {
     };
   }, [calOpen]);
 
-  // Idle Zen: after 60s of no interaction, invite a quiet breathing pause.
+  // Idle Zen: after 2 min of no interaction, invite a quiet breathing pause.
   // The moment the user moves — mouse, key, scroll, touch — it fades away.
   useEffect(() => {
     let timer;
     const arm = () => {
       clearTimeout(timer);
       setIdleZen(false);
-      timer = setTimeout(() => setIdleZen(true), 60_000);
+      timer = setTimeout(() => setIdleZen(true), 120_000);
     };
     const events = ["mousemove", "mousedown", "keydown", "scroll", "touchstart", "wheel"];
     events.forEach((e) => window.addEventListener(e, arm, { passive: true }));
