@@ -221,7 +221,7 @@ const UI = {
     calTip: (n) => `🗓️ दिन ${n} / ३६५ — आप streak पर हैं! बोधिसत्त्व चैलेंज का हर दिन रोज़ अनलॉक होता है।`,
     calNoteTitle: "आज का प्लान",
     calNoteOf: (n) => `/ ${n}`,
-    calNoteJourney: "यात्रा पूरी 🪷",
+    calNoteJourney: "यात्रा पूरी",
     calNoteBody: "365-दिवसीय बोधिसत्त्व चैलेंज में आपका आज का दिन। हर दिन एक नया श्लोक अनलॉक होता है — रोज़ आते रहें।",
     badgeChapter: "अध्याय",
     // voice picker
