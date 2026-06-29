@@ -60,13 +60,16 @@ body {
 
 /* ── Header ── */
 .app__header {
-  padding: 8px 20px;
+  padding: 11px 20px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(247, 246, 243, 0.7));
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  backdrop-filter: saturate(1.4) blur(14px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 12px rgba(26, 25, 23, 0.04);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -75,30 +78,53 @@ body {
 .header__brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/* Gentle hover lift on the logo */
+.header__brand img {
+  transition: transform 0.28s var(--ease);
+}
+.header__brand img:hover {
+  transform: translateY(-1px) scale(1.04);
 }
 
 .header__controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 45px;
   margin-left: auto;
 }
 
 .header__text h1 {
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(120deg, var(--ink) 30%, #6b5d4f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   line-height: 1.2;
 }
 .header__text p {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.72rem;
   color: var(--ink-muted);
-  font-weight: 400;
-  margin-top: 1px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+.header__text p::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #4f8cff);
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.5);
+  flex-shrink: 0;
 }
 
 .lang-toggle {
@@ -252,6 +278,7 @@ body {
   position: relative;
   display: inline-flex;
   flex-shrink: 0;
+  transform: translateX(-15px);
 }
 .cal {
   position: relative;
