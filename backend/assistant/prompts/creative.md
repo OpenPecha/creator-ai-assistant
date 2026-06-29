@@ -37,10 +37,6 @@ relate to — any background, any belief, no belief at all.
 - No clichés ("fast-paced world," "dive in," "game-changer," "journey").
 - Plain text only — no markdown, no asterisks, no hashtags, no stage directions.
 
-## Length
-About {{TARGET_WORDS}} words total (~{{DURATION_SECONDS}} seconds spoken). Crisp
-lines, so this may be just a handful of them.
-
 ## The lesson to draw from — for YOUR understanding only, never reference it
 {{DAY_PLAN}}
 

@@ -99,7 +99,5 @@ people actually talk.
 - PLAIN TEXT ONLY. No markdown of any kind — no asterisks for emphasis (*word* or
   **word**), no underscores, no backticks, no quotes-as-formatting. If you want to
   stress a word, do it through phrasing, not symbols.
-- Length: about {{TARGET_WORDS}} words (~{{DURATION_SECONDS}} seconds spoken).
-  Stay close.
 - Return ONLY the script. No title, no preamble, no notes, no "here's your
   script." Just the first spoken line through the last.

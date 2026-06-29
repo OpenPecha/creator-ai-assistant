@@ -44,6 +44,12 @@ GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 GEMINI_TEXT_MODEL = env("GEMINI_TEXT_MODEL", default="gemini-3.1-flash-lite")
 GEMINI_TTS_MODEL = env("GEMINI_TTS_MODEL", default="gemini-2.5-flash-preview-tts")
 GEMINI_TTS_VOICE = env("GEMINI_TTS_VOICE", default="Algenib")
+# Voices the app offers (male, female). An explicit request for any other voice is
+# rejected, so a typo or abusive client can't trigger a paid TTS call with junk.
+GEMINI_TTS_VOICES_ALLOWED = env.list(
+    "GEMINI_TTS_VOICES_ALLOWED",
+    default=["Algenib", "Sulafat"],
+)
 # Natural-language delivery direction prepended to the script for TTS (Gemini
 # supports style prompts). Keeps narration upbeat, warm, and clear for
 # short-form social video (TikTok / Instagram Reels).

@@ -354,7 +354,8 @@ export default function App() {
 
   async function submitDay(e) {
     e?.preventDefault();
-    const n = parseInt(dayInput, 10);
+    const match = dayInput.match(/\d+/);
+    const n = match ? parseInt(match[0], 10) : NaN;
     if (!n || n < 1 || n > 365) {
       addMsg("assistant", t.dayRange);
       return;
@@ -649,9 +650,8 @@ export default function App() {
           <form onSubmit={submitDay} className="composer__form">
             <input
               ref={inputRef}
-              type="number"
-              min="1"
-              max="365"
+              type="text"
+              inputMode="numeric"
               placeholder={t.dayPlaceholder}
               value={dayInput}
               onChange={(e) => setDayInput(e.target.value)}

@@ -60,6 +60,15 @@ def _focus_block(focus: str, focus_label: str = "") -> str:
     )
 
 
+def _length_block(duration_seconds: int) -> str:
+    return (
+        "\n\n## Length\n"
+        f"About {target_words(duration_seconds)} words total "
+        f"(~{duration_seconds} seconds spoken). Stay close — crisp lines, so it "
+        "may be just a handful of them."
+    )
+
+
 def generate(
     dc: DayContent,
     idea_key: str,
@@ -79,8 +88,6 @@ def generate(
         "DAY": str(dc.day),
         "DATE": dc.date,
         "VERSES_LABEL": dc.verses_label,
-        "DURATION_SECONDS": str(duration_seconds),
-        "TARGET_WORDS": str(target_words(duration_seconds)),
         "DAY_PLAN": dc.plan_markdown,
         "VERSE_SYNTHESIS": dc.synthesis_text or "(no per-verse commentary synthesis available)",
         "CREATOR_NOTES": creator_notes.strip() or "(the creator did not provide notes)",
@@ -88,6 +95,10 @@ def generate(
     idea = IDEAS[idea_key]
     shared = None if idea.get("self_contained") else "_shared.md"
     prompt = build_prompt(tokens, idea["file"], shared=shared)
+    # Length lives in an appended tail (not the templates) so the stable rules +
+    # day content + idea instructions stay a cacheable prefix even when the user
+    # regenerates the same day/idea at a different duration.
+    prompt += _length_block(duration_seconds)
     if focus.strip():
         prompt += _focus_block(focus, focus_label)
     if feedback.strip() and previous.strip():

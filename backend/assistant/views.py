@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
@@ -48,8 +49,13 @@ def health(request):
 
 
 @api_view(["GET"])
+@throttle_classes([GenerateRateThrottle])
 def day_detail(request, day: int):
-    """Load a day's verses/plan and the video ideas its content supports."""
+    """Load a day's verses/plan and the video ideas its content supports.
+
+    Throttled at the strict 'generate' rate (not the looser 'anon' rate) because
+    a cache-miss here triggers a paid Gemini call via idea_analyzer.analyze.
+    """
     language = lang_service.normalize(request.query_params.get("language"))
     try:
         dc = get_day_content(day)
@@ -261,6 +267,8 @@ def generate_audio(request):
             {"error": f"script is too long (max {MAX_SCRIPT_CHARS} characters)."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+    if voice is not None and voice not in settings.GEMINI_TTS_VOICES_ALLOWED:
+        return Response({"error": "Unsupported voice."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         audio_url = audio_generator.generate(script, voice=voice)
