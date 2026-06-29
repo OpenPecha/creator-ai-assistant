@@ -104,7 +104,7 @@ const UI = {
     refinePlaceholder: `Ask for a change — e.g. "make the hook punchier" or "shorten the opening"…`,
     regenerate: "↻ Regenerate",
     makeAnother: "+ Make another video",
-    daysAvailable: "Days available",
+    today: "Today",
     // verse card
     generateAbout: "Generate a video about this:",
     clickExpand: "Click to expand",
@@ -139,6 +139,7 @@ const UI = {
     copied: "✓ Copied",
     // day badge
     badgeDay: "Day",
+    calTip: (n) => `Day ${n} of 365 — a new lesson unlocks every day 🔥`,
     badgeChapter: "Chapter",
     badgeVerses: "Verses",
     badgeDate: "Date",
@@ -182,7 +183,7 @@ const UI = {
     refinePlaceholder: `कोई बदलाव बताइए — जैसे "शुरुआत को और दमदार बनाओ" या "ओपनिंग छोटी करो"…`,
     regenerate: "↻ फिर से बनाएँ",
     makeAnother: "+ एक और वीडियो बनाएँ",
-    daysAvailable: "उपलब्ध दिन",
+    today: "आज",
     generateAbout: "इस पर एक वीडियो बनाएँ:",
     clickExpand: "खोलने के लिए क्लिक करें",
     collapse: "बंद करें",
@@ -213,6 +214,7 @@ const UI = {
     copyScript: "स्क्रिप्ट कॉपी करें",
     copied: "✓ कॉपी हो गया",
     badgeDay: "दिन",
+    calTip: (n) => `🗓️ दिन ${n} / ३६५ — आप streak पर हैं! बोधिसत्त्व चैलेंज का हर दिन रोज़ अनलॉक होता है।`,
     badgeChapter: "अध्याय",
     // voice picker
     voiceLabel: "आवाज़",
@@ -551,19 +553,15 @@ export default function App() {
           </div>
           {progress?.released > 0 && (
             <div
-              className="progress-pill"
-              title={`The plan started ${progress.startDate}. A new day unlocks every day.`}
+              className="cal"
+aria-label={`${t.today} — ${t.userDay(progress.released)}`}
             >
-              <div className="progress-pill__top">
-                <span className="progress-pill__label">{t.daysAvailable}</span>
-                <span className="progress-pill__count">{progress.released} / {progress.total}</span>
-              </div>
-              <div className="progress-pill__bar">
-                <div
-                  className="progress-pill__fill"
-                  style={{ width: `${Math.max(2, (progress.released / progress.total) * 100)}%` }}
-                />
-              </div>
+              <span className="cal__page cal__page--1" aria-hidden="true" />
+              <span className="cal__page cal__page--2" aria-hidden="true" />
+              <span className="cal__card">
+                <span className="cal__top">{t.badgeDay}</span>
+                <span className="cal__num">{progress.released}</span>
+              </span>
             </div>
           )}
         </div>
