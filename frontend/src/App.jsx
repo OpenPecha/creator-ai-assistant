@@ -140,6 +140,10 @@ const UI = {
     // day badge
     badgeDay: "Day",
     calTip: (n) => `Day ${n} of 365 — a new lesson unlocks every day 🔥`,
+    calNoteTitle: "Today's plan",
+    calNoteOf: (n) => `of ${n}`,
+    calNoteJourney: "into the journey",
+    calNoteBody: "Your spot in the 365-day Bodhisattva Challenge. A fresh verse unlocks every day.",
     badgeChapter: "Chapter",
     badgeVerses: "Verses",
     badgeDate: "Date",
@@ -215,6 +219,10 @@ const UI = {
     copied: "✓ कॉपी हो गया",
     badgeDay: "दिन",
     calTip: (n) => `🗓️ दिन ${n} / ३६५ — आप streak पर हैं! बोधिसत्त्व चैलेंज का हर दिन रोज़ अनलॉक होता है।`,
+    calNoteTitle: "आज का प्लान",
+    calNoteOf: (n) => `/ ${n}`,
+    calNoteJourney: "यात्रा पूरी 🪷",
+    calNoteBody: "365-दिवसीय बोधिसत्त्व चैलेंज में आपका आज का दिन। हर दिन एक नया श्लोक अनलॉक होता है — रोज़ आते रहें।",
     badgeChapter: "अध्याय",
     // voice picker
     voiceLabel: "आवाज़",
@@ -295,6 +303,8 @@ export default function App() {
   const [currentVerseLines, setCurrentVerseLines] = useState([]);
   const [idleZen, setIdleZen] = useState(false);
   const [progress, setProgress] = useState(null);
+  const [calOpen, setCalOpen] = useState(false);
+  const calRef = useRef(null);
   const [logoBlessing, setLogoBlessing] = useState(false);
   const logoTaps = useRef(0);
   const logoTimer = useRef(null);
@@ -333,6 +343,19 @@ export default function App() {
   useEffect(() => {
     if (!busy) setTimeout(() => inputRef.current?.focus(), 50);
   }, [busy, stage]);
+
+  // Close the calendar popover on outside click or Escape
+  useEffect(() => {
+    if (!calOpen) return;
+    const onDown = (e) => { if (calRef.current && !calRef.current.contains(e.target)) setCalOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") setCalOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [calOpen]);
 
   // Idle Zen: after 60s of no interaction, invite a quiet breathing pause.
   // The moment the user moves — mouse, key, scroll, touch — it fades away.
@@ -538,7 +561,8 @@ export default function App() {
           </div>
         </div>
         <div className="header__controls">
-          <div className="lang-toggle" role="group" aria-label="Language">
+          <div className={`lang-toggle lang-toggle--${language}`} role="group" aria-label="Language">
+            <span className="lang-toggle__thumb" aria-hidden="true" />
             {LANGUAGES.map((l) => (
               <button
                 key={l.key}
@@ -552,16 +576,46 @@ export default function App() {
             ))}
           </div>
           {progress?.released > 0 && (
-            <div
-              className="cal"
-aria-label={`${t.today} — ${t.userDay(progress.released)}`}
-            >
-              <span className="cal__page cal__page--1" aria-hidden="true" />
-              <span className="cal__page cal__page--2" aria-hidden="true" />
-              <span className="cal__card">
-                <span className="cal__top">{t.badgeDay}</span>
-                <span className="cal__num">{progress.released}</span>
-              </span>
+            <div className={`cal-wrap${calOpen ? " is-open" : ""}`} ref={calRef}>
+              <button
+                type="button"
+                className="cal"
+                onClick={() => setCalOpen((o) => !o)}
+                aria-label={`${t.today} — ${t.userDay(progress.released)}`}
+                aria-expanded={calOpen}
+              >
+                <span className="cal__page cal__page--1" aria-hidden="true" />
+                <span className="cal__page cal__page--2" aria-hidden="true" />
+                <span className="cal__card">
+                  <span className="cal__top">{t.badgeDay}</span>
+                  <span className="cal__num">{progress.released}</span>
+                </span>
+              </button>
+              {calOpen && (
+                <div className="cal-note" role="dialog" aria-label={t.calNoteTitle}>
+                  <span className="cal-note__tear" aria-hidden="true">
+                    <span className="cal-note__hole" />
+                    <span className="cal-note__hole" />
+                  </span>
+                  <div className="cal-note__hero">
+                    <span className="cal-note__hero-side">
+                      <span className="cal-note__hero-label">{t.badgeDay}</span>
+                      <span className="cal-note__hero-of">{t.calNoteOf(365)}</span>
+                    </span>
+                    <span className="cal-note__hero-num">{progress.released}</span>
+                  </div>
+                  <div className="cal-note__bar" aria-hidden="true">
+                    <span
+                      className="cal-note__bar-fill"
+                      style={{ width: `${Math.max(2, Math.round((progress.released / 365) * 100))}%` }}
+                    />
+                  </div>
+                  <span className="cal-note__pct">
+                    {Math.round((progress.released / 365) * 100)}% · {t.calNoteJourney}
+                  </span>
+                  <span className="cal-note__body">{t.calNoteBody}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
