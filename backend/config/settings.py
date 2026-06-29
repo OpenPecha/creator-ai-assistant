@@ -149,10 +149,8 @@ CORS_ALLOWED_ORIGINS = env.list(
 # --- DRF --------------------------------------------------------------------
 # Throttling protects the (unauthenticated) Gemini-backed endpoints from abuse
 # that would burn the API budget. Rates are configurable via .env.
-# NOTE: throttle counters use Django's cache. The default LocMemCache is
-# per-process, so with multiple gunicorn workers the effective limit is
-# rate × workers. For accurate limits in production, configure a shared cache
-# (Redis/Memcached).
+# Throttle counters live in Django's cache — see the CACHES section below, which
+# uses a worker-shared cache in production so the limits stay accurate.
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
@@ -168,6 +166,33 @@ REST_FRAMEWORK = {
         "generate": env("THROTTLE_GENERATE", default="20/min"),
     },
 }
+
+# --- Cache (backs DRF throttle counters) ------------------------------------
+# DRF throttle counters live here. The default LocMemCache is PER-PROCESS, so
+# with multiple gunicorn workers each keeps its own counter and the effective
+# limit becomes rate × workers — i.e. the throttle leaks. To keep the limits
+# accurate, production uses a cache shared across workers:
+#   • REDIS_URL set  → Redis (use for a multi-host / load-balanced setup;
+#                      requires `pip install redis`).
+#   • else in prod   → file-based cache, shared across workers on one host with
+#                      zero extra infrastructure (right for a single EC2 box).
+#   • else (dev)     → LocMemCache (single process — perfectly fine locally).
+REDIS_URL = env("REDIS_URL", default="")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+        }
+    }
+elif IS_PRODUCTION:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": str(BASE_DIR / ".cache"),
+        }
+    }
+# else: Django's built-in LocMemCache default (no CACHES block needed locally).
 
 # --- Production hardening ---------------------------------------------------
 if IS_PRODUCTION:
