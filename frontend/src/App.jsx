@@ -983,24 +983,35 @@ function StructureView({ structure }) {
                       </div>
                     )}
                     {state.url && (
-                      <div className="script__audio">
-                        <audio controls src={state.url} />
-                        <button
-                          type="button"
-                          className="chip"
-                          disabled={state.downloading}
-                          onClick={() => downloadVO(key, state.url, `voiceover-${sec.label || "beat"}-${idx + 1}.wav`)}
-                        >
-                          {state.downloading ? t.downloading : t.download}
-                        </button>
-                        <button
-                          type="button"
-                          className="chip"
-                          disabled={state.loading}
-                          onClick={() => makeVO(key, opt.voiceover)}
-                        >
-                          {state.loading ? t.regenerating : t.regenAudio}
-                        </button>
+                      <div className="audio-card">
+                        <div className="audio-card__player">
+                          <audio controls src={state.url} />
+                          <button
+                            type="button"
+                            className="chip"
+                            disabled={state.downloading}
+                            onClick={() => downloadVO(key, state.url, `voiceover-${sec.label || "beat"}-${idx + 1}.wav`)}
+                          >
+                            {state.downloading ? t.downloading : t.download}
+                          </button>
+                        </div>
+                        <div className="audio-gen audio-gen--inline" role="group">
+                          <span className="audio-gen__voice-label">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                              <line x1="12" y1="19" x2="12" y2="23"/>
+                              <line x1="8" y1="23" x2="16" y2="23"/>
+                            </svg>
+                            {t.voiceLabel}
+                          </span>
+                          <button type="button" className={`audio-gen__voice-btn${voiceKey === "male" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("male")}>{t.voiceMale}</button>
+                          <button type="button" className={`audio-gen__voice-btn${voiceKey === "female" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("female")}>{t.voiceFemale}</button>
+                          <span className="audio-gen__divider" aria-hidden="true" />
+                          <button type="button" className="audio-gen__generate" disabled={state.loading} onClick={() => makeVO(key, opt.voiceover)}>
+                            <SpeakerIcon />{state.loading ? t.regenerating : t.regenAudio}
+                          </button>
+                        </div>
                       </div>
                     )}
                     {state.error && <p className="beat__audio-err">{state.error}</p>}
@@ -1122,43 +1133,40 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
                   </svg>
                   {t.voiceLabel}
                 </span>
-                <button
-                  type="button"
-                  className={`audio-gen__voice-btn${voice === "male" ? " audio-gen__voice-btn--active" : ""}`}
-                  onClick={() => changeVoice("male")}
-                >
-                  {t.voiceMale}
-                </button>
-                <button
-                  type="button"
-                  className={`audio-gen__voice-btn${voice === "female" ? " audio-gen__voice-btn--active" : ""}`}
-                  onClick={() => changeVoice("female")}
-                >
-                  {t.voiceFemale}
-                </button>
+                <button type="button" className={`audio-gen__voice-btn${voice === "male" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("male")}>{t.voiceMale}</button>
+                <button type="button" className={`audio-gen__voice-btn${voice === "female" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("female")}>{t.voiceFemale}</button>
                 <span className="audio-gen__divider" aria-hidden="true" />
-                <button
-                  type="button"
-                  className="audio-gen__generate"
-                  onClick={() => onMakeAudio(msg.scriptText, msg.id)}
-                  disabled={busy}
-                >
+                <button type="button" className="audio-gen__generate" onClick={() => onMakeAudio(msg.scriptText, msg.id)} disabled={busy}>
                   <SpeakerIcon />{t.generateAudio}
                 </button>
               </div>
             )}
           </div>
           {msg.audioUrl && (
-            <div className="script__audio">
-              <audio controls src={msg.audioUrl} />
-              <button
-                type="button"
-                className="chip"
-                disabled={downloading}
-                onClick={() => downloadScript(msg.audioUrl, "script-audio.wav")}
-              >
-                {downloading ? t.downloading : t.download}
-              </button>
+            <div className="audio-card">
+              <div className="audio-card__player">
+                <audio controls src={msg.audioUrl} />
+                <button type="button" className="chip" disabled={downloading} onClick={() => downloadScript(msg.audioUrl, "script-audio.wav")}>
+                  {downloading ? t.downloading : t.download}
+                </button>
+              </div>
+              <div className="audio-gen audio-gen--inline" role="group">
+                <span className="audio-gen__voice-label">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                  {t.voiceLabel}
+                </span>
+                <button type="button" className={`audio-gen__voice-btn${voice === "male" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("male")}>{t.voiceMale}</button>
+                <button type="button" className={`audio-gen__voice-btn${voice === "female" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("female")}>{t.voiceFemale}</button>
+                <span className="audio-gen__divider" aria-hidden="true" />
+                <button type="button" className="audio-gen__generate" onClick={() => onMakeAudio(msg.scriptText, msg.id)} disabled={busy}>
+                  <SpeakerIcon />{t.regenAudio}
+                </button>
+              </div>
             </div>
           )}
         </div>
