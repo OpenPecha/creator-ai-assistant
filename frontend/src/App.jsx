@@ -890,6 +890,13 @@ function sectionOptions(sec) {
   return [{ visuals: sec.visuals || [], voiceover: sec.voiceover || "" }];
 }
 
+// The model is asked for a seconds range (e.g. "0–8 sec") but doesn't always
+// include the unit, so make sure the badge always reads unambiguously.
+function formatTimeRange(timeRange) {
+  if (!timeRange) return timeRange;
+  return /sec|min|:/i.test(timeRange) ? timeRange : `${timeRange} sec`;
+}
+
 function structureToText(s, sel = {}) {
   const lines = [`Core theme: ${s.coreTheme}`, `Concept: "${s.concept}"`, ""];
   (s.sections || []).forEach((sec, i) => {
@@ -962,7 +969,7 @@ function StructureView({ structure }) {
           <div key={i} className="beat">
             <div className="beat__head">
               <span className="beat__label">{sec.label}</span>
-              <span className="beat__time">{sec.timeRange}</span>
+              <span className="beat__time">{formatTimeRange(sec.timeRange)}</span>
             </div>
             {options.length > 1 && (
               <div className="beat__options">
