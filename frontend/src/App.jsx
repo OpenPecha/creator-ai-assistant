@@ -557,7 +557,7 @@ export default function App() {
           <img src="/logo.png" width="32" height="32" alt="WeBuddhist" onClick={tapLogo} className={`logo-tap${logoBlessing ? " logo-tap--spin" : ""}`} />
           <div className="header__text">
             <h1>WeBuddhist Creator Assistant</h1>
-            <p><span className="header__ctx-title">Bodhisattva Challenge</span><span className="header__ctx-sep"> · </span>Video script generator</p>
+            <p>Bodhisattva Challenge</p>
           </div>
         </div>
         <div className="header__controls">
