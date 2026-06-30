@@ -1560,6 +1560,10 @@ body {
   .day-badge__item { flex: 1; padding: 6px 8px; }
 
   .composer { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  /* iOS Safari auto-zooms into any input under 16px and won't reliably zoom
+     back out. Keep inputs at 16px on mobile so the tap never triggers a zoom. */
+  .composer__form input,
+  .composer__form textarea { font-size: 16px; }
 
   .zen__breath { width: 96px; height: 96px; }
   .zen__cue { font-size: 0.95rem; letter-spacing: 0.3em; }
