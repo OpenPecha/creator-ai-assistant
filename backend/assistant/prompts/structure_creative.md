@@ -12,13 +12,17 @@ required.
 - No Sanskrit, no religious or spiritual jargon, no preaching.
 - Secular and everyday. The lesson should feel like a smart, relatable human idea.
 
+## Length budget — make the storyboard actually fit this duration
+{{LENGTH_BUDGET}}
+
 ## Build a simple storyboard
 - coreTheme: the universal lesson in one plain line (no spiritual wording).
 - concept: one crisp, punchy hook line anyone would stop to hear.
 - Break the {{DURATION_SECONDS}} seconds into three beats: Opening (a strong hook,
   ~the first fifth), Middle (develop it, ~three fifths), End (land it + a light
   call to action, ~the last fifth). Give each a timeRange in seconds that adds up
-  to the total — for example "0–6 sec".
+  to the total — for example "0–6 sec". Size each beat's voiceover to the seconds it
+  covers, so the spoken content fills the whole duration (see the length budget above).
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:

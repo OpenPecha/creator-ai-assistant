@@ -12,6 +12,9 @@ show on screen and what to say out loud.
 - Format / angle: {{IDEA_LABEL}} — {{IDEA_FOCUS}}
 - Total length: about {{DURATION_SECONDS}} seconds.
 
+## Length budget — make the storyboard actually fit this duration
+{{LENGTH_BUDGET}}
+
 ## Today's source (Day {{DAY}}, {{DATE}} — verses {{VERSES_LABEL}})
 
 ### The verse
@@ -32,7 +35,9 @@ show on screen and what to say out loud.
 - Break the {{DURATION_SECONDS}} seconds into three beats: Opening (a strong hook,
   about the first fifth), Middle (develop the idea, about three fifths), End (land
   it plus a gentle call to action, about the last fifth). Give each beat a
-  timeRange in seconds that adds up to the total — for example "0–8 sec".
+  timeRange in seconds that adds up to the total — for example "0–8 sec". Size each
+  beat's voiceover to the seconds it covers, so the spoken content fills the whole
+  duration (see the length budget above).
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:
@@ -42,7 +47,9 @@ show on screen and what to say out loud.
     least one as a montage (several quick shots cut together) — so the creator can
     pick whichever they prefer. Neither is the default; choose per option whatever
     serves that beat best.
-  - voiceover: one or two natural spoken lines. Plain, warm, and human — the way a
+  - voiceover: natural spoken lines sized to this beat's share of the length
+    budget — a few words for a short beat, a fuller line or two for a longer one.
+    Plain, warm, and human — the way a
     real person talks. Keep it MOTIVATIONAL and uplifting, never technical or
     academic. Use simple, everyday words a 12-year-old gets on the first listen.
     If a teacher or figure is named, work in a brief one-line plain intro so a

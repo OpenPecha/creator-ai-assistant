@@ -7,13 +7,7 @@ import re
 from . import gemini, language as lang_service
 from .content_loader import DayContent
 from .ideas import IDEAS, build_prompt
-
-# ~150 spoken words per minute => 2.5 words per second.
-WORDS_PER_SECOND = 2.5
-
-
-def target_words(duration_seconds: int) -> int:
-    return max(20, round(duration_seconds * WORDS_PER_SECOND))
+from .length import WORDS_PER_SECOND, target_words, word_range  # noqa: F401 (re-exported)
 
 
 def strip_markdown(text: str) -> str:
@@ -61,11 +55,21 @@ def _focus_block(focus: str, focus_label: str = "") -> str:
 
 
 def _length_block(duration_seconds: int) -> str:
+    target = target_words(duration_seconds)
+    low, high = word_range(duration_seconds)
     return (
-        "\n\n## Length\n"
-        f"About {target_words(duration_seconds)} words total "
-        f"(~{duration_seconds} seconds spoken). Stay close — crisp lines, so it "
-        "may be just a handful of them."
+        "\n\n## Length — a hard requirement, not a suggestion\n"
+        f"The creator chose a {duration_seconds}-second video. At a natural "
+        f"speaking pace that is about {target} spoken words. Write between "
+        f"{low} and {high} words — count as you write and land inside that band.\n"
+        "- A SHORTER pick means fewer, tighter lines. A LONGER pick means you "
+        "must genuinely develop the idea more — an extra example, a deeper turn, "
+        "a fuller middle — NOT the same short script padded with filler or stretched "
+        "with pauses.\n"
+        f"- Do not stop early. {target} words of real, watchable content is the "
+        "floor of what this length needs; finishing well under it is a failure even "
+        "if the script feels done. If you're short, deepen the idea, don't pad.\n"
+        "- Do not overshoot either — going well past the band makes the video run long."
     )
 
 
