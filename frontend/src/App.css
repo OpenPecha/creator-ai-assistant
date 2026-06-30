@@ -1050,6 +1050,9 @@ body {
   white-space: nowrap;
   pointer-events: none;
 }
+/* On desktop the seg wrapper is transparent — its buttons flow directly in the
+   pill, exactly as before. On mobile it becomes a real segmented-control track. */
+.audio-gen__seg { display: contents; }
 .audio-gen__voice-btn {
   padding: 4px 10px;
   border: none;
@@ -1585,29 +1588,30 @@ body {
   }
   .beat__audio .script__audio { flex-direction: column; align-items: stretch; }
 
-  /* Audio-gen pill: stack into a two-row card */
+  /* Same elements as desktop (pill, blue toggle, grey button). On narrow
+     screens the Generate button drops to its own tidy row — no dangling
+     divider, no restructure into a different-looking component. */
   .audio-gen {
     flex-wrap: wrap;
-    border-radius: 14px;
-    width: 100%;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+    padding: 6px;
+    gap: 8px;
+    border-radius: 16px;
   }
-  .audio-gen__voice-label { flex: 1; }
+  .audio-gen__voice-label { padding-left: 4px; }
   .audio-gen__divider { display: none; }
   .audio-gen__generate {
-    width: 100%;
+    flex-basis: 100%;
     justify-content: center;
-    border-top: 1px solid var(--border);
-    border-radius: 0 0 12px 12px;
-    padding: 8px 14px;
+    padding: 9px 14px;
   }
-  /* Inline variant inside audio-card: same two rows, no pill border */
   .audio-gen--inline {
     flex-wrap: wrap;
-    border-radius: 0;
-    padding: 4px 6px;
-  }
-  .audio-gen--inline .audio-gen__generate {
-    border-radius: 0;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px;
   }
   /* Audio card player: stack on mobile */
   .audio-card__player {

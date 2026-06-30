@@ -1007,20 +1007,22 @@ function StructureView({ structure }) {
                           </svg>
                           {t.voiceLabel}
                         </span>
-                        <button
-                          type="button"
-                          className={`audio-gen__voice-btn${voiceKey === "male" ? " audio-gen__voice-btn--active" : ""}`}
-                          onClick={() => changeVoice("male")}
-                        >
-                          {t.voiceMale}
-                        </button>
-                        <button
-                          type="button"
-                          className={`audio-gen__voice-btn${voiceKey === "female" ? " audio-gen__voice-btn--active" : ""}`}
-                          onClick={() => changeVoice("female")}
-                        >
-                          {t.voiceFemale}
-                        </button>
+                        <span className="audio-gen__seg">
+                          <button
+                            type="button"
+                            className={`audio-gen__voice-btn${voiceKey === "male" ? " audio-gen__voice-btn--active" : ""}`}
+                            onClick={() => changeVoice("male")}
+                          >
+                            {t.voiceMale}
+                          </button>
+                          <button
+                            type="button"
+                            className={`audio-gen__voice-btn${voiceKey === "female" ? " audio-gen__voice-btn--active" : ""}`}
+                            onClick={() => changeVoice("female")}
+                          >
+                            {t.voiceFemale}
+                          </button>
+                        </span>
                         <span className="audio-gen__divider" aria-hidden="true" />
                         <button
                           type="button"
@@ -1055,8 +1057,10 @@ function StructureView({ structure }) {
                             </svg>
                             {t.voiceLabel}
                           </span>
-                          <button type="button" className={`audio-gen__voice-btn${voiceKey === "male" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("male")}>{t.voiceMale}</button>
-                          <button type="button" className={`audio-gen__voice-btn${voiceKey === "female" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("female")}>{t.voiceFemale}</button>
+                          <span className="audio-gen__seg">
+                            <button type="button" className={`audio-gen__voice-btn${voiceKey === "male" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("male")}>{t.voiceMale}</button>
+                            <button type="button" className={`audio-gen__voice-btn${voiceKey === "female" ? " audio-gen__voice-btn--active" : ""}`} onClick={() => changeVoice("female")}>{t.voiceFemale}</button>
+                          </span>
                           <span className="audio-gen__divider" aria-hidden="true" />
                           <button type="button" className="audio-gen__generate" disabled={state.loading} onClick={() => makeVO(key, opt.voiceover)}>
                             <SpeakerIcon />{state.loading ? t.regenerating : t.regenAudio}
