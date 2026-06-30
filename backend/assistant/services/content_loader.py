@@ -189,23 +189,47 @@ def expand_verses(label: str) -> list[str]:
 # ── Schedule ──────────────────────────────────────────────────────────────────
 
 def get_schedule() -> dict[int, dict]:
-    """Fetch and parse the schedule markdown table from GitHub."""
+    """Fetch and parse the schedule markdown table from GitHub.
+
+    Resolves the "Verses" and "Date" columns by their header names so the
+    parser keeps working if extra columns (e.g. "Studio Verse") are added.
+    """
     text = _fetch_raw(_SCHEDULE)
     if text is None:
         raise ContentError("schedule.md not found in the GitHub repo.")
+
+    # Column indices, resolved from the header row when present. Defaults match
+    # the historic 3-column layout: Day | Verses | Date.
+    verses_idx, date_idx = 1, 2
+
     schedule: dict[int, dict] = {}
     for line in text.splitlines():
         line = line.strip()
         if not line.startswith("|"):
             continue
         cells = [c.strip() for c in line.strip("|").split("|")]
-        if len(cells) < 3 or not cells[0].isdigit():
+        if len(cells) < 3:
+            continue
+
+        # Header row: map column names to indices.
+        lowered = [c.lower() for c in cells]
+        if "date" in lowered:
+            date_idx = lowered.index("date")
+            for label in ("verses", "verse"):
+                if label in lowered:
+                    verses_idx = lowered.index(label)
+                    break
+            continue
+
+        if not cells[0].isdigit():
+            continue
+        if date_idx >= len(cells) or verses_idx >= len(cells):
             continue
         day = int(cells[0])
         schedule[day] = {
-            "verses_label": cells[1],
-            "date": cells[2],
-            "verses": expand_verses(cells[1]),
+            "verses_label": cells[verses_idx],
+            "date": cells[date_idx],
+            "verses": expand_verses(cells[verses_idx]),
         }
     if not schedule:
         raise ContentError("No schedule rows parsed from schedule.md.")
