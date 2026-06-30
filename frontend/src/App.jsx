@@ -4,6 +4,14 @@ import "./App.css";
 
 const DURATION_VALUES = [30, 45, 60, 90];
 
+// Grow a composer textarea to fit its content (up to the CSS max-height, which
+// then takes over via overflow-y scroll).
+function autoResizeTextarea(el) {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight}px`;
+}
+
 const OUTPUT_TYPE_KEYS = ["script", "structure"];
 
 // Display order for idea tabs. The backend decides which keys are available for
@@ -450,6 +458,7 @@ export default function App() {
     setCreatorNotes(testimonyInput);
     addMsg("user", testimonyInput.trim() || t.noNotes);
     setTestimonyInput("");
+    if (inputRef.current) inputRef.current.style.height = "auto";
     askDuration();
   }
 
@@ -504,6 +513,7 @@ export default function App() {
     if (!fb) return;
     addMsg("user", fb);
     setRefineInput("");
+    if (inputRef.current) inputRef.current.style.height = "auto";
     generate({ seconds: duration, feedback: fb, previous: lastOutput, onErrorStage: "done" });
   }
 
@@ -722,7 +732,10 @@ export default function App() {
               rows={3}
               placeholder={t.testimonyPlaceholder}
               value={testimonyInput}
-              onChange={(e) => setTestimonyInput(e.target.value)}
+              onChange={(e) => {
+                setTestimonyInput(e.target.value);
+                autoResizeTextarea(e.target);
+              }}
               disabled={busy}
             />
             <div className="composer__actions">
@@ -740,7 +753,10 @@ export default function App() {
               rows={1}
               placeholder={t.refinePlaceholder}
               value={refineInput}
-              onChange={(e) => setRefineInput(e.target.value)}
+              onChange={(e) => {
+                setRefineInput(e.target.value);
+                autoResizeTextarea(e.target);
+              }}
               disabled={busy}
             />
             <div className="composer__actions">

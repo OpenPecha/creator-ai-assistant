@@ -1325,6 +1325,7 @@ body {
   resize: none;
   min-height: 28px;
   max-height: 160px;
+  overflow-y: auto;
 }
 .composer__form input::placeholder,
 .composer__form textarea::placeholder { color: var(--ink-muted); }
