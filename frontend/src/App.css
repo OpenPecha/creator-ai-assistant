@@ -1544,6 +1544,13 @@ body {
 
   .cal__card { width: 46px; }
   .cal__num  { font-size: 1rem; }
+  /* Background pages are hardcoded 50px on desktop, but the mobile card is
+     46px — so they poke out past its right edge. Match the width and replace
+     the rotating sway with a small downward-only stack (no rightward spill). */
+  .cal-wrap { transform: none; }
+  .cal__page { width: 46px; }
+  .cal__page--1 { animation: none; transform: translateY(2px); }
+  .cal__page--2 { animation: none; transform: translateY(4px); }
 
   .chat { padding-top: 20px; gap: 14px; }
   .bubble { max-width: 92%; padding: 12px 15px; }
@@ -1613,5 +1620,6 @@ body {
   .lang-toggle__btn { padding: 5px 10px; font-size: 0.74rem; }
   .voice-toggle__btn { padding: 5px 10px; font-size: 0.74rem; }
   .cal__card { width: 44px; }
+  .cal__page { width: 44px; }
 }
 
