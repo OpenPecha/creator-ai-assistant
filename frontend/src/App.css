@@ -46,7 +46,8 @@ body {
 /* ── Layout ── */
 .app {
   width: 100%;
-  height: 100vh;
+  height: 100vh;          /* fallback for browsers without dvh */
+  height: 100dvh;         /* tracks the real visible area as mobile toolbars show/hide */
   display: flex;
   flex-direction: column;
 }
