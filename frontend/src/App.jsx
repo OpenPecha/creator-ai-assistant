@@ -142,8 +142,8 @@ const UI = {
     calTip: (n) => `Day ${n} of 365 — a new lesson unlocks every day 🔥`,
     calNoteTitle: "Today's plan",
     calNoteOf: (n) => `of ${n}`,
-    calNoteJourney: "into the journey",
-    calNoteBody: "Your spot in the 365-day Bodhisattva Challenge. A fresh verse unlocks every day.",
+    calNoteJourney: "complete",
+    calNoteBody: "The Bodhisattva Challenge runs for 365 days. This shows the day you're on — a new verse and lesson unlock every day.",
     badgeChapter: "Chapter",
     badgeVerses: "Verses",
     badgeDate: "Date",
@@ -221,8 +221,8 @@ const UI = {
     calTip: (n) => `🗓️ दिन ${n} / ३६५ — आप streak पर हैं! बोधिसत्त्व चैलेंज का हर दिन रोज़ अनलॉक होता है।`,
     calNoteTitle: "आज का प्लान",
     calNoteOf: (n) => `/ ${n}`,
-    calNoteJourney: "यात्रा पूरी",
-    calNoteBody: "365-दिवसीय बोधिसत्त्व चैलेंज में आपका आज का दिन। हर दिन एक नया श्लोक अनलॉक होता है — रोज़ आते रहें।",
+    calNoteJourney: "पूरा",
+    calNoteBody: "बोधिसत्त्व चैलेंज 365 दिनों का है। यह दिखाता है कि आप किस दिन पर हैं — हर दिन एक नया श्लोक और पाठ अनलॉक होता है।",
     badgeChapter: "अध्याय",
     // voice picker
     voiceLabel: "आवाज़",
@@ -597,12 +597,10 @@ export default function App() {
                     <span className="cal-note__hole" />
                     <span className="cal-note__hole" />
                   </span>
+                  <span className="cal-note__hero-label">{t.calNoteTitle}</span>
                   <div className="cal-note__hero">
-                    <span className="cal-note__hero-side">
-                      <span className="cal-note__hero-label">{t.badgeDay}</span>
-                      <span className="cal-note__hero-of">{t.calNoteOf(365)}</span>
-                    </span>
                     <span className="cal-note__hero-num">{progress.released}</span>
+                    <span className="cal-note__hero-of">{t.calNoteOf(365)}</span>
                   </div>
                   <div className="cal-note__bar" aria-hidden="true">
                     <span
@@ -611,7 +609,7 @@ export default function App() {
                     />
                   </div>
                   <span className="cal-note__pct">
-                    {Math.round((progress.released / 365) * 100)}% · {t.calNoteJourney}
+                    {Math.round((progress.released / 365) * 100)}% {t.calNoteJourney}
                   </span>
                   <span className="cal-note__body">{t.calNoteBody}</span>
                 </div>
