@@ -12,6 +12,17 @@ function autoResizeTextarea(el) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
+// Bold the "please try again..." clause of our own (localized) retry message so
+// the ask stands out. Matches the phrasing used in t.contentUnavailable below.
+const RETRY_PHRASE_RE = /(please try again[^.]*\.?|(?:फिर से )?कोशिश करें[^।]*।?)/i;
+function emphasizeRetry(text) {
+  const parts = text.split(RETRY_PHRASE_RE);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    RETRY_PHRASE_RE.test(part) ? <strong key={i}>{part}</strong> : part
+  );
+}
+
 const OUTPUT_TYPE_KEYS = ["script", "structure"];
 
 // Display order for idea tabs. The backend decides which keys are available for
@@ -93,7 +104,6 @@ const UI = {
     updatedStructure: "Here's the updated structure:",
     yourScript: "Here's your script:",
     updatedScript: "Here's the updated script:",
-    somethingWrong: (m) => `Something went wrong: ${m}`,
     another: "Let's make another one! Which day are you filming? (1–365)",
     userDay: (n) => `Day ${n}`,
     seconds: (s) => `${s} seconds`,
@@ -112,6 +122,11 @@ const UI = {
     refinePlaceholder: `Ask for a change — e.g. "make the hook punchier" or "shorten the opening"…`,
     regenerate: "↻ Regenerate",
     makeAnother: "+ Make another video",
+    tryAgain: "↻ Try again",
+    // Shown for transient failures (5xx / network); retryable → gets a Try-again chip.
+    contentUnavailable: "The content service is temporarily unavailable. Please try again in a moment.",
+    // Shown for permanent failures (e.g. a 404); wraps the specific backend detail.
+    somethingWrong: (m) => `Something went wrong: ${m}`,
     today: "Today",
     // verse card
     generateAbout: "Generate a video about this:",
@@ -178,7 +193,6 @@ const UI = {
     updatedStructure: "यह रहा अपडेटेड स्ट्रक्चर:",
     yourScript: "यह रही आपकी स्क्रिप्ट:",
     updatedScript: "यह रही अपडेटेड स्क्रिप्ट:",
-    somethingWrong: (m) => `कुछ गड़बड़ हो गई: ${m}`,
     another: "चलिए एक और बनाते हैं! आप किस दिन की शूटिंग कर रहे हैं? (1–365)",
     userDay: (n) => `दिन ${n}`,
     seconds: (s) => `${s} सेकंड`,
@@ -195,6 +209,9 @@ const UI = {
     refinePlaceholder: `कोई बदलाव बताइए — जैसे "शुरुआत को और दमदार बनाओ" या "ओपनिंग छोटी करो"…`,
     regenerate: "↻ फिर से बनाएँ",
     makeAnother: "+ एक और वीडियो बनाएँ",
+    tryAgain: "↻ फिर से कोशिश करें",
+    contentUnavailable: "कंटेंट सेवा अभी अस्थायी रूप से उपलब्ध नहीं है। कृपया थोड़ी देर बाद फिर से कोशिश करें।",
+    somethingWrong: (m) => `कुछ गड़बड़ हो गई: ${m}`,
     today: "आज",
     generateAbout: "इस पर एक वीडियो बनाएँ:",
     clickExpand: "खोलने के लिए क्लिक करें",
@@ -383,24 +400,16 @@ export default function App() {
     };
   }, []);
 
-  const fail = (err) => addMsg("assistant", t.somethingWrong(err.message), { error: true });
+  // A failure is transient (worth retrying) when it's a network error (no status)
+  // or a 5xx; a 4xx like a 404 is permanent, so a retry can't help.
+  const isRetryable = (err) => err.status == null || err.status >= 500;
 
-  async function submitDay(e) {
-    e?.preventDefault();
-    const match = dayInput.match(/\d+/);
-    const n = match ? parseInt(match[0], 10) : NaN;
-    if (!n || n < 1 || n > 365) {
-      addMsg("assistant", t.dayRange);
-      return;
-    }
-    if (progress?.released && n > progress.released) {
-      addMsg("user", t.userDay(n));
-      addMsg("assistant", t.notReleased(n, progress.released));
-      setDayInput("");
-      return;
-    }
-    addMsg("user", t.userDay(n));
-    setDayInput("");
+  const fail = (err, extra = {}) =>
+    addMsg("assistant",
+      isRetryable(err) ? t.contentUnavailable : t.somethingWrong(err.message),
+      { notice: true, ...extra });
+
+  async function loadDay(n) {
     setBusy(true);
     setStage("summarizing");
     try {
@@ -422,11 +431,32 @@ export default function App() {
       addMsg("assistant", t.breakdown, { summaryPoints: summary.points });
       showIdeas();
     } catch (err) {
-      fail(err);
+      // Only offer a retry chip for transient failures; a missing day (404) will
+      // never succeed on retry (and the backend negative-caches it anyway).
+      fail(err, isRetryable(err) ? { retryDay: n } : {});
       setStage("askDay");
     } finally {
       setBusy(false);
     }
+  }
+
+  async function submitDay(e) {
+    e?.preventDefault();
+    const match = dayInput.match(/\d+/);
+    const n = match ? parseInt(match[0], 10) : NaN;
+    if (!n || n < 1 || n > 365) {
+      addMsg("assistant", t.dayRange);
+      return;
+    }
+    if (progress?.released && n > progress.released) {
+      addMsg("user", t.userDay(n));
+      addMsg("assistant", t.notReleased(n, progress.released));
+      setDayInput("");
+      return;
+    }
+    addMsg("user", t.userDay(n));
+    setDayInput("");
+    await loadDay(n);
   }
 
   function showIdeas() {
@@ -630,8 +660,8 @@ export default function App() {
       </header>
 
       <main className="chat" ref={scrollRef}>
-        {messages.map((m) => (
-          <Bubble key={m.id} msg={m} onChooseIdea={chooseIdea} onMakeAudio={makeAudio} busy={busy} />
+        {messages.map((m, i) => (
+          <Bubble key={m.id} msg={m} onChooseIdea={chooseIdea} onMakeAudio={makeAudio} onRetryDay={loadDay} busy={busy} isLast={i === messages.length - 1} />
         ))}
 
         {busy && (
@@ -1107,7 +1137,7 @@ function StructureView({ structure }) {
   );
 }
 
-function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
+function Bubble({ msg, onChooseIdea, onMakeAudio, onRetryDay, busy, isLast }) {
   const t = useUI();
   const { voice, changeVoice } = useVoice();
   const [copied, setCopied] = useState(false);
@@ -1126,7 +1156,7 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
   };
 
   return (
-    <div className={`bubble bubble--${msg.role} ${msg.error ? "bubble--error" : ""}`}>
+    <div className={`bubble bubble--${msg.role} ${msg.notice ? "bubble--notice" : ""}`}>
       {msg.dayMeta && (
         <div className="day-badge">
           <div className="day-badge__item">
@@ -1151,7 +1181,17 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, busy }) {
         </div>
       )}
 
-      <div className="bubble__text">{msg.i18nKey && t[msg.i18nKey] ? t[msg.i18nKey] : msg.content}</div>
+      <div className="bubble__text">
+        {msg.i18nKey && t[msg.i18nKey] ? t[msg.i18nKey] : msg.notice ? emphasizeRetry(msg.content) : msg.content}
+      </div>
+
+      {msg.retryDay != null && isLast && (
+        <div className="choices">
+          <button className="chip chip--retry" onClick={() => onRetryDay(msg.retryDay)} disabled={busy}>
+            {t.tryAgain}
+          </button>
+        </div>
+      )}
 
       {(() => {
         const lines = msg.verseLines

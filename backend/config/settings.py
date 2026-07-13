@@ -38,6 +38,11 @@ ALLOWED_HOSTS = env.list(
 GITHUB_REPO = env("GITHUB_REPO", default="")
 GITHUB_BRANCH = env("GITHUB_BRANCH", default="main")
 GITHUB_TOKEN = env("GITHUB_TOKEN", default="")
+# Seconds to cache GitHub responses per process. Collapses the 5–14 outbound
+# calls per day-load down to ~1 per file per window, keeping us well under
+# GitHub's API rate limits. Higher = fewer calls but slower to reflect content
+# pushes; 0 disables caching (always fetch fresh).
+GITHUB_CACHE_TTL = env.int("GITHUB_CACHE_TTL", default=300)
 
 # Gemini (model ids are configurable; confirm current ids in the Gemini docs).
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")

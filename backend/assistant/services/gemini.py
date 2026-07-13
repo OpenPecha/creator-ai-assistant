@@ -23,8 +23,18 @@ def get_client():
             "script and audio generation."
         )
     from google import genai  # imported lazily so the app boots without the key
+    from google.genai import types
 
-    return genai.Client(api_key=settings.GEMINI_API_KEY)
+    from . import ipv4
+
+    # Pin Gemini's httpx calls to IPv4: the Google APIs publish IPv6 records,
+    # and on networks where the IPv6 route is blackholed every request stalls
+    # for the full timeout before falling back. See assistant.services.ipv4.
+    http_options = types.HttpOptions(
+        client_args=ipv4.httpx_client_args(),
+        async_client_args=ipv4.httpx_async_client_args(),
+    )
+    return genai.Client(api_key=settings.GEMINI_API_KEY, http_options=http_options)
 
 
 def generate_text(prompt: str, *, model: str | None = None) -> str:

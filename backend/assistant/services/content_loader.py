@@ -1,14 +1,17 @@
 """
 Load day-plan content from the bodhisattvacharyavatara-rails GitHub repo.
 
-Every request fetches fresh content directly from raw.githubusercontent.com.
-No local clone, no cache, no stale data — new content pushed to GitHub is
-available immediately on the next request.
+Content is fetched from GitHub (raw.githubusercontent.com + the Contents API)
+and served through a short per-process TTL cache, so new content pushed to
+GitHub becomes available on the next request after the cache window elapses.
+See the "HTTP response cache" section below for the rationale and tuning.
 """
 
 from __future__ import annotations
 
 import re
+import threading as _threading
+import time as _time
 from dataclasses import dataclass, field
 from datetime import date, datetime
 
@@ -17,9 +20,17 @@ import requests as _requests
 from django.conf import settings
 from django.utils import timezone
 
+from . import ipv4
+
+# GitHub publishes IPv6 records; on networks where the IPv6 route is blackholed
+# every fetch stalls for the full timeout before falling back. This session
+# pins GitHub connections to IPv4 (see assistant.services.ipv4). We still use
+# `_requests` above for its exception classes.
+_http = ipv4.requests_session()
+
 # Relative paths inside the rails repo.
 _PLAN_ROOT = "3-TRANSFORMATIONS/Plans/the-bodhisattva-challenge/en"
-_SCHEDULE = f"{_PLAN_ROOT}/assets/schedule-corrected.md"
+_SCHEDULE = f"{_PLAN_ROOT}/assets/schedule-hhdl-birthday.md"
 _DAYS_DIR = f"{_PLAN_ROOT}/Days"
 _VERSES_DIR = "3-TRANSFORMATIONS/Translations/en-ai/Verses"
 
@@ -34,6 +45,10 @@ _VARIANT_SUFFIXES = ["-A", "-B", "-option-1", "-option-2", "-new", "-Final", "-f
 
 class ContentError(Exception):
     """Raised when source content cannot be located or parsed."""
+
+
+class ContentUnavailableError(ContentError):
+    """Raised when GitHub is transiently unreachable/erroring (safe to retry)."""
 
 
 @dataclass
@@ -68,6 +83,54 @@ class DayContent:
         return "\n\n".join(self.verses_text)
 
 
+# ── HTTP response cache ───────────────────────────────────────────────────────
+# GitHub is the source of truth, but fetching every file live on every request
+# means 5–14 outbound calls per day-load and quickly exhausts GitHub's API rate
+# limits under real traffic. A short per-process TTL cache collapses repeat reads
+# (schedule, day files, verse files, directory listings) to ~1 network round-trip
+# per file per TTL window. Only successful responses (including 404s) are cached;
+# transient errors are never cached, so a retry always re-hits GitHub.
+#
+# The cache is per-process: with multiple gunicorn workers each keeps its own
+# copy, which is fine for shedding load. Use a shared cache (e.g. Redis) if you
+# later need cross-worker consistency. Tune or disable via the GITHUB_CACHE_TTL
+# setting (seconds; 0 disables caching entirely).
+_MISS = object()
+_cache_lock = _threading.Lock()
+_cache: dict[str, tuple[float, object]] = {}
+
+
+def _cache_ttl() -> int:
+    return int(getattr(settings, "GITHUB_CACHE_TTL", 300))
+
+
+def _cache_get(key: str):
+    """Return the cached value for `key`, or the `_MISS` sentinel if absent/stale.
+
+    Uses a sentinel rather than None because None is a valid cached value (a 404).
+    """
+    if _cache_ttl() <= 0:
+        return _MISS
+    now = _time.monotonic()
+    with _cache_lock:
+        hit = _cache.get(key)
+        if hit is None:
+            return _MISS
+        expires, value = hit
+        if expires <= now:
+            _cache.pop(key, None)
+            return _MISS
+        return value
+
+
+def _cache_set(key: str, value) -> None:
+    ttl = _cache_ttl()
+    if ttl <= 0:
+        return
+    with _cache_lock:
+        _cache[key] = (_time.monotonic() + ttl, value)
+
+
 # ── GitHub helpers ────────────────────────────────────────────────────────────
 
 def _github_config() -> tuple[str, str]:
@@ -90,34 +153,61 @@ def _auth_headers() -> dict:
 
 def _list_github_dir(path: str) -> list[str]:
     """Return directory entry names via the GitHub Contents API."""
+    cache_key = f"dir:{path}"
+    cached = _cache_get(cache_key)
+    if cached is not _MISS:
+        return cached
+
     repo, branch = _github_config()
     url = f"https://api.github.com/repos/{repo}/contents/{path}?ref={branch}"
     try:
-        r = _requests.get(url, timeout=15, headers=_auth_headers())
+        r = _http.get(url, timeout=15, headers=_auth_headers())
     except _requests.RequestException as exc:
-        raise ContentError(f"Network error listing {path}: {exc}") from exc
+        # Connection reset / timeout / DNS — transient and safe to retry.
+        raise ContentUnavailableError(f"Network error listing {path}: {exc}") from exc
     if r.status_code == 404:
+        _cache_set(cache_key, [])
         return []
-    r.raise_for_status()
+    try:
+        r.raise_for_status()
+    except _requests.HTTPError as exc:
+        raise ContentUnavailableError(
+            f"GitHub returned {r.status_code} listing {path}."
+        ) from exc
     data = r.json()
-    return [item["name"] for item in data] if isinstance(data, list) else []
+    result = [item["name"] for item in data] if isinstance(data, list) else []
+    _cache_set(cache_key, result)
+    return result
 
 
 def _fetch_raw(path: str) -> str | None:
     """Fetch a file from the repo via raw.githubusercontent.com.
 
     Returns None on 404 (file doesn't exist) so callers can try fallback paths.
-    Raises ContentError on network errors or unexpected HTTP errors.
+    Raises ContentUnavailableError on transient network/HTTP errors (retryable).
     """
+    cache_key = f"raw:{path}"
+    cached = _cache_get(cache_key)
+    if cached is not _MISS:
+        return cached
+
     repo, branch = _github_config()
     url = f"https://raw.githubusercontent.com/{repo}/{branch}/{path}"
     try:
-        r = _requests.get(url, timeout=15)
+        r = _http.get(url, timeout=15)
     except _requests.RequestException as exc:
-        raise ContentError(f"Network error fetching {path}: {exc}") from exc
+        # Connection reset / timeout / DNS — transient and safe to retry.
+        raise ContentUnavailableError(f"Network error fetching {path}: {exc}") from exc
     if r.status_code == 404:
+        _cache_set(cache_key, None)
         return None
-    r.raise_for_status()
+    try:
+        r.raise_for_status()
+    except _requests.HTTPError as exc:
+        raise ContentUnavailableError(
+            f"GitHub returned {r.status_code} fetching {path}."
+        ) from exc
+    _cache_set(cache_key, r.text)
     return r.text
 
 
@@ -196,7 +286,7 @@ def get_schedule() -> dict[int, dict]:
     """
     text = _fetch_raw(_SCHEDULE)
     if text is None:
-        raise ContentError("schedule.md not found in the GitHub repo.")
+        raise ContentError(f"Schedule file not found in the GitHub repo: {_SCHEDULE}")
 
     # Column indices, resolved from the header row when present. Defaults match
     # the historic 3-column layout: Day | Verses | Date.
@@ -232,7 +322,7 @@ def get_schedule() -> dict[int, dict]:
             "verses": expand_verses(cells[verses_idx]),
         }
     if not schedule:
-        raise ContentError("No schedule rows parsed from schedule.md.")
+        raise ContentError(f"No schedule rows parsed from {_SCHEDULE}.")
     return schedule
 
 
@@ -337,4 +427,6 @@ def get_day_content(day: int) -> DayContent:
 
 
 def clear_cache() -> None:
-    pass  # no-op — no cache to clear
+    """Drop all cached GitHub responses (e.g. after a content push)."""
+    with _cache_lock:
+        _cache.clear()

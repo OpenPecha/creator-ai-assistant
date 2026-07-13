@@ -19,7 +19,12 @@ from .services import (
     structure_generator,
     verse_summary,
 )
-from .services.content_loader import ContentError, get_day_content, released_progress
+from .services.content_loader import (
+    ContentError,
+    ContentUnavailableError,
+    get_day_content,
+    released_progress,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +32,11 @@ logger = logging.getLogger(__name__)
 MAX_CREATOR_NOTES = 2000
 MAX_SCRIPT_CHARS = 5000
 MAX_FEEDBACK = 1000
+
+# Shown when GitHub itself is erroring/rate-limited rather than the content being missing.
+CONTENT_UNAVAILABLE_MESSAGE = (
+    "Content source is temporarily unavailable. Please try again in a moment."
+)
 
 
 class GenerateRateThrottle(AnonRateThrottle):
@@ -59,6 +69,10 @@ def day_detail(request, day: int):
     language = lang_service.normalize(request.query_params.get("language"))
     try:
         dc = get_day_content(day)
+    except ContentUnavailableError:
+        logger.warning("Day content temporarily unavailable (day=%s)", day, exc_info=True)
+        return Response({"error": CONTENT_UNAVAILABLE_MESSAGE},
+                        status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except ContentError as exc:
         return Response({"error": str(exc)}, status=status.HTTP_404_NOT_FOUND)
 
@@ -105,6 +119,10 @@ def verse_summary_view(request):
 
     try:
         dc = get_day_content(day)
+    except ContentUnavailableError:
+        logger.warning("Day content temporarily unavailable (day=%s)", day, exc_info=True)
+        return Response({"error": CONTENT_UNAVAILABLE_MESSAGE},
+                        status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except ContentError as exc:
         return Response({"error": str(exc)}, status=status.HTTP_404_NOT_FOUND)
 
@@ -161,6 +179,10 @@ def generate_script(request):
 
     try:
         dc = get_day_content(day)
+    except ContentUnavailableError:
+        logger.warning("Day content temporarily unavailable (day=%s)", day, exc_info=True)
+        return Response({"error": CONTENT_UNAVAILABLE_MESSAGE},
+                        status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except ContentError as exc:
         return Response({"error": str(exc)}, status=status.HTTP_404_NOT_FOUND)
 
@@ -227,6 +249,10 @@ def generate_structure(request):
 
     try:
         dc = get_day_content(day)
+    except ContentUnavailableError:
+        logger.warning("Day content temporarily unavailable (day=%s)", day, exc_info=True)
+        return Response({"error": CONTENT_UNAVAILABLE_MESSAGE},
+                        status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except ContentError as exc:
         return Response({"error": str(exc)}, status=status.HTTP_404_NOT_FOUND)
 

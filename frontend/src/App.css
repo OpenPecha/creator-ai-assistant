@@ -573,11 +573,13 @@ body {
   border-bottom-right-radius: 5px;
 }
 
-.bubble--error {
-  background: #fff0f0;
-  border: 1px solid #f5c5c5;
-  color: #c0392b;
+.bubble--notice {
+  background: var(--assistant-bg);
+  border: 1px solid var(--border);
+  color: var(--ink);
 }
+
+.bubble--notice strong { color: #2563eb; }
 
 /* typing indicator */
 .typing {
@@ -1010,6 +1012,18 @@ body {
   border-style: dashed;
 }
 .chip:disabled { opacity: 0.35; cursor: default; }
+
+.chip--retry {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+  font-weight: 600;
+}
+.chip--retry:hover:not(:disabled) {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #2563eb;
+}
 
 /* ── Script card ── */
 .script { margin-top: 12px; }
