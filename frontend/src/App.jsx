@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { api } from "./api";
+import { api, shareImageUrl } from "./api";
 import "./App.css";
 
 const DURATION_VALUES = [30, 45, 60, 90];
@@ -95,6 +95,16 @@ const UI = {
     variantNote: " (using a draft variant)",
     foundDay: (d, v) => `Here's what I found for Day ${d}${v}. Today's verses:`,
     breakdown: "Here's a simple breakdown of today's verses:",
+    todaysChallenge: "Today's challenge — the shareable image and the plan link for this day:",
+    downloadImage: "↓ Download image",
+    share: "Share",
+    shareVia: "Share via",
+    shareEmail: "Email",
+    shareTitle: "Bodhisattva Challenge",
+    shareMessage:
+      "I completed a day of my practice on WeBuddhist. Join me and let's build a daily practice habit together.",
+    shareLinkLabel: "Plan link for this day",
+    copyLink: "Copy link",
     pickVerse: "Now, pick a verse and choose the type of video you want to make:",
     howLike: "How would you like it?",
     testimonyPrompt:
@@ -184,6 +194,16 @@ const UI = {
     variantNote: " (ड्राफ़्ट वर्शन इस्तेमाल हो रहा है)",
     foundDay: (d, v) => `दिन ${d}${v} के लिए मुझे यह मिला। आज के श्लोक:`,
     breakdown: "आज के श्लोक का आसान सार यह रहा:",
+    todaysChallenge: "आज की चुनौती — इस दिन की शेयर करने वाली इमेज और प्लान लिंक:",
+    downloadImage: "↓ इमेज डाउनलोड करें",
+    share: "शेयर करें",
+    shareVia: "इसके ज़रिए शेयर करें",
+    shareEmail: "ईमेल",
+    shareTitle: "बोधिसत्व चैलेंज",
+    shareMessage:
+      "मैंने WeBuddhist पर अपने अभ्यास का एक दिन पूरा किया। मेरे साथ जुड़ें और साथ मिलकर रोज़ाना अभ्यास की आदत बनाएं।",
+    shareLinkLabel: "इस दिन के लिए प्लान लिंक",
+    copyLink: "लिंक कॉपी करें",
     pickVerse: "अब एक श्लोक चुनिए और तय कीजिए कि किस तरह का वीडियो बनाना है:",
     howLike: "आप इसे कैसे चाहेंगे?",
     testimonyPrompt:
@@ -429,6 +449,17 @@ export default function App() {
       // then the idea cards — no mid-flow language question.
       const summary = await api.verseSummary({ day: data.day, language });
       addMsg("assistant", t.breakdown, { summaryPoints: summary.points });
+      // Today's challenge: the shareable image + the plan link for this day.
+      // Best-effort — the image loads lazily via the backend proxy and hides
+      // itself if unavailable, and the link is present whenever the backend
+      // could build it.
+      addMsg("assistant", t.todaysChallenge, {
+        share: {
+          shareUrl: data.shareUrl,
+          imageUrl: shareImageUrl(data.day, language),
+          day: data.day,
+        },
+      });
       showIdeas();
     } catch (err) {
       // Only offer a retry chip for transient failures; a missing day (404) will
@@ -908,10 +939,11 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
 }
 
 // Force a real file download. The <a download> attribute is ignored for
-// cross-origin URLs (the audio is served from the backend origin), so we fetch
-// the file as a blob and download that instead — which keeps it on-page.
-async function downloadAudio(url, filename) {
-  const name = filename || url.split("/").pop() || "audio.wav";
+// cross-origin URLs (audio and the share image are served from the backend
+// origin), so we fetch the file as a blob and download that instead — which
+// keeps it on-page.
+async function downloadFile(url, filename) {
+  const name = filename || url.split("/").pop() || "download";
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Request failed (${res.status})`);
@@ -928,6 +960,79 @@ async function downloadAudio(url, filename) {
     // Last resort if the fetch fails: open the file directly.
     window.open(url, "_blank", "noopener");
   }
+}
+
+// Save a Blob as a named file via a temporary object URL.
+function saveBlob(blob, filename) {
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(objectUrl);
+}
+
+// Decode an image blob (the share image is WebP) and re-encode it as a JPEG
+// blob. JPEG has no transparency, so we paint a white background first. The
+// image is proxied through our own origin, so the canvas stays untainted.
+async function toJpegBlob(srcBlob, quality = 0.92) {
+  let drawable, width, height;
+  if (typeof createImageBitmap === "function") {
+    drawable = await createImageBitmap(srcBlob);
+    width = drawable.width;
+    height = drawable.height;
+  } else {
+    const url = URL.createObjectURL(srcBlob);
+    try {
+      drawable = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+    width = drawable.naturalWidth;
+    height = drawable.naturalHeight;
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(drawable, 0, 0);
+  drawable.close?.();
+  return await new Promise((resolve, reject) =>
+    canvas.toBlob(
+      (b) => (b ? resolve(b) : reject(new Error("JPEG encode failed"))),
+      "image/jpeg",
+      quality
+    )
+  );
+}
+
+// Fetch the (WebP) share image and return it as a JPEG File.
+async function fetchImageAsJpegFile(url, filename) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Request failed (${res.status})`);
+  const jpeg = await toJpegBlob(await res.blob());
+  return new File([jpeg], filename, { type: "image/jpeg" });
+}
+
+function ShareIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "inline-block", verticalAlign: "middle", marginRight: 5 }}>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  );
 }
 
 // Normalize a section to a list of options (handles older single-option shape).
@@ -984,7 +1089,7 @@ function StructureView({ structure }) {
 
   const downloadVO = async (key, url, filename) => {
     setVo((v) => ({ ...v, [key]: { ...v[key], downloading: true } }));
-    try { await downloadAudio(url, filename); }
+    try { await downloadFile(url, filename); }
     finally { setVo((v) => ({ ...v, [key]: { ...v[key], downloading: false } })); }
   };
 
@@ -1137,6 +1242,176 @@ function StructureView({ structure }) {
   );
 }
 
+// "Today's challenge" card: the shareable image (with a download button) and
+// the plan link for the day (with a copy button). The image hides itself if the
+// backend proxy can't produce one; the link section is shown when a URL exists.
+function ShareBlock({ share }) {
+  const t = useUI();
+  const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+  // Pre-convert the image to a JPEG File so a native share can fire directly on
+  // tap (iOS/Android require navigator.share to run within the user gesture; a
+  // long await before it can invalidate that, so we prepare it up front).
+  const fileRef = useRef(null);
+
+  const jpegName = `todays-challenge-day-${share.day}.jpg`;
+
+  useEffect(() => {
+    if (!share.imageUrl) return;
+    let cancelled = false;
+    fetchImageAsJpegFile(share.imageUrl, jpegName)
+      .then((file) => { if (!cancelled) fileRef.current = file; })
+      .catch(() => { /* falls back to a fresh fetch / link-only share */ });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [share.imageUrl]);
+
+  // Close the fallback menu on outside click or Escape (mirrors the calendar).
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDown = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
+    const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  const copyLink = () => {
+    if (!share.shareUrl) return;
+    navigator.clipboard.writeText(share.shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+
+  const download = async () => {
+    setDownloading(true);
+    try {
+      const file = fileRef.current || await fetchImageAsJpegFile(share.imageUrl, jpegName);
+      saveBlob(file, jpegName);
+    } catch {
+      // Conversion/fetch failed — fall back to the raw proxied image.
+      await downloadFile(share.imageUrl, jpegName);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const onShare = async () => {
+    const shareData = { title: t.shareTitle, text: t.shareMessage, url: share.shareUrl };
+    // Best path (mobile): native share sheet with the JPEG attached.
+    try {
+      const file = fileRef.current;
+      if (file && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ ...shareData, files: [file] });
+        return;
+      }
+    } catch (e) {
+      if (e?.name === "AbortError") return;   // user dismissed the sheet
+    }
+    // Native share without a file (some mobile browsers).
+    if (navigator.share) {
+      try { await navigator.share(shareData); return; }
+      catch (e) { if (e?.name === "AbortError") return; }
+    }
+    // Desktop / unsupported: our own share-target menu.
+    setMenuOpen((o) => !o);
+  };
+
+  // Desktop fallback targets — these carry the plan link (web intents can't
+  // attach a file); the image is available via the Download button.
+  const enc = encodeURIComponent;
+  const msg = t.shareMessage;
+  const url = share.shareUrl || "";
+  const targets = [
+    { key: "whatsapp", label: "WhatsApp", href: `https://wa.me/?text=${enc(`${msg} ${url}`)}` },
+    { key: "x", label: "X", href: `https://twitter.com/intent/tweet?text=${enc(msg)}&url=${enc(url)}` },
+    { key: "facebook", label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}` },
+    { key: "telegram", label: "Telegram", href: `https://t.me/share/url?url=${enc(url)}&text=${enc(msg)}` },
+    { key: "email", label: t.shareEmail, href: `mailto:?subject=${enc(t.shareTitle)}&body=${enc(`${msg}\n\n${url}`)}` },
+  ];
+
+  return (
+    <div className="share">
+      {share.imageUrl && !imgError && (
+        <div className="share__image-wrap">
+          <img
+            className="share__image"
+            src={share.imageUrl}
+            alt={t.todaysChallenge}
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+          <div className="share__actions" ref={menuRef}>
+            <button type="button" className="chip" disabled={downloading} onClick={download}>
+              {downloading ? t.downloading : t.downloadImage}
+            </button>
+            <button
+              type="button"
+              className="chip"
+              onClick={onShare}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+            >
+              <ShareIcon />{t.share}
+            </button>
+            {menuOpen && (
+              <div className="share__menu" role="menu">
+                <span className="share__menu-label">{t.shareVia}</span>
+                {targets.map((tg) => (
+                  <a
+                    key={tg.key}
+                    className="share__menu-item"
+                    href={tg.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    role="menuitem"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {tg.label}
+                  </a>
+                ))}
+                <button
+                  type="button"
+                  className="share__menu-item"
+                  role="menuitem"
+                  onClick={() => { copyLink(); setMenuOpen(false); }}
+                >
+                  {t.copyLink}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {share.shareUrl && (
+        <div className="share__link">
+          <span className="share__link-label">{t.shareLinkLabel}</span>
+          <div className="share__link-row">
+            <a
+              className="share__link-url"
+              href={share.shareUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {share.shareUrl}
+            </a>
+            <button type="button" className="chip" onClick={copyLink}>
+              {copied ? t.copied : t.copyLink}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Bubble({ msg, onChooseIdea, onMakeAudio, onRetryDay, busy, isLast }) {
   const t = useUI();
   const { voice, changeVoice } = useVoice();
@@ -1151,7 +1426,7 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, onRetryDay, busy, isLast }) {
 
   const downloadScript = async (url, filename) => {
     setDownloading(true);
-    try { await downloadAudio(url, filename); }
+    try { await downloadFile(url, filename); }
     finally { setDownloading(false); }
   };
 
@@ -1216,6 +1491,8 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, onRetryDay, busy, isLast }) {
           ))}
         </ul>
       )}
+
+      {msg.share && <ShareBlock share={msg.share} />}
 
       {msg.ideas && (
         <div className="ideas">

@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 
 from django.conf import settings
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
@@ -18,6 +19,7 @@ from .services import (
     script_generator,
     structure_generator,
     verse_summary,
+    webuddhist_plan,
 )
 from .services.content_loader import (
     ContentError,
@@ -83,6 +85,14 @@ def day_detail(request, day: int):
         for i, t in enumerate(dc.verses_text)
     ]
 
+    # The per-day share link is built from config alone (no network call), so a
+    # failure here should never break loading the day — degrade to no link.
+    try:
+        share_url = webuddhist_plan.share_url(dc.day, language)
+    except webuddhist_plan.PlanShareError:
+        logger.warning("Could not build share link (day=%s)", day, exc_info=True)
+        share_url = None
+
     return Response({
         "day": dc.day,
         "verses": dc.verses,
@@ -93,7 +103,39 @@ def day_detail(request, day: int):
         "planFile": dc.plan_file,
         "isVariant": dc.is_variant,
         "availableIdeas": idea_analyzer.available_ideas(dc, language),
+        "shareUrl": share_url,
     })
+
+
+@api_view(["GET"])
+def day_share_image(request, day: int):
+    """Proxy the 'today's challenge' shareable image for a day.
+
+    The upstream plan API and its S3 bucket send no CORS headers and the S3 URL
+    is presigned (expires ~1h), so the browser can't use either directly. We
+    resolve the image server-side and stream the bytes back same-origin, which
+    lets the frontend both display it (<img>) and blob-download it. Not on the
+    strict 'generate' throttle — it makes no paid Gemini call.
+    """
+    language = lang_service.normalize(request.query_params.get("language"))
+    try:
+        url = webuddhist_plan.shareable_image_url(day, language)
+        if not url:
+            return Response({"error": "No shareable image for this day."},
+                            status=status.HTTP_404_NOT_FOUND)
+        content, content_type = webuddhist_plan.fetch_image(url)
+    except webuddhist_plan.PlanShareUnavailable:
+        logger.warning("Share image temporarily unavailable (day=%s)", day, exc_info=True)
+        return Response({"error": CONTENT_UNAVAILABLE_MESSAGE},
+                        status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    except webuddhist_plan.PlanShareError as exc:
+        return Response({"error": str(exc)}, status=status.HTTP_404_NOT_FOUND)
+
+    resp = HttpResponse(content, content_type=content_type)
+    # Safe to cache: the image for a given day is stable even though the signed
+    # upstream URL rotates.
+    resp["Cache-Control"] = "public, max-age=900"
+    return resp
 
 
 @api_view(["POST"])

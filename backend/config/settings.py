@@ -44,6 +44,16 @@ GITHUB_TOKEN = env("GITHUB_TOKEN", default="")
 # pushes; 0 disables caching (always fetch fresh).
 GITHUB_CACHE_TTL = env.int("GITHUB_CACHE_TTL", default=300)
 
+# WeBuddhist plan integration — the public plan API supplies the "today's
+# challenge" shareable image, and the share site hosts the per-day plan link.
+# Plan ids differ by language. All overridable via .env if these ever change.
+WEBUDDHIST_API_BASE = env("WEBUDDHIST_API_BASE", default="https://api.webuddhist.com")
+WEBUDDHIST_SHARE_BASE = env("WEBUDDHIST_SHARE_BASE", default="https://webuddhist.com")
+WEBUDDHIST_PLAN_IDS = {
+    "english": env("WEBUDDHIST_PLAN_ID_EN", default="9c1cb58d-a972-4473-94f1-779abc4a5a4c"),
+    "hindi": env("WEBUDDHIST_PLAN_ID_HI", default="920d96b3-933b-42cd-8de1-0666b107ce16"),
+}
+
 # Gemini (model ids are configurable; confirm current ids in the Gemini docs).
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 GEMINI_TEXT_MODEL = env("GEMINI_TEXT_MODEL", default="gemini-3.1-flash-lite")

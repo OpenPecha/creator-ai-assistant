@@ -20,6 +20,12 @@ async function request(path, options = {}) {
   return data;
 }
 
+// Same-origin proxy for the "today's challenge" image (the upstream S3 URL is
+// presigned and CORS-less, so the backend streams the bytes). Usable directly as
+// an <img src> and for a blob download.
+export const shareImageUrl = (day, language = "english") =>
+  `${BASE}/api/days/${encodeURIComponent(day)}/share-image/?language=${encodeURIComponent(language)}`;
+
 export const api = {
   health: () => request("/health/"),
   getDay: (day, language = "english") =>
