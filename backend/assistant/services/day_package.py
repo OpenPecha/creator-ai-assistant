@@ -31,13 +31,25 @@ _VERSE_MARKER_RE = re.compile(r"^\*\*Verse\s+([\w.-]+)\*\*\s*$", re.MULTILINE)
 # Obsidian links: `[[path#^1-1]]`, `![[embed]]`, and any wrapping `( … )`.
 _LINK_RE = re.compile(r"\(?\s*!?\[\[[^\]]*\]\]\s*\)?")
 _SOURCE_NOTE_RE = re.compile(r"^\*?\(Source:.*\)\*?$")
+_HEADING_RE = re.compile(r"^#{1,6}\s*(.+?)\s*$")
+
+
+@dataclass
+class Resource:
+    """A discrete, selectable piece of source material (a story, a commentator's
+    explanation, or a metaphor) with a short human label and its full text."""
+    label: str
+    text: str
 
 
 @dataclass
 class VerseRail:
     verse_id: str
     rails_md: str  # full cleaned rails for this verse (all subsections)
-    stories: list[str] = field(default_factory=list)
+    stories: list[str] = field(default_factory=list)  # cleaned, heading included
+    story_items: list[Resource] = field(default_factory=list)
+    commentaries: list[Resource] = field(default_factory=list)
+    metaphors: list[Resource] = field(default_factory=list)
     sections: dict[str, str] = field(default_factory=dict)  # sub-anchor -> cleaned text
 
 
@@ -47,6 +59,7 @@ class ParsedPackage:
     challenge_md: str
     verses: list[tuple[str, str]]  # (verse_id, plain-English text) from Section 2
     verse_rails: list[VerseRail]
+    practice: Resource | None = None  # "Today's Practice" (<!-- challenge:practice -->)
 
     @property
     def stories(self) -> list[str]:
@@ -88,6 +101,60 @@ def _clean(text: str) -> str:
     text = "\n".join(kept)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+
+def _heading_and_body(text: str) -> tuple[str, str]:
+    """Split a `##### Key — Title` block into (label, body).
+
+    The label is the heading text after the first dash (so `kunpal — Khenpo
+    Kunzang Pelden` → "Khenpo Kunzang Pelden"); if there's no dash the whole
+    heading is used. Text with no leading heading yields ("", text).
+    """
+    lines = text.strip().splitlines()
+    idx = 0
+    while idx < len(lines) and not lines[idx].strip():
+        idx += 1
+    label = ""
+    if idx < len(lines):
+        m = _HEADING_RE.match(lines[idx].strip())
+        if m:
+            head = m.group(1)
+            for sep in ("—", "–"):
+                if sep in head:
+                    head = head.split(sep, 1)[1]
+                    break
+            label = head.strip()
+            idx += 1
+    return label, "\n".join(lines[idx:]).strip()
+
+
+def _to_resource(text: str) -> Resource:
+    label, body = _heading_and_body(text)
+    return Resource(label=label, text=body or text.strip())
+
+
+def _split_bullets(text: str) -> list[Resource]:
+    """Split a bulleted section (e.g. metaphors) into one Resource per bullet.
+
+    Each item's label is its leading bold term (`**A well-filled vase**`); the
+    text is the full bullet. Non-bullet lines (e.g. the section heading) are
+    ignored until the first bullet.
+    """
+    items: list[list[str]] = []
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith(("- ", "* ")):
+            items.append([line])
+        elif items:
+            items[-1].append(line)
+
+    out: list[Resource] = []
+    for chunk in items:
+        body = "\n".join(chunk).strip()
+        body = re.sub(r"^[-*]\s+", "", body)
+        m = re.search(r"\*\*(.+?)\*\*", body)
+        out.append(Resource(label=(m.group(1).strip() if m else ""), text=body))
+    return out
 
 
 # ── Segmentation ────────────────────────────────────────────────────────────────
@@ -143,10 +210,14 @@ def _parse_rails(rails_segs: list[tuple[str, str]]) -> list[VerseRail]:
 
     def finish(state: dict) -> VerseRail:
         sections = {k: _clean("\n".join(v)) for k, v in state["sections"].items()}
+        stories = [_clean(t) for t in state["stories_raw"]]
         return VerseRail(
             verse_id=state["id"],
             rails_md=_clean("\n".join(state["raw"])),
-            stories=state["stories"],
+            stories=stories,
+            story_items=[_to_resource(s) for s in stories],
+            commentaries=[_to_resource(_clean(t)) for t in state["cm_raw"]],
+            metaphors=_split_bullets(sections.get("sub:metaphors", "")),
             sections=sections,
         )
 
@@ -157,7 +228,7 @@ def _parse_rails(rails_segs: list[tuple[str, str]]) -> list[VerseRail]:
             if cur is not None:
                 rails.append(finish(cur))
             cur = {"id": name.split(":", 1)[1].replace(".", "-"),
-                   "raw": [], "stories": [], "sections": {}}
+                   "raw": [], "stories_raw": [], "cm_raw": [], "sections": {}}
             cur_sub = None
             continue
         if cur is None:
@@ -167,10 +238,14 @@ def _parse_rails(rails_segs: list[tuple[str, str]]) -> list[VerseRail]:
             cur_sub = name
             cur["sections"].setdefault(cur_sub, []).append(text)
         elif name.startswith("story:"):
-            cur["stories"].append(_clean(text))
+            cur["stories_raw"].append(text)
             if cur_sub:
                 cur["sections"].setdefault(cur_sub, []).append(text)
-        elif cur_sub:  # cm:* and any other nested anchors
+        elif name.startswith("cm:"):
+            cur["cm_raw"].append(text)
+            if cur_sub:
+                cur["sections"].setdefault(cur_sub, []).append(text)
+        elif cur_sub:  # any other nested anchors
             cur["sections"].setdefault(cur_sub, []).append(text)
 
     if cur is not None:
@@ -186,6 +261,7 @@ def parse(markdown: str) -> ParsedPackage:
     segs = _segments(body)
 
     challenge_parts: list[str] = []
+    practice_raw = ""
     verses_raw = ""
     rails_segs: list[tuple[str, str]] = []
     section: str | None = None
@@ -202,14 +278,18 @@ def parse(markdown: str) -> ParsedPackage:
             continue
         if section == "sec:challenge":
             challenge_parts.append(text)
+            if name == "challenge:practice":
+                practice_raw = text
         elif section == "sec:verses":
             verses_raw += "\n" + text
         elif section == "sec:rails":
             rails_segs.append((name, text))
 
+    practice_clean = _clean(practice_raw)
     return ParsedPackage(
         status=status,
         challenge_md=_clean("\n".join(challenge_parts)),
         verses=_parse_verses(verses_raw),
         verse_rails=_parse_rails(rails_segs),
+        practice=_to_resource(practice_clean) if practice_clean else None,
     )

@@ -67,6 +67,10 @@ class DayContent:
     verse_syntheses: list[VerseSynthesis] = field(default_factory=list)
     verses_text: list[str] = field(default_factory=list)
     stories: list[str] = field(default_factory=list)
+    # Per-verse selectable source material, keyed by verse id, then by idea
+    # category: {"1-1": {"story": [{label, text}], "concept": [...], "extra_info": [...]}}.
+    # story ← package stories, concept ← commentaries, extra_info ← metaphors.
+    verse_resources: dict[str, dict[str, list[dict]]] = field(default_factory=dict)
     is_variant: bool = False
 
     @property
@@ -388,6 +392,27 @@ def get_day_content(day: int) -> DayContent:
         for vid in entry["verses"]
     ]
 
+    # Per-verse selectable resources, mapped to the idea categories they feed:
+    # Story ← stories, Concept ← commentaries, Extra-info ← metaphors. Challenge ←
+    # the day's "Today's Practice" (day-level, so repeated on each verse).
+    def _items(resources) -> list[dict]:
+        return [{"label": r.label, "text": r.text} for r in resources]
+
+    practice_items = (
+        [{"label": parsed.practice.label, "text": parsed.practice.text}]
+        if parsed.practice else []
+    )
+
+    verse_resources = {}
+    for vid in entry["verses"]:
+        vr = rails.get(vid)
+        verse_resources[vid] = {
+            "story": _items(vr.story_items) if vr else [],
+            "concept": _items(vr.commentaries) if vr else [],
+            "extra_info": _items(vr.metaphors) if vr else [],
+            "practice": list(practice_items),
+        }
+
     return DayContent(
         day=day,
         verses=entry["verses"],
@@ -398,6 +423,7 @@ def get_day_content(day: int) -> DayContent:
         verse_syntheses=syntheses,
         verses_text=verses_text,
         stories=parsed.stories,
+        verse_resources=verse_resources,
         is_variant=False,
     )
 

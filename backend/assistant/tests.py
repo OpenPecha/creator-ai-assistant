@@ -93,6 +93,14 @@ Long ago a proud daughter would not bow to the arhats, then relented.
 
 Sources: [[1-SOURCES/Commentaries/KTB.md#^1-1]]
 
+<!-- sub:metaphors -->
+#### Metaphors and Examples
+
+- **A well-filled vase** (བུམ་པ་) → Sugata as "gone completely." Nothing left unattained.
+- **A person beautiful to behold** → Sugata as "gone beautifully."
+
+Sources: [[1-SOURCES/Commentaries/KKP.md#^1-1]]
+
 <!-- sub:synthesis -->
 #### Verse Synthesis (overview)
 
@@ -168,6 +176,11 @@ class DayPackageParseTests(SimpleTestCase):
     def test_status_from_frontmatter(self):
         self.assertEqual(self.parsed.status, "draft")
 
+    def test_practice_resource(self):
+        self.assertIsNotNone(self.parsed.practice)
+        self.assertEqual(self.parsed.practice.label, "Today's Practice")
+        self.assertIn("Share a quote", self.parsed.practice.text)
+
     def test_challenge_section(self):
         self.assertIn("Share a quote with someone", self.parsed.challenge_md)
         # The H1 title/date block above sec:challenge is excluded.
@@ -192,6 +205,26 @@ class DayPackageParseTests(SimpleTestCase):
         self.assertEqual(second.stories, [])
         # Aggregate helper flattens across verses.
         self.assertEqual(len(self.parsed.stories), 1)
+
+    def test_structured_resources(self):
+        first, second = self.parsed.verse_rails
+        # Story item: label from the heading (after the dash), body without heading.
+        self.assertEqual(len(first.story_items), 1)
+        self.assertEqual(first.story_items[0].label,
+                         "The Arrogance of the Bodhisattva Daughter")
+        self.assertIn("proud daughter", first.story_items[0].text)
+        self.assertNotIn("#####", first.story_items[0].text)
+        # Commentary: labelled by commentator display name (after the dash).
+        self.assertEqual(len(first.commentaries), 1)
+        self.assertEqual(first.commentaries[0].label, "Khenpo Kunzang Pelden")
+        self.assertIn("three meanings", first.commentaries[0].text)
+        # Metaphors: one Resource per bullet, label = leading bold term.
+        self.assertEqual([m.label for m in first.metaphors],
+                         ["A well-filled vase", "A person beautiful to behold"])
+        # Verse with none of these stays empty.
+        self.assertEqual(second.story_items, [])
+        self.assertEqual(second.commentaries, [])
+        self.assertEqual(second.metaphors, [])
 
     def test_rails_cleaned(self):
         for vr in self.parsed.verse_rails:
@@ -240,6 +273,21 @@ class GetDayContentTests(SimpleTestCase):
         self.assertIn("Bodhisattva Daughter", dc.synthesis_text)
         # stories surfaced for idea analysis.
         self.assertEqual(len(dc.stories), 1)
+        # Per-verse selectable resources, mapped to idea categories.
+        self.assertEqual(len(dc.verse_resources["1-1"]["story"]), 1)
+        self.assertEqual(len(dc.verse_resources["1-1"]["concept"]), 1)
+        self.assertEqual(len(dc.verse_resources["1-1"]["extra_info"]), 2)
+        self.assertEqual(dc.verse_resources["1-1"]["concept"][0]["label"],
+                         "Khenpo Kunzang Pelden")
+        # Challenge ← "Today's Practice" (day-level, repeated on every verse).
+        self.assertEqual(dc.verse_resources["1-1"]["practice"][0]["label"],
+                         "Today's Practice")
+        self.assertIn("Share a quote", dc.verse_resources["1-1"]["practice"][0]["text"])
+        # Verse 1-2 has no per-verse rails, but still carries the day's practice.
+        self.assertEqual(dc.verse_resources["1-2"]["story"], [])
+        self.assertEqual(dc.verse_resources["1-2"]["concept"], [])
+        self.assertEqual(dc.verse_resources["1-2"]["extra_info"], [])
+        self.assertEqual(len(dc.verse_resources["1-2"]["practice"]), 1)
 
     def test_missing_package_raises(self):
         with mock.patch.object(content_loader, "_list_github_dir",

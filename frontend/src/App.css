@@ -1007,6 +1007,26 @@ body {
   font-size: 0.875rem;
   color: var(--ink);
   line-height: 1.6;
+  /* Honour paragraph breaks in source material (e.g. Practice / Explanation on
+     separate lines) instead of collapsing them into one run. */
+  white-space: pre-line;
+}
+/* Preview of a source-material item: keep the option scannable by clamping long
+   commentary/story text to a few lines. */
+.vcard__option-text--clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* A fixed description of the active category shown above its options — explains
+   what the category is and where its material comes from. */
+.vcard__resource-desc {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
 }
 .vcard__option-arrow {
   flex-shrink: 0;
