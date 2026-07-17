@@ -886,6 +886,10 @@ export default function App() {
 // Challenge ← "Today's Practice".
 const RESOURCE_TABS = new Set(["story", "concept", "extra_info", "practice"]);
 
+// Categories that only make sense when this specific verse has the material —
+// hidden entirely on verses with no story / no metaphor.
+const VERSE_GATED_TABS = new Set(["story", "extra_info"]);
+
 // Render the light markdown used in source material for previews: **bold** becomes
 // a <strong> (so inline labels like "Practice:" / "Explanation:" read as headings),
 // stray * and ` are dropped, and blank lines collapse so parts sit on adjacent
@@ -903,12 +907,16 @@ function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
   const [open, setOpen] = useState(false);
   const cardRef = useRef(null);
 
-  // Tabs come from the day's availableIdeas, plus any mapped resource tab this
-  // particular verse actually has material for (so a verse's story/commentary/
-  // metaphor is never hidden just because the day-level analyzer didn't flag it).
+  // Tabs shown for this verse:
+  //  - Story and Extra-info are per-verse: shown ONLY when this verse actually has
+  //    a story / metaphor, so they're hidden on verses that lack them.
+  //  - The rest (Concept, Challenge, Creative, Testimony) always show, per the
+  //    day's availableIdeas (Concept/Challenge also carry per-verse material).
   const ideaByKey = Object.fromEntries((ideas || []).map((i) => [i.key, i]));
   const hasResource = (key) => RESOURCE_TABS.has(key) && (resources[key] || []).length > 0;
-  const tabs = TAB_ORDER.filter((key) => !!ideaByKey[key] || hasResource(key));
+  const tabs = TAB_ORDER.filter((key) =>
+    VERSE_GATED_TABS.has(key) ? hasResource(key) : (!!ideaByKey[key] || hasResource(key))
+  );
   const [activeTab, setActiveTab] = useState(tabs[0] ?? "concept");
 
   function handleToggle() {
