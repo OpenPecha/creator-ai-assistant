@@ -398,10 +398,21 @@ def get_day_content(day: int) -> DayContent:
     def _items(resources) -> list[dict]:
         return [{"label": r.label, "text": r.text} for r in resources]
 
-    practice_items = (
-        [{"label": parsed.practice.label, "text": parsed.practice.text}]
-        if parsed.practice else []
-    )
+    # "Today's Practice" is "**Practice:** <action>\n\n**Explanation:** <why>".
+    # Split it so the UI can show the action under the "Today's Practice" title and
+    # the explanation under its own heading. Degrades gracefully if a day omits the
+    # Explanation part.
+    practice_items = []
+    if parsed.practice:
+        action_part, _, expl_part = parsed.practice.text.partition("**Explanation:**")
+        action = action_part.strip()
+        if action.startswith("**Practice:**"):
+            action = action[len("**Practice:**"):].strip()
+        explanation = expl_part.strip()
+        item = {"label": parsed.practice.label, "text": action or parsed.practice.text.strip()}
+        if explanation:
+            item["explanation"] = explanation
+        practice_items = [item]
 
     verse_resources = {}
     for vid in entry["verses"]:

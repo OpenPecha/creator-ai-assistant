@@ -97,6 +97,8 @@ def _clean(text: str) -> str:
             continue
         if _SOURCE_NOTE_RE.match(s):
             continue
+        if re.fullmatch(r"-{3,}|\*{3,}|_{3,}", s):  # markdown horizontal rule
+            continue
         kept.append(line)
     text = "\n".join(kept)
     text = re.sub(r"\n{3,}", "\n\n", text)

@@ -36,6 +36,8 @@ Open quietly.
 
 **Practice:** Share a quote with someone.
 
+**Explanation:** Sharing wisdom strengthens your own faith.
+
 *(Source: `Days/Chapter-1/1.md`)*
 
 ---
@@ -279,10 +281,13 @@ class GetDayContentTests(SimpleTestCase):
         self.assertEqual(len(dc.verse_resources["1-1"]["extra_info"]), 2)
         self.assertEqual(dc.verse_resources["1-1"]["concept"][0]["label"],
                          "Khenpo Kunzang Pelden")
-        # Challenge ← "Today's Practice" (day-level, repeated on every verse).
-        self.assertEqual(dc.verse_resources["1-1"]["practice"][0]["label"],
-                         "Today's Practice")
-        self.assertIn("Share a quote", dc.verse_resources["1-1"]["practice"][0]["text"])
+        # Challenge ← "Today's Practice" (day-level, repeated on every verse), split
+        # into the action (text, no "Practice:" prefix) and its explanation.
+        practice = dc.verse_resources["1-1"]["practice"][0]
+        self.assertEqual(practice["label"], "Today's Practice")
+        self.assertEqual(practice["text"], "Share a quote with someone.")
+        self.assertNotIn("Practice:", practice["text"])
+        self.assertIn("Sharing wisdom", practice["explanation"])
         # Verse 1-2 has no per-verse rails, but still carries the day's practice.
         self.assertEqual(dc.verse_resources["1-2"]["story"], [])
         self.assertEqual(dc.verse_resources["1-2"]["concept"], [])

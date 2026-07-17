@@ -156,6 +156,7 @@ const UI = {
       testimony: "A first-person reflection where you share your own experience with today's teaching.",
     },
     chooseThisType: "Make this video",
+    explanationLabel: "Explanation",
     generateThis: "Generate idea",
     generateVideo: "Generate idea",
     // output types
@@ -259,6 +260,7 @@ const UI = {
       testimony: "एक व्यक्तिगत अनुभव, जहाँ आप आज की शिक्षा से जुड़ा अपना अनुभव साझा करते हैं।",
     },
     chooseThisType: "यह वीडियो बनाएँ",
+    explanationLabel: "व्याख्या",
     generateThis: "आइडिया जनरेट करें",
     generateVideo: "आइडिया जनरेट करें",
     outputTypes: {
@@ -985,7 +987,9 @@ function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
                   className="vcard__option"
                   disabled={busy}
                   onClick={() => onChooseIdea(activeIdea, {
-                    text: item.text,
+                    // Build the video around the whole item — action plus any
+                    // explanation — even though they display as separate blocks.
+                    text: [item.text, item.explanation].filter(Boolean).join("\n\n"),
                     typeLabel: t.tabLabels[activeTab],
                     label: item.label || t.tabLabels[activeTab],
                   })}
@@ -995,6 +999,12 @@ function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
                       <span className="vcard__option-label">{item.label}</span>
                     ) : null}
                     <span className="vcard__option-text vcard__option-text--clamp">{renderRichText(item.text)}</span>
+                    {item.explanation ? (
+                      <>
+                        <span className="vcard__option-label">{t.explanationLabel}</span>
+                        <span className="vcard__option-text vcard__option-text--clamp">{renderRichText(item.explanation)}</span>
+                      </>
+                    ) : null}
                   </span>
                   <svg className="vcard__option-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6" />
