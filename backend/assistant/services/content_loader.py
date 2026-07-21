@@ -34,7 +34,7 @@ _SCHEDULE = f"{_PLAN_ROOT}/assets/schedule-hhdl-birthday.md"
 # Each day's content is a single consolidated "Day-Package" file, `{day}-en.md`,
 # living under a chapter subdirectory (e.g. "Chapter-1 D1-D14"). See day_package.py
 # for its structure. A day with no package is unavailable (get_day_content raises).
-_PACKAGES_DIR = f"{_PLAN_ROOT}/Day-Packages"
+_PACKAGES_DIR = f"{_PLAN_ROOT}/Day-Packages-EN"
 
 _DASHES = "–—-"
 _RANGE_RE = re.compile(rf"(\d+)\.(\d+)\s*[{_DASHES}]\s*(?:(\d+)\.)?(\d+)")
@@ -332,7 +332,7 @@ def released_progress() -> dict:
 def _find_package_path(day: int, verses: list[str]) -> str:
     """Return the GitHub path to a day's Day-Package file (`{day}-en.md`).
 
-    Lists the Day-Packages directory once to find the chapter folder (which may
+    Lists the Day-Packages-EN directory once to find the chapter folder (which may
     carry a suffix like 'Chapter-1 D1-D14'), then returns the `{day}-en.md` path
     inside it. Raises ContentError if the chapter directory is absent; the file's
     own existence is checked by the caller's fetch.
@@ -346,7 +346,7 @@ def _find_package_path(day: int, verses: list[str]) -> str:
     )
     if chapter_dir is None:
         raise ContentError(
-            f"No Chapter-{chapter} directory found under Day-Packages/ in the repo."
+            f"No Chapter-{chapter} directory found under Day-Packages-EN/ in the repo."
         )
 
     return f"{_PACKAGES_DIR}/{chapter_dir}/{day}-en.md"

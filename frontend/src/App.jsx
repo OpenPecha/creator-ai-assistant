@@ -27,7 +27,7 @@ const OUTPUT_TYPE_KEYS = ["script", "structure"];
 
 // Display order for idea tabs. The backend decides which keys are available for
 // a given day; the frontend just shows them in this order.
-const TAB_ORDER = ["story", "concept", "practice", "extra_info", "creative", "testimony"];
+const TAB_ORDER = ["story", "concept", "extra_info", "practice", "creative", "testimony"];
 
 const LANGUAGES = [
   { key: "english", label: "English" },
