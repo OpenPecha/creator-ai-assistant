@@ -161,6 +161,7 @@ const UI = {
     readMore: "Read more",
     readLess: "Read less",
     overviewNote: "This overview is AI-generated from the classical commentaries, which are rooted in the source — nothing is invented.",
+    conceptSourceNote: "Each explanation above comes straight from the classical commentaries in the source — nothing here is AI-generated.",
     generateThis: "Generate idea",
     generateVideo: "Generate idea",
     // output types
@@ -269,6 +270,7 @@ const UI = {
     readMore: "और पढ़ें",
     readLess: "कम पढ़ें",
     overviewNote: "यह सारांश पारंपरिक टीकाओं से AI द्वारा तैयार किया गया है, जो स्रोत पर आधारित हैं — कुछ भी मनगढ़ंत नहीं।",
+    conceptSourceNote: "ऊपर दी गई हर व्याख्या सीधे मूल ग्रंथों की पारंपरिक टीकाओं से ली गई है — यहाँ कुछ भी AI द्वारा तैयार नहीं है।",
     generateThis: "आइडिया जनरेट करें",
     generateVideo: "आइडिया जनरेट करें",
     outputTypes: {
@@ -1074,6 +1076,13 @@ function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
               </button>
             )}
           </div>
+
+          {/* Provenance footer for the Concept tab: the commentary cards above are
+              the genuine classical commentators' words from the source (unlike the
+              AI Overview at the top), so reassure the creator they're authentic. */}
+          {activeTab === "concept" && resourceItems.length > 0 ? (
+            <p className="vcard__source-note">{t.conceptSourceNote}</p>
+          ) : null}
         </div>
       )}
     </div>
