@@ -20,7 +20,7 @@ import requests as _requests
 from django.conf import settings
 from django.utils import timezone
 
-from . import ipv4
+from . import day_package, ipv4
 
 # GitHub publishes IPv6 records; on networks where the IPv6 route is blackholed
 # every fetch stalls for the full timeout before falling back. This session
@@ -31,16 +31,14 @@ _http = ipv4.requests_session()
 # Relative paths inside the rails repo.
 _PLAN_ROOT = "3-TRANSFORMATIONS/Plans/the-bodhisattva-challenge/en"
 _SCHEDULE = f"{_PLAN_ROOT}/assets/schedule-hhdl-birthday.md"
-_DAYS_DIR = f"{_PLAN_ROOT}/Days"
-_VERSES_DIR = "3-TRANSFORMATIONS/Translations/en-ai/Verses"
+# Each day's content is a single consolidated "Day-Package" file, `{day}-en.md`,
+# living under a chapter subdirectory (e.g. "Chapter-1 D1-D14"). See day_package.py
+# for its structure. A day with no package is unavailable (get_day_content raises).
+_PACKAGES_DIR = f"{_PLAN_ROOT}/Day-Packages-EN"
 
 _DASHES = "–—-"
 _RANGE_RE = re.compile(rf"(\d+)\.(\d+)\s*[{_DASHES}]\s*(?:(\d+)\.)?(\d+)")
 _SINGLE_RE = re.compile(r"(\d+)\.(\d+)")
-_TIBETAN_RE = re.compile(r"[ༀ-࿿]")
-
-# Common variant suffixes to probe if the exact day file isn't found.
-_VARIANT_SUFFIXES = ["-A", "-B", "-option-1", "-option-2", "-new", "-Final", "-final"]
 
 
 class ContentError(Exception):
@@ -68,6 +66,14 @@ class DayContent:
     plan_file: str
     verse_syntheses: list[VerseSynthesis] = field(default_factory=list)
     verses_text: list[str] = field(default_factory=list)
+    stories: list[str] = field(default_factory=list)
+    # Per-verse selectable source material, keyed by verse id, then by idea
+    # category: {"1-1": {"story": [{label, text}], "concept": [...], "extra_info": [...]}}.
+    # story ← package stories, concept ← commentaries, extra_info ← metaphors.
+    verse_resources: dict[str, dict[str, list[dict]]] = field(default_factory=dict)
+    # Per-verse "Brief introduction" from the Verse Synthesis overview — a short
+    # summary shown above the Concept commentary options (not itself pickable).
+    verse_overviews: dict[str, str] = field(default_factory=dict)
     is_variant: bool = False
 
     @property
@@ -213,38 +219,6 @@ def _fetch_raw(path: str) -> str | None:
 
 # ── Content parsing ───────────────────────────────────────────────────────────
 
-def extract_today_verses(plan_markdown: str) -> list[str]:
-    """Pull English verse translations from the '## Today's Verses' section."""
-    verses: list[str] = []
-    current: list[str] = []
-    in_section = False
-
-    for line in plan_markdown.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("## "):
-            if in_section:
-                break
-            low = stripped.lower()
-            in_section = "today" in low and "verse" in low
-            continue
-        if not in_section:
-            continue
-        if stripped == "":
-            if current:
-                verses.append("\n".join(current))
-                current = []
-            continue
-        if stripped.startswith(">"):
-            text = stripped.lstrip(">").strip()
-            if not text or _TIBETAN_RE.search(text):
-                continue
-            current.append(text)
-
-    if current:
-        verses.append("\n".join(current))
-    return verses
-
-
 def expand_verses(label: str) -> list[str]:
     """Expand a schedule verse label into verse ids.
 
@@ -356,73 +330,119 @@ def released_progress() -> dict:
     }
 
 
-# ── Day file lookup ───────────────────────────────────────────────────────────
+# ── Day-Package lookup ──────────────────────────────────────────────────────────
 
-def _find_day_path(day: int, verses: list[str]) -> tuple[str, bool]:
-    """Find the day-plan file path in the GitHub repo.
+def _find_package_path(day: int, verses: list[str]) -> str:
+    """Return the GitHub path to a day's Day-Package file (`{day}-en.md`).
 
-    Lists the Days directory once per request to find the correct
-    Chapter folder (which may have a suffix like 'Chapter-1 D1-D14'),
-    then probes for the exact file or common variant names.
+    Lists the Day-Packages-EN directory once to find the chapter folder (which may
+    carry a suffix like 'Chapter-1 D1-D14'), then returns the `{day}-en.md` path
+    inside it. Raises ContentError if the chapter directory is absent; the file's
+    own existence is checked by the caller's fetch.
     """
     chapter = int(verses[0].split("-")[0]) if verses else 1
 
-    # Find the chapter directory — name starts with "Chapter-{chapter}".
-    all_dirs = _list_github_dir(_DAYS_DIR)
+    all_dirs = _list_github_dir(_PACKAGES_DIR)
     chapter_dir = next(
         (d for d in all_dirs if d.startswith(f"Chapter-{chapter}")),
         None,
     )
     if chapter_dir is None:
-        raise ContentError(f"No Chapter-{chapter} directory found under Days/ in the repo.")
+        raise ContentError(
+            f"No Chapter-{chapter} directory found under Day-Packages-EN/ in the repo."
+        )
 
-    base = f"{_DAYS_DIR}/{chapter_dir}"
-
-    # Exact match.
-    exact = f"{base}/{day}.md"
-    if _fetch_raw(exact) is not None:
-        return exact, False
-
-    # Variant suffixes.
-    for suffix in _VARIANT_SUFFIXES:
-        path = f"{base}/{day}{suffix}.md"
-        if _fetch_raw(path) is not None:
-            return path, True
-
-    raise ContentError(f"No day-plan file found for Day {day} in the GitHub repo.")
+    return f"{_PACKAGES_DIR}/{chapter_dir}/{day}-en.md"
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
-def _load_verse_synthesis(verse_id: str) -> VerseSynthesis:
-    path = f"{_VERSES_DIR}/{verse_id}.md"
-    text = _fetch_raw(path)
-    return VerseSynthesis(verse_id=verse_id, text=text or "", available=text is not None)
-
-
 def get_day_content(day: int) -> DayContent:
-    """Fetch everything needed to generate a script for `day` from GitHub."""
+    """Fetch and parse a day's consolidated Day-Package from GitHub.
+
+    The Day-Package (`{day}-en.md`) is the single source of day content: its
+    practice-plan track becomes `plan_markdown`, its Section-2 verses become
+    `verses_text`, and each verse's full "rails" become that verse's synthesis
+    (so `synthesis_text` carries the complete commentary). A day with no package
+    is unavailable — this raises ContentError, which the API surfaces as a 404.
+    """
     schedule = get_schedule()
     if day not in schedule:
         raise ContentError(f"Day {day} is not in the schedule (valid range 1–{max(schedule)}).")
 
     entry = schedule[day]
-    plan_path, is_variant = _find_day_path(day, entry["verses"])
-    plan_markdown = _fetch_raw(plan_path)
-    if plan_markdown is None:
-        raise ContentError(f"Day plan file disappeared after lookup: {plan_path}")
-    syntheses = [_load_verse_synthesis(vid) for vid in entry["verses"]]
+    plan_path = _find_package_path(day, entry["verses"])
+    markdown = _fetch_raw(plan_path)
+    if markdown is None:
+        raise ContentError(
+            f"No Day-Package (`{day}-en.md`) found for Day {day} in the GitHub repo."
+        )
+
+    parsed = day_package.parse(markdown)
+
+    # Order verses_text by the schedule's verse ids so views.py's positional
+    # pairing of dc.verses ↔ dc.verses_text stays aligned. A verse the package
+    # doesn't carry yields "" rather than shifting the rest.
+    verse_text = {vid: text for vid, text in parsed.verses}
+    rails = {vr.verse_id: vr for vr in parsed.verse_rails}
+    verses_text = [verse_text.get(vid, "") for vid in entry["verses"]]
+    syntheses = [
+        VerseSynthesis(
+            verse_id=vid,
+            text=(rails[vid].rails_md if vid in rails else ""),
+            available=(vid in rails and bool(rails[vid].rails_md)),
+        )
+        for vid in entry["verses"]
+    ]
+
+    # Per-verse selectable resources, mapped to the idea categories they feed:
+    # Story ← stories, Concept ← commentaries, Extra-info ← metaphors. Challenge ←
+    # the day's "Today's Practice" (day-level, so repeated on each verse).
+    def _items(resources) -> list[dict]:
+        return [{"label": r.label, "text": r.text} for r in resources]
+
+    # "Today's Practice" is "**Practice:** <action>\n\n**Explanation:** <why>".
+    # Split it so the UI can show the action under the "Today's Practice" title and
+    # the explanation under its own heading. Degrades gracefully if a day omits the
+    # Explanation part.
+    practice_items = []
+    if parsed.practice:
+        action_part, _, expl_part = parsed.practice.text.partition("**Explanation:**")
+        action = action_part.strip()
+        if action.startswith("**Practice:**"):
+            action = action[len("**Practice:**"):].strip()
+        explanation = expl_part.strip()
+        item = {"label": parsed.practice.label, "text": action or parsed.practice.text.strip()}
+        if explanation:
+            item["explanation"] = explanation
+        practice_items = [item]
+
+    verse_resources = {}
+    for vid in entry["verses"]:
+        vr = rails.get(vid)
+        verse_resources[vid] = {
+            "story": _items(vr.story_items) if vr else [],
+            "concept": _items(vr.commentaries) if vr else [],
+            "extra_info": _items(vr.metaphors) if vr else [],
+            "practice": list(practice_items),
+            # A short, already-distilled overview of the verse (the synthesis'
+            # "Brief introduction"), shown above the commentaries in the Concept
+            # tab — not a selectable option, so it's a plain string, not a list.
+            "concept_overview": (vr.synthesis_intro if vr else ""),
+        }
 
     return DayContent(
         day=day,
         verses=entry["verses"],
         verses_label=entry["verses_label"],
         date=entry["date"],
-        plan_markdown=plan_markdown,
+        plan_markdown=parsed.challenge_md,
         plan_file=plan_path,
         verse_syntheses=syntheses,
-        verses_text=extract_today_verses(plan_markdown),
-        is_variant=is_variant,
+        verses_text=verses_text,
+        stories=parsed.stories,
+        verse_resources=verse_resources,
+        is_variant=False,
     )
 
 

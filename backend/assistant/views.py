@@ -78,10 +78,15 @@ def day_detail(request, day: int):
     except ContentError as exc:
         return Response({"error": str(exc)}, status=status.HTTP_404_NOT_FOUND)
 
-    # Pair each verse text with its verse number (e.g. "1-6" -> "6").
+    # Pair each verse text with its verse number (e.g. "1-6" -> "6") and full id
+    # (so the client can look up that verse's resources in `verseResources`).
     # Best-effort: use schedule IDs for as many texts as available; leave extras blank.
     verse_lines = [
-        {"n": dc.verses[i].split("-")[-1] if i < len(dc.verses) else "", "text": t}
+        {
+            "id": dc.verses[i] if i < len(dc.verses) else "",
+            "n": dc.verses[i].split("-")[-1] if i < len(dc.verses) else "",
+            "text": t,
+        }
         for i, t in enumerate(dc.verses_text)
     ]
 
@@ -100,6 +105,7 @@ def day_detail(request, day: int):
         "date": dc.date,
         "verseText": dc.verse_block,
         "verseLines": verse_lines,
+        "verseResources": dc.verse_resources,
         "planFile": dc.plan_file,
         "isVariant": dc.is_variant,
         "availableIdeas": idea_analyzer.available_ideas(dc, language),

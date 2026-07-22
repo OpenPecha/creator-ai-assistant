@@ -5,6 +5,11 @@ Take the single most powerful idea in today's verses and make a total beginner
 
 - **Find the one idea.** Not three, not "everything Śāntideva covers" — the one
   that would change how someone sees their day. Build the whole script around it.
+- **Aim it at a real ache.** Before you write, name the everyday struggle this
+  idea speaks to — the 2am racing thoughts, the grudge you can't put down, the
+  comparison that steals the day — and the relief on the other side of it. Say
+  the ache in plain, modern words (not "suffering," not "attachment"), and let the
+  whole script quietly carry the viewer from that ache toward the relief.
 - **Open with the itch.** A relatable moment, a question they've quietly asked
   themselves, or a wrong assumption everyone makes. Make them think "wait, that's
   me." THEN bring in what Śāntideva says.

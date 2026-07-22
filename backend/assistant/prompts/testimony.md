@@ -22,7 +22,9 @@ testimonial."
 - **Tie it to today's verse or practice** — show how the teaching actually showed
   up in their ordinary life, not as a quote but as a thing that happened.
 - **Close on what's still true now** — what shifted, or what they're still working
-  on. Honesty over triumph. No bow.
+  on. Honesty over triumph. No bow. Make sure the shift answers the exact ache you
+  opened on: if it started with the snap, close on how the anger sits differently
+  now — same thread, quietly moved from the mess toward a little relief.
 - **If the notes are thin,** write a gentle, genuinely relatable reflection in the
   first person that they can easily make their own — true and human, but never
   fabricating specific events.

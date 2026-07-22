@@ -47,9 +47,13 @@ def _focus_block(focus: str, focus_label: str = "") -> str:
     label = focus_label.strip() or "piece of source material"
     return (
         "\n\n## Primary focus — build the video around THIS\n"
-        f"The creator chose one specific {label} from today's content. Build the "
-        "entire video around it and treat it as the heart of the script. You may "
-        "use the rest of the day's context for background, but this is the subject:\n\n"
+        f"The creator chose one specific {label} from today's content. This IS the "
+        "video — build the entire script around it and keep it the subject from the "
+        "first line to the last. The rest of the day's context above exists ONLY to "
+        "keep you accurate (correct terms, who a teacher is, faithful meaning) — do "
+        "not pull in other ideas, stories, or angles from it, and do not let the "
+        "script drift onto the day's general theme. If it isn't about the material "
+        "below, cut it:\n\n"
         f'"""\n{focus.strip()[:2500]}\n"""\n'
     )
 
@@ -92,6 +96,7 @@ def generate(
         "DAY": str(dc.day),
         "DATE": dc.date,
         "VERSES_LABEL": dc.verses_label,
+        "VERSE_TEXT": dc.verse_block or "(no verse text found)",
         "DAY_PLAN": dc.plan_markdown,
         "VERSE_SYNTHESIS": dc.synthesis_text or "(no per-verse commentary synthesis available)",
         "CREATOR_NOTES": creator_notes.strip() or "(the creator did not provide notes)",

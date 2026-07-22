@@ -27,7 +27,7 @@ const OUTPUT_TYPE_KEYS = ["script", "structure"];
 
 // Display order for idea tabs. The backend decides which keys are available for
 // a given day; the frontend just shows them in this order.
-const TAB_ORDER = ["story", "concept", "practice", "extra_info", "creative", "testimony"];
+const TAB_ORDER = ["story", "concept", "extra_info", "practice", "creative", "testimony"];
 
 const LANGUAGES = [
   { key: "english", label: "English" },
@@ -147,6 +147,20 @@ const UI = {
     whatType: "What type of video?",
     sections: { story: "Story", concept: "Concept", challenge: "Challenge", extraInfo: "Extra info" },
     tabLabels: { story: "Story", concept: "Concept", practice: "Challenge", extra_info: "Extra info", creative: "Creative", testimony: "Testimony" },
+    tabDescriptions: {
+      story: "A story from today's teaching — a narrative with characters and a turning point you can retell.",
+      concept: "The core idea of the verse, drawn from the classical commentaries.",
+      practice: "Today's practice — a simple, doable action to invite viewers to try.",
+      extra_info: "A surprising detail — the metaphors and images the commentaries use to explain the verse.",
+      creative: "A fun, everyday take on the lesson — secular, for anyone, with no scripture or Buddhist terms.",
+      testimony: "A first-person reflection where you share your own experience with today's teaching.",
+    },
+    chooseThisType: "Make this video",
+    explanationLabel: "Explanation",
+    overviewLabel: "AI Overview",
+    readMore: "Read more",
+    readLess: "Read less",
+    overviewNote: "This overview is AI-generated from the classical commentaries, which are rooted in the source — nothing is invented.",
     generateThis: "Generate idea",
     generateVideo: "Generate idea",
     // output types
@@ -241,6 +255,20 @@ const UI = {
     whatType: "किस तरह का वीडियो?",
     sections: { story: "कहानी", concept: "मुख्य विचार", challenge: "चुनौती", extraInfo: "रोचक जानकारी" },
     tabLabels: { story: "कहानी", concept: "मुख्य विचार", practice: "चुनौती", extra_info: "रोचक जानकारी", creative: "क्रिएटिव", testimony: "आपका अनुभव" },
+    tabDescriptions: {
+      story: "आज की शिक्षा से एक कहानी — पात्रों और एक मोड़ के साथ, जिसे आप सुना सकें।",
+      concept: "श्लोक का मूल विचार, पारंपरिक टीकाओं (commentaries) से लिया गया।",
+      practice: "आज का अभ्यास — एक सरल काम जिसे करने के लिए आप दर्शकों को कह सकें।",
+      extra_info: "एक रोचक बात — टीकाओं में श्लोक समझाने के लिए दिए गए उपमा और उदाहरण।",
+      creative: "पाठ का एक रोज़मर्रा, सरल पहलू — सभी के लिए, बिना किसी धार्मिक या बौद्ध शब्द के।",
+      testimony: "एक व्यक्तिगत अनुभव, जहाँ आप आज की शिक्षा से जुड़ा अपना अनुभव साझा करते हैं।",
+    },
+    chooseThisType: "यह वीडियो बनाएँ",
+    explanationLabel: "व्याख्या",
+    overviewLabel: "AI सारांश",
+    readMore: "और पढ़ें",
+    readLess: "कम पढ़ें",
+    overviewNote: "यह सारांश पारंपरिक टीकाओं से AI द्वारा तैयार किया गया है, जो स्रोत पर आधारित हैं — कुछ भी मनगढ़ंत नहीं।",
     generateThis: "आइडिया जनरेट करें",
     generateVideo: "आइडिया जनरेट करें",
     outputTypes: {
@@ -346,6 +374,7 @@ export default function App() {
   const [lastOutput, setLastOutput] = useState(null);
   const [refineInput, setRefineInput] = useState("");
   const [currentVerseLines, setCurrentVerseLines] = useState([]);
+  const [currentVerseResources, setCurrentVerseResources] = useState({});
   const [idleZen, setIdleZen] = useState(false);
   const [progress, setProgress] = useState(null);
   const [calOpen, setCalOpen] = useState(false);
@@ -437,6 +466,7 @@ export default function App() {
       setDay(data.day);
       setPendingIdeas(data.availableIdeas);
       setCurrentVerseLines(data.verseLines || []);
+      setCurrentVerseResources(data.verseResources || {});
       const variantNote = data.isVariant ? t.variantNote : "";
       addMsg("assistant",
         t.foundDay(data.day, variantNote),
@@ -711,6 +741,7 @@ export default function App() {
                 verse={verse}
                 idx={idx}
                 ideas={pendingIdeas || []}
+                resources={currentVerseResources[verse.id] || {}}
                 onChooseIdea={chooseIdea}
                 busy={busy}
               />
@@ -860,14 +891,43 @@ export default function App() {
 }
 
 
-function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
+// Idea tabs that map to concrete source material the creator can pick from:
+// Story ← package stories, Concept ← commentaries, Extra-info ← metaphors,
+// Challenge ← "Today's Practice".
+const RESOURCE_TABS = new Set(["story", "concept", "extra_info", "practice"]);
+
+// Categories that only make sense when this specific verse has the material —
+// hidden entirely on verses with no story / no metaphor.
+const VERSE_GATED_TABS = new Set(["story", "extra_info"]);
+
+// Render the light markdown used in source material for previews: **bold** becomes
+// a <strong> (so inline labels like "Practice:" / "Explanation:" read as headings),
+// stray * and ` are dropped, and blank lines collapse so parts sit on adjacent
+// lines. Line breaks are preserved via `white-space: pre-line` on the container.
+function renderRichText(s) {
+  const text = String(s || "").replace(/`/g, "").replace(/\n{2,}/g, "\n").trim();
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+    const bold = /^\*\*([^*]+)\*\*$/.exec(part);
+    return bold ? <strong key={i}>{bold[1]}</strong> : part.replace(/\*(.+?)\*/g, "$1");
+  });
+}
+
+function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
   const t = useUI();
   const [open, setOpen] = useState(false);
+  const [overviewOpen, setOverviewOpen] = useState(false);
   const cardRef = useRef(null);
 
-  // Tabs come entirely from the backend's availableIdeas for this verse.
+  // Tabs shown for this verse:
+  //  - Story and Extra-info are per-verse: shown ONLY when this verse actually has
+  //    a story / metaphor, so they're hidden on verses that lack them.
+  //  - The rest (Concept, Challenge, Creative, Testimony) always show, per the
+  //    day's availableIdeas (Concept/Challenge also carry per-verse material).
   const ideaByKey = Object.fromEntries((ideas || []).map((i) => [i.key, i]));
-  const tabs = TAB_ORDER.filter((key) => !!ideaByKey[key]);
+  const hasResource = (key) => RESOURCE_TABS.has(key) && (resources[key] || []).length > 0;
+  const tabs = TAB_ORDER.filter((key) =>
+    VERSE_GATED_TABS.has(key) ? hasResource(key) : (!!ideaByKey[key] || hasResource(key))
+  );
   const [activeTab, setActiveTab] = useState(tabs[0] ?? "concept");
 
   function handleToggle() {
@@ -884,6 +944,10 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
   }
 
   const activeIdea = ideaByKey[activeTab] || { key: activeTab, label: t.tabLabels[activeTab], teaser: "" };
+
+  // For mapped tabs, the creator picks from this verse's actual source material
+  // (a specific story / commentary / metaphor). Other tabs keep the single teaser.
+  const resourceItems = RESOURCE_TABS.has(activeTab) ? (resources[activeTab] || []) : [];
 
   return (
     <div ref={cardRef} className={`vcard${open ? " vcard--open" : ""}`}>
@@ -902,35 +966,113 @@ function VerseCard({ verse, idx, ideas, onChooseIdea, busy }) {
         <div className="vcard__body">
           <p className="vcard__ideas-heading">{t.whatType}</p>
           <div className="vcard__tabs">
-            {tabs.map((key) => (
-              <button
-                key={key}
-                className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
-                onClick={() => setActiveTab(key)}
-              >
-                <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
-                {t.tabLabels[key] || key}
-              </button>
-            ))}
+            {tabs.map((key) => {
+              // Show a count only when a category offers more than one source item
+              // to choose between (e.g. several commentaries); hide it for one.
+              const count = RESOURCE_TABS.has(key) ? (resources[key] || []).length : 0;
+              return (
+                <button
+                  key={key}
+                  className={`vcard__tab${activeTab === key ? " vcard__tab--active" : ""}`}
+                  onClick={() => setActiveTab(key)}
+                >
+                  <span className="vcard__tab-icon">{IDEA_ICONS[key]}</span>
+                  {t.tabLabels[key] || key}
+                  {count > 1 ? <span className="vcard__tab-count">{count}</span> : null}
+                </button>
+              );
+            })}
           </div>
 
+          {/* A fixed description of what this category is (and where its material
+              comes from), instead of an AI-written example line. */}
+          <p className="vcard__resource-desc">{t.tabDescriptions?.[activeTab] || ""}</p>
+
+          {/* Concept tab: a short, pre-distilled overview of the verse (the
+              synthesis' "Brief introduction") above the commentaries — like an
+              at-a-glance summary, not a selectable option. Clamped to 2 lines with
+              a Read more toggle when the text runs long. */}
+          {activeTab === "concept" && (resources.concept_overview || "").trim() ? (
+            (() => {
+              const overviewText = (resources.concept_overview || "").trim();
+              const clampable = overviewText.length > 150;
+              return (
+                <div className="vcard__overview">
+                  <span className="vcard__overview-head">
+                    <svg className="vcard__overview-icon" width="14" height="14" viewBox="0 0 16 16" fill="url(#aiSparkleGrad)" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="aiSparkleGrad" x1="0" y1="0" x2="16" y2="16" gradientUnits="userSpaceOnUse">
+                          <stop offset="0" stopColor="#4285F4" />
+                          <stop offset="0.5" stopColor="#9B72CB" />
+                          <stop offset="1" stopColor="#D96570" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M8 0.5C8.5 4.6 11.4 7.5 15.5 8 11.4 8.5 8.5 11.4 8 15.5 7.5 11.4 4.6 8.5 0.5 8 4.6 7.5 7.5 4.6 8 0.5Z" />
+                    </svg>
+                    <span className="vcard__overview-label">{t.overviewLabel || "AI Overview"}</span>
+                  </span>
+                  <p className={`vcard__overview-text${clampable && !overviewOpen ? " vcard__overview-text--clamp" : ""}`}>
+                    {renderRichText(overviewText)}
+                  </p>
+                  {clampable ? (
+                    <button type="button" className="vcard__overview-toggle" onClick={() => setOverviewOpen((v) => !v)}>
+                      {overviewOpen ? (t.readLess || "Read less") : (t.readMore || "Read more")}
+                    </button>
+                  ) : null}
+                  <p className="vcard__overview-note">{t.overviewNote}</p>
+                </div>
+              );
+            })()
+          ) : null}
+
           <div className="vcard__options">
-            <button
-              className="vcard__option"
-              disabled={busy}
-              onClick={() => onChooseIdea(activeIdea, {
-                text: activeIdea.teaser,
-                typeLabel: t.tabLabels[activeTab],
-                label: activeIdea.label,
-              })}
-            >
-              <span className="vcard__option-body">
-                <span className="vcard__option-text">{activeIdea.teaser}</span>
-              </span>
-              <svg className="vcard__option-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
+            {resourceItems.length > 0 ? (
+              resourceItems.map((item, i) => (
+                <button
+                  key={i}
+                  className="vcard__option"
+                  disabled={busy}
+                  onClick={() => onChooseIdea(activeIdea, {
+                    // Build the video around the whole item — action plus any
+                    // explanation — even though they display as separate blocks.
+                    text: [item.text, item.explanation].filter(Boolean).join("\n\n"),
+                    typeLabel: t.tabLabels[activeTab],
+                    label: item.label || t.tabLabels[activeTab],
+                  })}
+                >
+                  <span className="vcard__option-body">
+                    {item.label ? (
+                      <span className="vcard__option-label">{item.label}</span>
+                    ) : null}
+                    <span className="vcard__option-text vcard__option-text--clamp">{renderRichText(item.text)}</span>
+                    {item.explanation ? (
+                      <>
+                        <span className="vcard__option-label">{t.explanationLabel}</span>
+                        <span className="vcard__option-text vcard__option-text--clamp">{renderRichText(item.explanation)}</span>
+                      </>
+                    ) : null}
+                  </span>
+                  <svg className="vcard__option-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </button>
+              ))
+            ) : (
+              // Categories with no per-verse source item (Challenge/Creative/
+              // Testimony) generate from the whole day's context — no specific focus.
+              <button
+                className="vcard__option"
+                disabled={busy}
+                onClick={() => onChooseIdea(activeIdea, null)}
+              >
+                <span className="vcard__option-body">
+                  <span className="vcard__option-text">{t.chooseThisType || t.tabLabels[activeTab]}</span>
+                </span>
+                <svg className="vcard__option-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       )}

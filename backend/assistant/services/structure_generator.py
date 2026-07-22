@@ -133,9 +133,14 @@ def generate(
         label = focus_label.strip() or "piece of source material"
         prompt += (
             "\n\n## Primary focus — build the video around THIS\n"
-            f"The creator chose one specific {label} from today's content. Build the "
-            "entire storyboard around it and treat it as the heart of the video. Use "
-            "the rest of the day's context only for background:\n\n"
+            f"The creator chose one specific {label} from today's content. This IS the "
+            "video — build the entire storyboard around it and keep it the subject of "
+            "every beat, from the opening hook to the close. The rest of the day's "
+            "context above exists ONLY to keep you accurate (correct terms, who a "
+            "teacher is, faithful meaning) — do NOT pull ideas, images, stories, or "
+            "angles from it, and do NOT drift onto the day's general theme or other "
+            "verses. If a beat isn't drawn from the material below, it does not belong "
+            "in this video:\n\n"
             f'"""\n{focus.strip()[:2500]}\n"""\n'
         )
     if feedback.strip() and previous:

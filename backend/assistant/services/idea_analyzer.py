@@ -31,6 +31,7 @@ _ANALYSIS_SCHEMA = {
 
 
 def _analysis_prompt(dc: DayContent) -> str:
+    stories_block = "\n\n---\n\n".join(dc.stories) if dc.stories else "(none)"
     return f"""Analyze the source material for Day {dc.day} (verses {dc.verses_label}) of a
 Buddhist short-video series. Decide which video ideas it can genuinely support,
 and write an irresistible one-line teaser for each — the hook a creator would put
@@ -53,8 +54,11 @@ to make this video):
 Return JSON with:
 - "story" (bool): true ONLY if the material contains an ACTUAL self-contained
   story you could retell — a sūtra narrative with characters and events, a named
-  parable, or a teacher's illustrative anecdote. A passing simile ("like a candle")
-  or a one-word comparison is NOT a story. When in doubt, return false.
+  parable, or a teacher's illustrative anecdote. The "STORIES IN TODAY'S MATERIAL"
+  section below is the authority: if it lists one or more stories, return true and
+  base the teaser on them; if it says "(none)", a passing simile ("like a candle")
+  or a one-word comparison in the commentary is NOT a story — return false. When in
+  doubt, return false.
 - "story_teaser" (string): only if story is true — a teasing line hinting at the
   story without spoiling it. If story is false, return "".
 - "extra_info" (bool): true ONLY if there's a genuinely surprising, concrete fact
@@ -81,8 +85,11 @@ no option — default to false.
 --- DAY PLAN ---
 {dc.plan_markdown}
 
---- VERSE COMMENTARY ---
+--- VERSE COMMENTARY (classical commentators, stories, quotations, key terms) ---
 {dc.synthesis_text or "(no per-verse commentary synthesis available for these verses)"}
+
+--- STORIES IN TODAY'S MATERIAL ---
+{stories_block}
 """
 
 
@@ -93,13 +100,12 @@ def _heuristic(dc: DayContent) -> dict:
     to offer a forced one.
     """
     text = (dc.plan_markdown + "\n" + dc.synthesis_text).lower()
-    # Story: needs an explicit narrative source, not just a simile.
-    story_markers = ["sūtra", "sutra", "parable", "jātaka", "jataka", "tells the story",
-                     "the story of", "a story", "once, ", "there was a"]
     # Extra info: needs an explicit scholastic/etymological/citation signal.
     info_markers = ["distinction between", "etymolog", "literally means",
                     "the term ", "scholastic", "commentators note", "cross-reference"]
-    has_story = any(m in text for m in story_markers)
+    # Story: the parser already isolates genuine stories from the day's rails, so
+    # trust its explicit list rather than scanning prose for narrative markers.
+    has_story = bool(dc.stories)
     has_info = any(m in text for m in info_markers)
     return {
         "story": has_story,

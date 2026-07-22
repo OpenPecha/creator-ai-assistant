@@ -19,7 +19,10 @@ scroll past.
   the moment that matters. Let a little tension build before the turn — and plant
   one question early ("why would anyone do that?") that you only answer at the end.
 - **Reveal the meaning as a twist**, not a footnote — the "and here's why this is
-  actually about *you*" beat. Connect it to today's verses naturally.
+  actually about *you*" beat. Connect it to today's verses naturally. Land the
+  twist on a real, everyday ache the viewer knows — the worry, the grudge, the
+  restlessness — so the old story suddenly reads like their own week, and points
+  quietly toward the relief.
 - **End on the image, not the explanation.** Leave them with the picture that
   carries the point.
 

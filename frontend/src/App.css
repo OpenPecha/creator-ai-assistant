@@ -1007,6 +1007,88 @@ body {
   font-size: 0.875rem;
   color: var(--ink);
   line-height: 1.6;
+  /* Honour paragraph breaks in source material (e.g. Practice / Explanation on
+     separate lines) instead of collapsing them into one run. */
+  white-space: pre-line;
+}
+/* Preview of a source-material item: keep the option scannable by clamping long
+   commentary/story text to a few lines. */
+.vcard__option-text--clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* A fixed description of the active category shown above its options — explains
+   what the category is and where its material comes from. */
+.vcard__resource-desc {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+/* A passive, at-a-glance summary — no container (that read as inconsistent with
+   the flat UI). Just a small label + italic text, set off from the tappable
+   commentary cards below by a thin divider. */
+.vcard__overview {
+  margin: 2px 0 14px;
+  padding: 11px 13px 12px;
+  border-radius: 8px;
+  background: var(--surface-hover);
+}
+.vcard__overview-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.vcard__overview-label {
+  background: linear-gradient(90deg, #4285F4, #9B72CB, #D96570);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.vcard__overview-icon { flex-shrink: 0; }
+.vcard__overview-text {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--ink-soft);
+  white-space: pre-line;
+}
+.vcard__overview-text--clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vcard__overview-toggle {
+  margin-top: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+}
+.vcard__overview-toggle:hover { text-decoration: underline; }
+.vcard__overview-note {
+  margin: 9px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 0.63rem;
+  line-height: 1.4;
+  color: var(--ink-muted);
 }
 .vcard__option-arrow {
   flex-shrink: 0;

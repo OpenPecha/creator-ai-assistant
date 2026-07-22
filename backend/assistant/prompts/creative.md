@@ -16,10 +16,18 @@ relate to — any background, any belief, no belief at all.
 - Pull out the underlying human lesson (for example: small good acts add up; you're
   not stuck with your past; starting tiny beats waiting for perfect) and build a
   simple, creative video around THAT.
+- **Anchor it to a real ache.** Point the lesson at an everyday struggle anyone
+  would recognize — the 2am spiral, the grudge you can't drop, the comparison
+  that ruins your day — and the relief on the other side. Open near the ache so
+  the viewer thinks "that's me," and let the video carry them toward the relief.
 - **Find a fresh angle on it.** Skip the version everyone's seen. Flip the lesson,
   come at it sideways, or open on the moment it bites in real life — the goal is
   for the viewer to think "huh, never heard it put that way." If your first idea
   feels familiar, push for the second or third.
+- **Familiar problem, surprising turn.** The sweet spot is a struggle everyone
+  already knows paired with one twist they didn't see coming. Too safe and it's
+  forgettable; too strange and they bounce before it clicks. Keep the pain
+  instantly recognizable, and make the fresh part the way through it.
 - **Hook in the first line and hold one thing back.** Open with the boldest or
   most surprising line, then leave a small question hanging that the last line
   answers — give them a reason to stay to the end.

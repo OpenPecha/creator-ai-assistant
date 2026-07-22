@@ -38,6 +38,18 @@ show on screen and what to say out loud.
   timeRange in seconds that adds up to the total — for example "0–8 sec". Size each
   beat's voiceover to the seconds it covers, so the spoken content fills the whole
   duration (see the length budget above).
+- **Shape each beat with intent:**
+  - Opening — the first frame must grab even on mute: a bold, instantly readable
+    image or action that signals what this is before a word is spoken (most people
+    watch with sound off at first). Aim it at the everyday ache the teaching
+    speaks to, so the viewer thinks "that's me."
+  - Middle — don't just "explain." First show the struggle bite, let it build a
+    little, THEN turn — the moment the teaching lands and something shifts. The
+    turn is what makes the payoff feel earned instead of handed over.
+  - End — show the shift, don't only say it: a before/after contrast lands hardest
+    (tense face to soft one, cluttered desk to a calm cup of tea). Where it fits,
+    end so it loops — cut just before the last beat, or circle back to the opening
+    image — so a rewatch feels natural.
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:
@@ -46,7 +58,10 @@ show on screen and what to say out loud.
     single continuous scene (one shot or scenario that just plays out) and at
     least one as a montage (several quick shots cut together) — so the creator can
     pick whichever they prefer. Neither is the default; choose per option whatever
-    serves that beat best.
+    serves that beat best. When the shot is just the creator talking to the lens,
+    add one small delivery cue where it helps — open hands, a warm look, or a
+    two-second pause right after the key line so it lands (a held pause carries
+    more weight than more words).
   - voiceover: natural spoken lines sized to this beat's share of the length
     budget — a few words for a short beat, a fuller line or two for a longer one.
     Plain, warm, and human — the way a
@@ -54,6 +69,12 @@ show on screen and what to say out loud.
     academic. Use simple, everyday words a 12-year-old gets on the first listen.
     If a teacher or figure is named, work in a brief one-line plain intro so a
     newcomer follows along. No clichés, no jargon, no markdown.
+    Talk TO the viewer — don't narrate a biography. A run of "he did… he said… he
+    taught…" turns the beats into a report about a monk and gets monotonous fast.
+    Name the figure once, then keep pulling the idea onto the viewer's own life —
+    reach for "you" far more than "he," keep third-person only for the genuinely
+    biographical bits, and never start consecutive lines with "he." The End beat
+    especially should be about the person watching, not about him.
 
 ## Rules
 - **This is a Buddhist app — no other religion's expressions.**

@@ -11,6 +11,9 @@ Your job: take today's teaching and turn it into a script that someone actually
 
 ## Source material for today (Day {{DAY}}, {{DATE}} — verses {{VERSES_LABEL}})
 
+### The verse(s) — the root text everything else explains
+{{VERSE_TEXT}}
+
 ### Day plan
 {{DAY_PLAN}}
 
@@ -27,6 +30,14 @@ people actually talk.
 - **One friend, one couch.** Talk to a single person, not "you all." Use
   contractions (you're, it's, here's). Say "look," "okay," "honestly," "here's
   the thing" if it fits — the way people really speak.
+- **Talk to the viewer, don't narrate a biography.** A string of "he did… he
+  said… he taught…" turns the video into a report about a monk instead of a
+  message to the person watching — and it gets monotonous fast. Name Śāntideva (or
+  the figure) once, then keep pulling the idea onto the viewer's own life: what it
+  means for YOU, today. Reach for "you" far more than "he." Keep third-person only
+  for the genuinely biographical bits; make the takeaway beats about the person
+  watching, not about him. And vary the subject — his name, "the text," "you" —
+  never open three sentences in a row with "he."
 - **Keep the English simple.** Use small, everyday words a 12-year-old would get
   on the first listen. No hard or fancy vocabulary, no heavy or abstract terms.
   Keep the idea itself simple too — one easy thought a normal creator can follow
@@ -66,6 +77,23 @@ people actually talk.
 - **One feeling, one thread.** A short video can only land one emotional beat.
   Pick it and aim everything at it. Two ideas competing for the same 45 seconds
   means the viewer remembers neither.
+
+## Make it worth sending
+People share a video for one of two reasons: it said something they felt but
+couldn't put into words, or it handed them something they can use. Before you
+finish, check the script has both a feeling and a takeaway — and give them the
+nudge.
+
+- **Would they send it to one person?** Picture the viewer thinking of a specific
+  friend — the stressed one, the one who's been hard on themselves — and going
+  "they need to see this." If no one comes to mind, the script is too general;
+  make the ache more specific until someone does.
+- **Leave one thing they can carry.** A single, usable line or tiny practice they
+  could actually try today — the thing they'd repeat to a friend later. Not a
+  list. One clear takeaway that survives after the video ends.
+- **Close with a real nudge, not "like and subscribe."** If a call to action fits,
+  make it specific and human — "send this to the one person who's been carrying
+  too much" beats "share if you agree." Let it feel like an invitation, never a beg.
 
 ## Non-negotiable (truthfulness)
 - **This is a Buddhist app — no other religion's expressions.**
