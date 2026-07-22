@@ -157,6 +157,10 @@ const UI = {
     },
     chooseThisType: "Make this video",
     explanationLabel: "Explanation",
+    overviewLabel: "AI Overview",
+    readMore: "Read more",
+    readLess: "Read less",
+    overviewNote: "This overview is AI-generated from the classical commentaries, which are rooted in the source — nothing is invented.",
     generateThis: "Generate idea",
     generateVideo: "Generate idea",
     // output types
@@ -261,6 +265,10 @@ const UI = {
     },
     chooseThisType: "यह वीडियो बनाएँ",
     explanationLabel: "व्याख्या",
+    overviewLabel: "AI सारांश",
+    readMore: "और पढ़ें",
+    readLess: "कम पढ़ें",
+    overviewNote: "यह सारांश पारंपरिक टीकाओं से AI द्वारा तैयार किया गया है, जो स्रोत पर आधारित हैं — कुछ भी मनगढ़ंत नहीं।",
     generateThis: "आइडिया जनरेट करें",
     generateVideo: "आइडिया जनरेट करें",
     outputTypes: {
@@ -907,6 +915,7 @@ function renderRichText(s) {
 function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
   const t = useUI();
   const [open, setOpen] = useState(false);
+  const [overviewOpen, setOverviewOpen] = useState(false);
   const cardRef = useRef(null);
 
   // Tabs shown for this verse:
@@ -978,6 +987,43 @@ function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
           {/* A fixed description of what this category is (and where its material
               comes from), instead of an AI-written example line. */}
           <p className="vcard__resource-desc">{t.tabDescriptions?.[activeTab] || ""}</p>
+
+          {/* Concept tab: a short, pre-distilled overview of the verse (the
+              synthesis' "Brief introduction") above the commentaries — like an
+              at-a-glance summary, not a selectable option. Clamped to 2 lines with
+              a Read more toggle when the text runs long. */}
+          {activeTab === "concept" && (resources.concept_overview || "").trim() ? (
+            (() => {
+              const overviewText = (resources.concept_overview || "").trim();
+              const clampable = overviewText.length > 150;
+              return (
+                <div className="vcard__overview">
+                  <span className="vcard__overview-head">
+                    <svg className="vcard__overview-icon" width="14" height="14" viewBox="0 0 16 16" fill="url(#aiSparkleGrad)" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="aiSparkleGrad" x1="0" y1="0" x2="16" y2="16" gradientUnits="userSpaceOnUse">
+                          <stop offset="0" stopColor="#4285F4" />
+                          <stop offset="0.5" stopColor="#9B72CB" />
+                          <stop offset="1" stopColor="#D96570" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M8 0.5C8.5 4.6 11.4 7.5 15.5 8 11.4 8.5 8.5 11.4 8 15.5 7.5 11.4 4.6 8.5 0.5 8 4.6 7.5 7.5 4.6 8 0.5Z" />
+                    </svg>
+                    <span className="vcard__overview-label">{t.overviewLabel || "AI Overview"}</span>
+                  </span>
+                  <p className={`vcard__overview-text${clampable && !overviewOpen ? " vcard__overview-text--clamp" : ""}`}>
+                    {renderRichText(overviewText)}
+                  </p>
+                  {clampable ? (
+                    <button type="button" className="vcard__overview-toggle" onClick={() => setOverviewOpen((v) => !v)}>
+                      {overviewOpen ? (t.readLess || "Read less") : (t.readMore || "Read more")}
+                    </button>
+                  ) : null}
+                  <p className="vcard__overview-note">{t.overviewNote}</p>
+                </div>
+              );
+            })()
+          ) : null}
 
           <div className="vcard__options">
             {resourceItems.length > 0 ? (

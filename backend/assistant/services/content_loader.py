@@ -71,6 +71,9 @@ class DayContent:
     # category: {"1-1": {"story": [{label, text}], "concept": [...], "extra_info": [...]}}.
     # story ← package stories, concept ← commentaries, extra_info ← metaphors.
     verse_resources: dict[str, dict[str, list[dict]]] = field(default_factory=dict)
+    # Per-verse "Brief introduction" from the Verse Synthesis overview — a short
+    # summary shown above the Concept commentary options (not itself pickable).
+    verse_overviews: dict[str, str] = field(default_factory=dict)
     is_variant: bool = False
 
     @property
@@ -422,6 +425,10 @@ def get_day_content(day: int) -> DayContent:
             "concept": _items(vr.commentaries) if vr else [],
             "extra_info": _items(vr.metaphors) if vr else [],
             "practice": list(practice_items),
+            # A short, already-distilled overview of the verse (the synthesis'
+            # "Brief introduction"), shown above the commentaries in the Concept
+            # tab — not a selectable option, so it's a plain string, not a list.
+            "concept_overview": (vr.synthesis_intro if vr else ""),
         }
 
     return DayContent(

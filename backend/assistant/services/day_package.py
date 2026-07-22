@@ -50,6 +50,7 @@ class VerseRail:
     story_items: list[Resource] = field(default_factory=list)
     commentaries: list[Resource] = field(default_factory=list)
     metaphors: list[Resource] = field(default_factory=list)
+    synthesis_intro: str = ""  # "Brief introduction" from the Verse Synthesis overview
     sections: dict[str, str] = field(default_factory=dict)  # sub-anchor -> cleaned text
 
 
@@ -133,6 +134,19 @@ def _heading_and_body(text: str) -> tuple[str, str]:
 def _to_resource(text: str) -> Resource:
     label, body = _heading_and_body(text)
     return Resource(label=label, text=body or text.strip())
+
+
+def _synthesis_intro(text: str) -> str:
+    """Pull just the "Brief introduction" paragraph out of a Verse Synthesis
+    overview — dropping the heading and everything from "Key points" on, so it
+    can be shown as a short summary without duplicating the bullets below it.
+    """
+    if not text:
+        return ""
+    _, body = _heading_and_body(text)
+    intro = re.split(r"\*\*Key points\.?\*\*", body, maxsplit=1)[0]
+    intro = re.sub(r"^\*\*Brief introduction\.?\*\*\s*", "", intro.strip())
+    return intro.strip()
 
 
 def _split_bullets(text: str) -> list[Resource]:
@@ -220,6 +234,7 @@ def _parse_rails(rails_segs: list[tuple[str, str]]) -> list[VerseRail]:
             story_items=[_to_resource(s) for s in stories],
             commentaries=[_to_resource(_clean(t)) for t in state["cm_raw"]],
             metaphors=_split_bullets(sections.get("sub:metaphors", "")),
+            synthesis_intro=_synthesis_intro(sections.get("sub:synthesis", "")),
             sections=sections,
         )
 
