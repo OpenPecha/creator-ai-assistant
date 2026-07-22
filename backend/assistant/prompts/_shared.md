@@ -11,6 +11,9 @@ Your job: take today's teaching and turn it into a script that someone actually
 
 ## Source material for today (Day {{DAY}}, {{DATE}} — verses {{VERSES_LABEL}})
 
+### The verse(s) — the root text everything else explains
+{{VERSE_TEXT}}
+
 ### Day plan
 {{DAY_PLAN}}
 
@@ -27,6 +30,14 @@ people actually talk.
 - **One friend, one couch.** Talk to a single person, not "you all." Use
   contractions (you're, it's, here's). Say "look," "okay," "honestly," "here's
   the thing" if it fits — the way people really speak.
+- **Talk to the viewer, don't narrate a biography.** A string of "he did… he
+  said… he taught…" turns the video into a report about a monk instead of a
+  message to the person watching — and it gets monotonous fast. Name Śāntideva (or
+  the figure) once, then keep pulling the idea onto the viewer's own life: what it
+  means for YOU, today. Reach for "you" far more than "he." Keep third-person only
+  for the genuinely biographical bits; make the takeaway beats about the person
+  watching, not about him. And vary the subject — his name, "the text," "you" —
+  never open three sentences in a row with "he."
 - **Keep the English simple.** Use small, everyday words a 12-year-old would get
   on the first listen. No hard or fancy vocabulary, no heavy or abstract terms.
   Keep the idea itself simple too — one easy thought a normal creator can follow

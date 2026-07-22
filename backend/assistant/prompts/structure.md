@@ -69,6 +69,12 @@ show on screen and what to say out loud.
     academic. Use simple, everyday words a 12-year-old gets on the first listen.
     If a teacher or figure is named, work in a brief one-line plain intro so a
     newcomer follows along. No clichés, no jargon, no markdown.
+    Talk TO the viewer — don't narrate a biography. A run of "he did… he said… he
+    taught…" turns the beats into a report about a monk and gets monotonous fast.
+    Name the figure once, then keep pulling the idea onto the viewer's own life —
+    reach for "you" far more than "he," keep third-person only for the genuinely
+    biographical bits, and never start consecutive lines with "he." The End beat
+    especially should be about the person watching, not about him.
 
 ## Rules
 - **This is a Buddhist app — no other religion's expressions.**
