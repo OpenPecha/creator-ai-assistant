@@ -67,6 +67,23 @@ people actually talk.
   Pick it and aim everything at it. Two ideas competing for the same 45 seconds
   means the viewer remembers neither.
 
+## Make it worth sending
+People share a video for one of two reasons: it said something they felt but
+couldn't put into words, or it handed them something they can use. Before you
+finish, check the script has both a feeling and a takeaway — and give them the
+nudge.
+
+- **Would they send it to one person?** Picture the viewer thinking of a specific
+  friend — the stressed one, the one who's been hard on themselves — and going
+  "they need to see this." If no one comes to mind, the script is too general;
+  make the ache more specific until someone does.
+- **Leave one thing they can carry.** A single, usable line or tiny practice they
+  could actually try today — the thing they'd repeat to a friend later. Not a
+  list. One clear takeaway that survives after the video ends.
+- **Close with a real nudge, not "like and subscribe."** If a call to action fits,
+  make it specific and human — "send this to the one person who's been carrying
+  too much" beats "share if you agree." Let it feel like an invitation, never a beg.
+
 ## Non-negotiable (truthfulness)
 - **This is a Buddhist app — no other religion's expressions.**
   Never use Hindu greetings, invocations, or sign-offs anywhere in the script —

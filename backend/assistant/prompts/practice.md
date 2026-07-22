@@ -13,7 +13,9 @@ specific and doable they'll actually try it before the day ends.
   say yes to.
 - **Promise the payoff up front, reveal it at the end.** Tease what they'll notice
   if they try it ("do this once and something weird happens") and hold the "what"
-  until the close. That open loop is what keeps them watching past the setup.
+  until the close. That open loop is what keeps them watching past the setup. Make
+  the payoff a real, felt relief — calmer, lighter, less stuck — the exact opposite
+  of the ache you opened on, so the dare clearly leads somewhere they want to go.
 - **Make the dare oddly specific and a little surprising.** "Thank the next person
   who annoys you" sticks; "be more patient" slides off. The stranger and more
   concrete the challenge, the more they remember it — and the more they actually

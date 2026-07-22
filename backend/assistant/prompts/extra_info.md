@@ -17,7 +17,10 @@ that makes someone pause the video and go "okay I did NOT know that."
   intro the first time — who they were, in a few simple words — so the surprise
   lands even for someone who's never heard the name. Keep the words simple.
 - **Then make it matter.** Tie the fact back to how it changes their
-  understanding or practice — the "so what" that turns trivia into insight.
+  understanding or practice — the "so what" that turns trivia into insight. Aim
+  that "so what" at a real, everyday ache (a worry, a grudge, a restless mind)
+  and the relief the fact points to, so the surprise doesn't just impress — it
+  lands somewhere in their actual life.
 - **Keep it playful and a touch mischievous** — like you're letting them in on a
   secret. Curiosity is the whole game here.
 - **Withhold the reveal for a beat.** Tease that there's a secret ("there's a word
