@@ -332,6 +332,35 @@ def released_progress() -> dict:
 
 # ── Day-Package lookup ──────────────────────────────────────────────────────────
 
+def _chapter_of_verses(verses: list[str]) -> int:
+    """The chapter number a day's verses belong to, from a verse id like '2-1'."""
+    return int(verses[0].split("-")[0]) if verses else 1
+
+
+def chapter_for_day(day: int) -> int:
+    """Return the chapter number (1-based) that a given schedule day belongs to."""
+    schedule = get_schedule()
+    if day not in schedule:
+        raise ContentError(f"Day {day} is not in the schedule (valid range 1-{max(schedule)}).")
+    return _chapter_of_verses(schedule[day]["verses"])
+
+
+def day_offset_in_chapter(day: int) -> int:
+    """Return `day`'s 1-based position within its own chapter's day range.
+
+    Each chapter is published as its own separate WeBuddhist "plan" (see
+    settings.WEBUDDHIST_PLAN_IDS), and that plan numbers its days starting from
+    1 — not from the global day number. E.g. global day 15, chapter 2's first
+    day, is "day 1" in the chapter-2 plan; global day 16 is "day 2"; etc.
+    """
+    schedule = get_schedule()
+    chapter = chapter_for_day(day)
+    chapter_days = sorted(
+        d for d, entry in schedule.items() if _chapter_of_verses(entry["verses"]) == chapter
+    )
+    return chapter_days.index(day) + 1
+
+
 def _find_package_path(day: int, verses: list[str]) -> str:
     """Return the GitHub path to a day's Day-Package file (`{day}-en.md`).
 
@@ -340,7 +369,7 @@ def _find_package_path(day: int, verses: list[str]) -> str:
     inside it. Raises ContentError if the chapter directory is absent; the file's
     own existence is checked by the caller's fetch.
     """
-    chapter = int(verses[0].split("-")[0]) if verses else 1
+    chapter = _chapter_of_verses(verses)
 
     all_dirs = _list_github_dir(_PACKAGES_DIR)
     chapter_dir = next(

@@ -7,10 +7,18 @@ Two per-day extras shown after the verse breakdown:
      *presigned* S3 URL that expires after ~1 hour. Neither that API nor the S3
      bucket sends CORS headers, so the browser can't fetch either directly; we
      proxy both here (fetch the metadata, then stream the image bytes).
-  2. The plan share link (`/open/plan/<plan-id>/day/<day>?lang=EN|HI`), built
-     purely from config — no network call needed.
+  2. The plan share link (`/open/plan/<plan-id>/day/<day>?lang=EN|HI`).
 
-The plan id differs by language (see settings.WEBUDDHIST_PLAN_IDS).
+Each CHAPTER is published as its own separate WeBuddhist "plan" — a distinct
+plan id per chapter per language (see settings.WEBUDDHIST_PLAN_IDS) — and that
+plan numbers its days starting from 1, not from the global day number. So
+building either the share link or the plan-API URL requires resolving which
+chapter `day` belongs to and its 1-based offset within that chapter (see
+content_loader.chapter_for_day / day_offset_in_chapter). That lookup goes
+through the (cached) schedule, so unlike before, these are no longer
+guaranteed to be network-call-free — in practice the schedule is already
+fetched for every day-detail request, so this is a cache hit.
+
 Outbound calls reuse the IPv4-pinned session (see `ipv4`) for the same reason
 GitHub fetches do — some networks blackhole IPv6 and stall otherwise.
 """
@@ -22,7 +30,7 @@ import logging
 import requests as _requests
 from django.conf import settings
 
-from . import ipv4
+from . import content_loader, ipv4
 
 logger = logging.getLogger(__name__)
 
@@ -40,25 +48,30 @@ class PlanShareUnavailable(PlanShareError):
     """The plan API or S3 is transiently unreachable/erroring (safe to retry)."""
 
 
-def plan_id(language: str) -> str:
+def plan_id(language: str, chapter: int) -> str:
     ids = getattr(settings, "WEBUDDHIST_PLAN_IDS", {}) or {}
-    pid = ids.get(language) or ids.get("english")
+    by_chapter = ids.get(language) or ids.get("english") or {}
+    pid = by_chapter.get(chapter)
     if not pid:
-        raise PlanShareError("No WeBuddhist plan id is configured.")
+        raise PlanShareError(f"No WeBuddhist plan id configured for chapter {chapter}.")
     return pid
 
 
 def share_url(day: int, language: str) -> str:
-    """Build the public per-day plan link. No network call."""
+    """Build the public per-day plan link (chapter-relative day number)."""
+    chapter = content_loader.chapter_for_day(day)
+    day_in_chapter = content_loader.day_offset_in_chapter(day)
     base = getattr(settings, "WEBUDDHIST_SHARE_BASE", "https://webuddhist.com").rstrip("/")
     code = _LANG_CODE.get(language, "EN")
-    return f"{base}/open/plan/{plan_id(language)}/day/{day}?lang={code}"
+    return f"{base}/open/plan/{plan_id(language, chapter)}/day/{day_in_chapter}?lang={code}"
 
 
 def _day_meta(day: int, language: str) -> dict:
     """Fetch the plan-day metadata JSON from the public WeBuddhist API."""
+    chapter = content_loader.chapter_for_day(day)
+    day_in_chapter = content_loader.day_offset_in_chapter(day)
     base = getattr(settings, "WEBUDDHIST_API_BASE", "https://api.webuddhist.com").rstrip("/")
-    url = f"{base}/plans/{plan_id(language)}/days/{day}"
+    url = f"{base}/plans/{plan_id(language, chapter)}/days/{day_in_chapter}"
     try:
         r = _http.get(url, timeout=15)
     except _requests.RequestException as exc:

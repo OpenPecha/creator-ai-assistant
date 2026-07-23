@@ -46,12 +46,36 @@ GITHUB_CACHE_TTL = env.int("GITHUB_CACHE_TTL", default=300)
 
 # WeBuddhist plan integration — the public plan API supplies the "today's
 # challenge" shareable image, and the share site hosts the per-day plan link.
-# Plan ids differ by language. All overridable via .env if these ever change.
+# Each CHAPTER is published as its own separate WeBuddhist "plan" (its own plan
+# id), and that plan numbers its days starting from 1 — not from the global
+# day number (see assistant.services.content_loader.day_offset_in_chapter).
 WEBUDDHIST_API_BASE = env("WEBUDDHIST_API_BASE", default="https://api.webuddhist.com")
 WEBUDDHIST_SHARE_BASE = env("WEBUDDHIST_SHARE_BASE", default="https://webuddhist.com")
 WEBUDDHIST_PLAN_IDS = {
-    "english": env("WEBUDDHIST_PLAN_ID_EN", default="9c1cb58d-a972-4473-94f1-779abc4a5a4c"),
-    "hindi": env("WEBUDDHIST_PLAN_ID_HI", default="920d96b3-933b-42cd-8de1-0666b107ce16"),
+    "english": {
+        1: "9c1cb58d-a972-4473-94f1-779abc4a5a4c",
+        2: "1bc0d23d-78b9-4907-921d-84708900c96e",
+        3: "2b2c930c-03ef-4e14-ad1b-00721f6a0912",
+        4: "9b5fedf5-e340-4842-8050-424a61d4ef27",
+        5: "04c1ccc9-70b7-4b76-b1ef-cf58623c44ed",
+        6: "8ef5db71-3339-4329-804d-4c3bf1ffee66",
+        7: "26fbb443-2ec8-4e3f-b7ac-c8b2a082332c",
+        8: "39ebc11e-33fd-41b0-a3e8-8923a66be7db",
+        9: "99e0a175-9a24-4de9-81b5-54cd31ae1a31",
+        10: "f5dac5c9-6392-4186-9ded-e6d4772aabb7",
+    },
+    "hindi": {
+        1: "920d96b3-933b-42cd-8de1-0666b107ce16",
+        2: "ce34bfbd-b3ed-4f62-b5d1-55b44d5e3060",
+        3: "7f99176b-9e33-4898-8323-85a33b1c5959",
+        4: "a03045e8-2a46-4863-8fc6-2227a2964027",
+        5: "26171610-6251-41db-8112-a311bb32334b",
+        6: "27199e59-2361-40f0-9f47-a5f63b336e84",
+        7: "3bccc496-21d8-443f-8423-d69ec5131a43",
+        8: "c7afeea0-1efa-406e-9a48-b1903d2a6108",
+        9: "456a7533-92a3-405c-8ba4-c8543b69d800",
+        10: "d8c4cf03-7c7b-46ad-8fbd-e0fb44942a59",
+    },
 }
 
 # Gemini (model ids are configurable; confirm current ids in the Gemini docs).
