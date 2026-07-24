@@ -135,6 +135,10 @@ def generate(
     else:
         template_name = "structure.md"
     prompt = load_prompt(template_name)
+    # Substitute the shared storyboard mechanics first (it carries its own {{…}}
+    # tokens, so this must run before the token loop below fills them in). Each
+    # template places {{STRUCTURE_SHARED}} where the common block belongs.
+    prompt = prompt.replace("{{STRUCTURE_SHARED}}", load_prompt("_structure_shared.md"))
     for key, value in tokens.items():
         prompt = prompt.replace("{{" + key + "}}", value)
     if focus.strip():

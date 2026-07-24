@@ -60,46 +60,34 @@ build beats out of it or let it pull the video onto the general theme.
 {{VERSE_SYNTHESIS}}
 
 ## How to build it
-- coreTheme: one short line naming what the creator's testimony is really about
-  (their lived lesson, not the abstract doctrine).
-- concept: one punchy, spoken-style first-person hook — the honest line that makes
-  someone stop scrolling.
-- Break the {{DURATION_SECONDS}} seconds into three beats: Opening (a strong hook,
-  about the first fifth), Middle (the story and the turn, about three fifths), End
-  (where they are now, about the last fifth). Give each beat a timeRange
-  in seconds that adds up to the total — for example "0–8 sec". Size each beat's
-  voiceover to the seconds it covers (see the length budget above).
-- **Shape each beat with intent:**
-  - Opening — open on the honest, unflattering moment: the mess, the snap, the
-    doubt, the thing they'd never post — not the victory. The first frame must grab
-    even on mute (the creator's face to the lens, or one plain everyday object that
-    signals the confession).
-  - Middle — let the struggle bite and build, THEN turn: the moment the teaching
-    landed and something shifted in them. Name the lesson plainly here; keep it in
-    their "I" voice ("I realized…", "what changed was…").
-  - End — show the shift, don't only say it (a before/after: tense face to soft
-    one). Choose the LANDING that fits — do NOT default to "so go do this today."
-    On a personal testimony the strongest ending is usually the honest reflection
-    itself: where they are now, the small true thing that changed, a line that
-    simply lingers. Only add a gentle nudge to the viewer when it feels earned and
-    natural, never as a formula — a preachy "you should try this" instruction at
-    the end of someone's real story breaks the trust the story just built. Never
-    "like and subscribe," never a religious sign-off from another tradition.
-- For each beat, give THREE distinct options — three genuinely different ways to
-  shoot it (different angle, imagery, or approach, not small rewordings). Each
-  option has:
-  - visuals: concrete, filmable things (the creator to the lens, one room, simple
-    everyday objects), not abstract concepts. Offer BOTH formats across the three
-    options — at least one as a single continuous talking-to-camera scene and at
-    least one as a small montage of simple shots. Where the shot is just them
-    talking, add one small delivery cue where it helps — open hands, a warm look,
-    or a two-second pause right after the honest line so it lands.
-  - voiceover: natural FIRST-PERSON spoken lines ("I", "me", "my"), sized to this
-    beat's share of the length budget. Plain, warm, human — the way a real person
-    confides to a friend. Motivational and honest, never technical or academic.
-    Simple everyday words a 12-year-old gets on the first listen. If a teacher or
-    figure is named, work in a brief one-line plain intro. No clichés, no jargon,
-    no markdown.
+- coreTheme names the creator's lived lesson (not the abstract doctrine); concept
+  is a punchy, first-person hook — the honest line that makes someone stop
+  scrolling. For the Opening/Middle/End split, follow the shared beat mechanics
+  below, but note the testimony-specific End: it lands on "where they are now."
+
+{{STRUCTURE_SHARED}}
+
+## Shape each beat with intent
+- Opening — open on the honest, unflattering moment: the mess, the snap, the
+  doubt, the thing they'd never post — not the victory. The first frame must grab
+  even on mute (the creator's face to the lens, or one plain everyday object that
+  signals the confession). For visuals, keep it to the creator and one real room —
+  everyday objects, nothing staged.
+- Middle — let the struggle bite and build, THEN turn: the moment the teaching
+  landed and something shifted in them. Name the lesson plainly here; keep it in
+  their "I" voice ("I realized…", "what changed was…").
+- End — show the shift, don't only say it (a before/after: tense face to soft
+  one). On a personal testimony the strongest ending is usually the honest
+  reflection itself: where they are now, the small true thing that changed, a line
+  that simply lingers. A preachy "you should try this" at the end of someone's
+  real story breaks the trust it just built (see "The End beat" above for handling
+  any nudge).
+
+## Voiceover style
+- Natural FIRST-PERSON spoken lines ("I", "me", "my"). Plain, warm, human — the
+  way a real person confides to a friend. Motivational and honest, never technical
+  or academic. Simple everyday words a 12-year-old gets on the first listen. If a
+  teacher or figure is named, work in a brief one-line plain intro.
 
 ## Rules
 - **This is a Buddhist app — no other religion's expressions.**

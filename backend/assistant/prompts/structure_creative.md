@@ -22,49 +22,25 @@ required.
   already knows (the 2am spiral, the grudge, the comparison) paired with one twist
   they didn't see coming. Too safe is forgettable; too strange and they scroll off.
   Keep the ache instantly recognizable; make the fresh part the way through it.
-- Break the {{DURATION_SECONDS}} seconds into three beats: Opening (a strong hook,
-  ~the first fifth), Middle (develop it, ~three fifths), End (land it, ~the last
-  fifth). Give each a timeRange in seconds that adds up
-  to the total — for example "0–6 sec". Size each beat's voiceover to the seconds it
-  covers, so the spoken content fills the whole duration (see the length budget above).
-- **Shape each beat with intent:**
-  - Opening — the first frame must grab even on mute: a bold, instantly readable
-    image or action that tells the viewer what this is before a word is spoken
-    (most watch with sound off at first).
-  - Middle — don't just "explain." First show the struggle bite, let it build a
-    little, THEN turn — the small moment where it clicks or flips. The turn is what
-    makes the payoff feel earned.
-  - End — show the shift, don't just say it: a before/after contrast lands hardest
-    (tense face to soft one, cluttered desk to a clean cup of tea). Where it fits,
-    end so it loops — cut just before the final beat, or circle back to the opening
-    image, so a rewatch feels natural. Choose the LANDING that fits THIS video —
-    do NOT default to "do this today." Pick whichever is strongest: a resonant line
-    that lingers with no instruction, a reframing question that leaves them
-    thinking, a loop back to the opening, a quiet "send this to someone who needs
-    it," OR a light call to action only when the idea genuinely asks them to act.
-    Vary it — a call to action every time turns the series formulaic; many of the
-    best endings just land a feeling and stop. **Hard rule for the three End
-    options:** at most ONE of the three may be a call to action ("try this today,"
-    "look for one person," "send this to…"). The other two MUST be non-instruction
-    landings (a lingering line, a reframing question, or a loop-back), so the
-    creator is always offered a real choice — never three variations of "do this
-    today." If the opening set up a strong image or loop, prefer closing that loop
-    over adding homework.
-- For each beat, give THREE distinct options — three genuinely different ways to
-  shoot that beat (different angle, imagery, or approach, not small rewordings of
-  the same idea). Each option has:
-  - visuals: SIMPLE, doable, filmable things a solo creator can shoot on a phone —
-    everyday people, places, and actions. No effects, no crew, nothing technical.
-    Offer BOTH formats across the three options — at least one as a single
-    continuous scene (one shot or scenario that just plays out) and at least one
-    as a montage (several quick shots cut together) — so the creator can pick
-    whichever they prefer. Neither is the default; choose whatever fits each beat.
-    When the shot is just the creator talking to the lens, add one small delivery
-    cue where it helps — open hands, a warm look, or a two-second pause right after
-    the key line so it lands (a pause carries more weight than more words).
-  - voiceover: one short, crisp one-liner. Punchy, plain, and motivating — the
-    kind of uplifting line people remember and repeat. Simple everyday words only,
-    never technical. No clichés, no jargon, no markdown.
+
+{{STRUCTURE_SHARED}}
+
+## Shape each beat with intent
+- Opening — the first frame must grab even on mute: a bold, instantly readable
+  image or action that tells the viewer what this is before a word is spoken (most
+  watch with sound off at first).
+- Middle — don't just "explain." First show the struggle bite, let it build a
+  little, THEN turn — the small moment where it clicks or flips. The turn is what
+  makes the payoff feel earned.
+- End — show the shift, don't just say it: a before/after contrast lands hardest
+  (tense face to soft one, cluttered desk to a clean cup of tea). Prefer a
+  lingering line or a loop back to the opening image (see "The End beat" above for
+  how to handle any call to action).
+
+## Voiceover style
+- One short, crisp one-liner per beat. Punchy, plain, and motivating — the kind of
+  uplifting line people remember and repeat. Simple everyday words only, never
+  technical. No clichés, no jargon, no markdown.
 
 ## Rules
 - Keep the whole thing genuinely shootable today by one person with a phone.
