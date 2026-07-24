@@ -194,7 +194,7 @@ const UI = {
     calNoteBody: "The Bodhisattva Challenge runs for 365 days. This shows the day you're on — a new verse and lesson unlock every day.",
     badgeChapter: "Chapter",
     badgeVerses: "Verses",
-    badgeDate: "Date",
+    badgeDate: "Release Date",
     // voice picker
     voiceLabel: "Voice",
     voiceMale: "Male",
@@ -1625,12 +1625,15 @@ function Bubble({ msg, onChooseIdea, onMakeAudio, onRetryDay, busy, isLast }) {
         if (!lines || !lines.length) return null;
         return (
           <div className="verse-block">
-            {lines.map((v, i) => (
-              <div key={i} className="verse-line">
-                <span className="verse-line__dot" />
-                <p className="verse-line__text">{v.text}</p>
-              </div>
-            ))}
+            {lines.map((v, i) => {
+              const ref = v.id ? String(v.id).replace(/-/g, ".") : (v.n ?? "");
+              return (
+                <div key={i} className="verse-line">
+                  {ref !== "" && <span className="verse-line__num">{ref}</span>}
+                  <p className="verse-line__text">{v.text}</p>
+                </div>
+              );
+            })}
           </div>
         );
       })()}

@@ -59,20 +59,24 @@ body {
   padding-right: max(24px, env(safe-area-inset-right));
 }
 
-/* ── Header ── */
+/* ── Header (floating card) ── */
 .app__header {
   padding: 11px 20px;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  border-bottom: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(247, 246, 243, 0.7));
+  width: min(880px, calc(100% - 2 * clamp(12px, 3vw, 28px)));
+  margin: 12px auto 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 246, 243, 0.78));
   -webkit-backdrop-filter: saturate(1.4) blur(14px);
   backdrop-filter: saturate(1.4) blur(14px);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 2px 12px rgba(26, 25, 23, 0.04);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 8px 24px rgba(26, 25, 23, 0.07),
+    0 2px 6px rgba(26, 25, 23, 0.04);
   position: sticky;
-  top: 0;
+  top: 10px;
   z-index: 10;
 }
 
@@ -529,10 +533,14 @@ body {
   flex: 1;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  padding: 32px 24px 16px;
+  padding: 44px 24px 28px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* Fade content out at both ends as it scrolls, so nothing collides with the
+     floating header above or the footer/composer below. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 40px, #000 calc(100% - 32px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 40px, #000 calc(100% - 32px), transparent 100%);
 }
 
 .chat::-webkit-scrollbar { width: 4px; }
@@ -612,48 +620,42 @@ body {
 
 /* ── Verse block ── */
 .verse-block {
-  margin-top: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  background: var(--surface);
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 .verse-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
+  position: relative;
+  padding-left: 20px;
 }
-.verse-line + .verse-line { border-top: 1px solid var(--border); }
+.verse-line::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 5px;
+  bottom: 5px;
+  width: 3px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #e8b339, #e07b1a);
+  opacity: 0.85;
+}
+.verse-line__dot { display: none; }
 .verse-line__num {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  margin-top: 1px;
-  border-radius: 10px;
-  background: #eff6ff;
-  border: 1.5px solid #bfdbfe;
-  color: #2563eb;
-  font-size: 0.85rem;
+  display: inline-block;
+  margin-bottom: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.62rem;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.verse-line__dot {
-  flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  margin-top: 11px;
-  margin-left: 9px;
-  margin-right: 9px;
-  border-radius: 50%;
-  background: var(--border-hover);
+  letter-spacing: 0.04em;
+  color: #b8641a;
+  background: rgba(224, 123, 26, 0.1);
+  border: 1px solid rgba(224, 123, 26, 0.22);
 }
 .verse-line__text {
-  flex: 1;
-  font-size: 0.93rem;
-  line-height: 1.7;
+  font-size: 0.97rem;
+  line-height: 1.8;
   color: var(--ink);
   white-space: pre-wrap;
 }
@@ -682,7 +684,7 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #2563eb;
+  background: linear-gradient(180deg, #e8b339, #e07b1a);
 }
 
 /* ── Today's challenge: shareable image + plan link ── */
@@ -834,21 +836,21 @@ body {
   width: 46px;
   height: 46px;
   border-radius: 10px;
-  background: #eff6ff;
-  border: 1.5px solid #bfdbfe;
+  background: rgba(224, 123, 26, 0.1);
+  border: 1.5px solid rgba(224, 123, 26, 0.22);
 }
 .vcard__num-label {
   font-size: 0.5rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #3b82f6;
+  color: #e07b1a;
   line-height: 1;
 }
 .vcard__num-value {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #1e3a5f;
+  color: #b8641a;
   line-height: 1.1;
   margin-top: 2px;
 }
@@ -1572,47 +1574,57 @@ body {
   padding: 10px 0 2px;
 }
 
-/* ── Day badge ── */
+/* ── Day badge (hero numeral + clean meta) ── */
 .day-badge {
-  display: inline-flex;
-  align-items: stretch;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 12px;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.08);
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
 
 .day-badge__item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 6px 14px;
-  gap: 1px;
+  justify-content: flex-end;
+  gap: 3px;
 }
 
 .day-badge__label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 600;
-  color: #3b82f6;
+  color: var(--ink-muted);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.1em;
 }
 
 .day-badge__value {
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #1e3a5f;
+  color: var(--ink);
   letter-spacing: -0.01em;
 }
 
-.day-badge__divider {
-  width: 1px;
-  background: #bfdbfe;
-  flex-shrink: 0;
+/* First cell = the day, rendered as a large temple-gold numeral to anchor
+   the card, separated from the supporting meta by a hairline. */
+.day-badge__item:first-child {
+  padding-right: 22px;
+  border-right: 1px solid var(--border);
 }
+.day-badge__item:first-child .day-badge__value {
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(120deg, #c0392b 0%, #e07b1a 45%, #e8b339 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.day-badge__divider { display: none; }
 
 /* Idle Zen — a quiet breathing pause after 60s of stillness. */
 .zen {
@@ -1747,6 +1759,9 @@ body {
     padding-top: 11px;
     padding-bottom: 11px;
     gap: 10px;
+    width: calc(100% - 20px);
+    margin: 8px auto 2px;
+    top: 6px;
   }
   .app__header img { width: 28px; height: 28px; }
   .header__text { min-width: 0; }
@@ -1763,12 +1778,11 @@ body {
   .cal__page--1 { animation: none; transform: translateY(2px); }
   .cal__page--2 { animation: none; transform: translateY(4px); }
 
-  .chat { padding-top: 20px; gap: 14px; }
+  .chat { padding-top: 32px; gap: 14px; }
   .bubble { max-width: 92%; padding: 12px 15px; }
 
-  /* Day badge: let the three cells share the row evenly */
-  .day-badge { display: flex; width: 100%; }
-  .day-badge__item { flex: 1; padding: 6px 8px; }
+  /* Day badge: tighter gaps, still wraps cleanly */
+  .day-badge { gap: 6px 16px; }
 
   .composer { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
   /* iOS Safari auto-zooms into any input under 16px and won't reliably zoom
