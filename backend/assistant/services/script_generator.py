@@ -99,6 +99,7 @@ def generate(
         "VERSE_TEXT": dc.verse_block or "(no verse text found)",
         "DAY_PLAN": dc.plan_markdown,
         "VERSE_SYNTHESIS": dc.synthesis_text or "(no per-verse commentary synthesis available)",
+        "TEACHING_POINTS": dc.teaching_points_text or "(no distilled teaching points available)",
         "CREATOR_NOTES": creator_notes.strip() or "(the creator did not provide notes)",
     }
     idea = IDEAS[idea_key]

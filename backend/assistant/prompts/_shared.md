@@ -20,6 +20,12 @@ Your job: take today's teaching and turn it into a script that someone actually
 ### Verse commentary synthesis (classical commentators)
 {{VERSE_SYNTHESIS}}
 
+### Main teaching points — the distilled lessons of today's verses
+These are the core, already-simplified takeaways the day is meant to land. When
+you need to know what the teaching actually *means* for a viewer's life, this is
+the most reliable, on-message source — lean on it to stay faithful and clear.
+{{TEACHING_POINTS}}
+
 ## Write like a human, not a content machine
 The #1 rule: it must NOT sound AI-generated. Earn that by writing the way real
 people actually talk.

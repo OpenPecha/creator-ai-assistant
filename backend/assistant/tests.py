@@ -110,6 +110,13 @@ This stanza is both homage and pledge.
 
 Sources: [[1-SOURCES/x.md#^1-1]]
 
+<!-- sub:teaching-points -->
+#### Main Teaching Points
+
+- Begin with humility, not ego.
+
+Sources: [[1-SOURCES/x.md#^1-1]]
+
 ---
 
 <!-- verse:1-2 -->
@@ -241,6 +248,13 @@ class DayPackageParseTests(SimpleTestCase):
         # Verse 1-2 has no stories/commentary/metaphors subsections.
         self.assertNotIn("sub:stories", self.parsed.verse_rails[1].sections)
 
+    def test_teaching_points_subsection(self):
+        first, second = self.parsed.verse_rails
+        self.assertIn("sub:teaching-points", first.sections)
+        self.assertIn("Begin with humility", first.sections["sub:teaching-points"])
+        # Verse 1-2 omits the subsection.
+        self.assertNotIn("sub:teaching-points", second.sections)
+
 
 class GetDayContentTests(SimpleTestCase):
     def _fake_fetch(self, package_md):
@@ -275,6 +289,13 @@ class GetDayContentTests(SimpleTestCase):
         self.assertIn("Bodhisattva Daughter", dc.synthesis_text)
         # stories surfaced for idea analysis.
         self.assertEqual(len(dc.stories), 1)
+        # teaching points: present for 1-1, empty for 1-2 (aligned to verses).
+        self.assertEqual(len(dc.teaching_points), 2)
+        self.assertIn("Begin with humility", dc.teaching_points[0])
+        self.assertEqual(dc.teaching_points[1], "")
+        # teaching_points_text joins present ones under a verse header.
+        self.assertIn("### Verse 1-1", dc.teaching_points_text)
+        self.assertIn("Begin with humility", dc.teaching_points_text)
         # Per-verse selectable resources, mapped to idea categories.
         self.assertEqual(len(dc.verse_resources["1-1"]["story"]), 1)
         self.assertEqual(len(dc.verse_resources["1-1"]["concept"]), 1)

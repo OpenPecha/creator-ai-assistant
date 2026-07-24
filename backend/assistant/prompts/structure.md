@@ -26,6 +26,12 @@ show on screen and what to say out loud.
 ### Verse commentary
 {{VERSE_SYNTHESIS}}
 
+### Main teaching points — the distilled lessons of today's verses
+These are the core, already-simplified takeaways the day is meant to land. Lean
+on them to keep the storyboard faithful and on-message about what the teaching
+actually means for a viewer's life.
+{{TEACHING_POINTS}}
+
 ### Creator's own notes (use only if it fits the format)
 {{CREATOR_NOTES}}
 
@@ -34,7 +40,7 @@ show on screen and what to say out loud.
 - concept: one punchy, spoken-style hook line — the heart of the video.
 - Break the {{DURATION_SECONDS}} seconds into three beats: Opening (a strong hook,
   about the first fifth), Middle (develop the idea, about three fifths), End (land
-  it plus a gentle call to action, about the last fifth). Give each beat a
+  the idea, about the last fifth). Give each beat a
   timeRange in seconds that adds up to the total — for example "0–8 sec". Size each
   beat's voiceover to the seconds it covers, so the spoken content fills the whole
   duration (see the length budget above).
@@ -49,7 +55,14 @@ show on screen and what to say out loud.
   - End — show the shift, don't only say it: a before/after contrast lands hardest
     (tense face to soft one, cluttered desk to a calm cup of tea). Where it fits,
     end so it loops — cut just before the last beat, or circle back to the opening
-    image — so a rewatch feels natural.
+    image — so a rewatch feels natural. Choose the LANDING that fits THIS video —
+    do NOT default to "do this today." Pick whichever is strongest here: a
+    resonant line that lingers with no instruction at all, a reframing question
+    that leaves them thinking, a loop back to the opening image, a quiet "send
+    this to the one person who needs it," OR a gentle, specific call to action
+    when the teaching genuinely asks the viewer to act. Vary it — a call to action
+    on every video turns the series formulaic and preachy, and many of the best
+    endings simply land a feeling and stop.
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:

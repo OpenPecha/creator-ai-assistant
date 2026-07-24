@@ -23,8 +23,8 @@ required.
   they didn't see coming. Too safe is forgettable; too strange and they scroll off.
   Keep the ache instantly recognizable; make the fresh part the way through it.
 - Break the {{DURATION_SECONDS}} seconds into three beats: Opening (a strong hook,
-  ~the first fifth), Middle (develop it, ~three fifths), End (land it + a light
-  call to action, ~the last fifth). Give each a timeRange in seconds that adds up
+  ~the first fifth), Middle (develop it, ~three fifths), End (land it, ~the last
+  fifth). Give each a timeRange in seconds that adds up
   to the total — for example "0–6 sec". Size each beat's voiceover to the seconds it
   covers, so the spoken content fills the whole duration (see the length budget above).
 - **Shape each beat with intent:**
@@ -37,7 +37,13 @@ required.
   - End — show the shift, don't just say it: a before/after contrast lands hardest
     (tense face to soft one, cluttered desk to a clean cup of tea). Where it fits,
     end so it loops — cut just before the final beat, or circle back to the opening
-    image, so a rewatch feels natural.
+    image, so a rewatch feels natural. Choose the LANDING that fits THIS video —
+    do NOT default to "do this today." Pick whichever is strongest: a resonant line
+    that lingers with no instruction, a reframing question that leaves them
+    thinking, a loop back to the opening, a quiet "send this to someone who needs
+    it," OR a light call to action only when the idea genuinely asks them to act.
+    Vary it — a call to action every time turns the series formulaic; many of the
+    best endings just land a feeling and stop.
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:

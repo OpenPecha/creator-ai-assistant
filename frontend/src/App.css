@@ -67,7 +67,7 @@ body {
   flex-wrap: wrap;
   gap: 10px;
   width: min(880px, calc(100% - 2 * clamp(12px, 3vw, 28px)));
-  margin: 12px auto 4px;
+  margin: 12px auto 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 246, 243, 0.78));
@@ -1760,7 +1760,7 @@ body {
     padding-bottom: 11px;
     gap: 10px;
     width: calc(100% - 20px);
-    margin: 8px auto 2px;
+    margin: 8px auto 12px;
     top: 6px;
   }
   .app__header img { width: 28px; height: 28px; }

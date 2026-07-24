@@ -7,6 +7,26 @@ testimonial."
 ### Creator's notes / experience
 {{CREATOR_NOTES}}
 
+## Your two sources — how to combine them
+You have the creator's own notes above and the day's **Main teaching points**
+(in the shared source block). Use them together:
+
+- **When the creator gave real notes:** their experience is the SPINE of the
+  video — keep it their story, in their "I" voice. Use the teaching points only
+  to sharpen and ground it: name the specific lesson their experience is an
+  example of, and let the verse's idea be the quiet "why" underneath what
+  happened to them. Do NOT bury their story under the doctrine, and do NOT swap
+  their honest, specific moment for the day's general theme. If their note is one
+  vague line ("this verse resonated and made me a better person"), don't inflate
+  it into fake events — anchor it to ONE concrete teaching point and speak to the
+  small, real way that lesson shows up in an ordinary life the viewer recognizes.
+- **When the creator gave little or nothing** (empty, a few words, or "none
+  provided"): build the testimony from the **Main teaching points** instead —
+  write a genuine, relatable first-person reflection that a real person living
+  this teaching could honestly say, true to the lesson and never fabricating
+  specific biographical events. It should still feel like a person talking, not a
+  summary of the verse.
+
 - **Write in their "I" voice** and stay true to what they actually wrote. Never
   invent events, feelings, or outcomes they didn't describe. You're a sharper
   mirror, not a fiction writer.

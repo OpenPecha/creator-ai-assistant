@@ -66,6 +66,9 @@ class DayContent:
     plan_file: str
     verse_syntheses: list[VerseSynthesis] = field(default_factory=list)
     verses_text: list[str] = field(default_factory=list)
+    # Per-verse "Main Teaching Points" (<!-- sub:teaching-points -->), aligned to
+    # `verses`. Empty string for a verse whose package omits the subsection.
+    teaching_points: list[str] = field(default_factory=list)
     stories: list[str] = field(default_factory=list)
     # Per-verse selectable source material, keyed by verse id, then by idea
     # category: {"1-1": {"story": [{label, text}], "concept": [...], "extra_info": [...]}}.
@@ -87,6 +90,19 @@ class DayContent:
     @property
     def verse_block(self) -> str:
         return "\n\n".join(self.verses_text)
+
+    @property
+    def teaching_points_text(self) -> str:
+        """The day's "Main Teaching Points" across all verses, with verse headers.
+
+        Aligned to `verses`; verses without a teaching-points subsection are
+        skipped. Returns "" when the day carries none.
+        """
+        parts = []
+        for vid, tp in zip(self.verses, self.teaching_points):
+            if tp and tp.strip():
+                parts.append(f"### Verse {vid}\n\n{tp.strip()}")
+        return "\n\n---\n\n".join(parts)
 
 
 # ── HTTP response cache ───────────────────────────────────────────────────────
@@ -446,6 +462,13 @@ def get_day_content(day: int) -> DayContent:
             item["explanation"] = explanation
         practice_items = [item]
 
+    # Per-verse "Main Teaching Points" (<!-- sub:teaching-points -->), aligned to
+    # entry["verses"] so it pairs positionally with `verses` in DayContent.
+    teaching_points = [
+        (rails[vid].sections.get("sub:teaching-points", "").strip() if vid in rails else "")
+        for vid in entry["verses"]
+    ]
+
     verse_resources = {}
     for vid in entry["verses"]:
         vr = rails.get(vid)
@@ -469,6 +492,7 @@ def get_day_content(day: int) -> DayContent:
         plan_file=plan_path,
         verse_syntheses=syntheses,
         verses_text=verses_text,
+        teaching_points=teaching_points,
         stories=parsed.stories,
         verse_resources=verse_resources,
         is_variant=False,

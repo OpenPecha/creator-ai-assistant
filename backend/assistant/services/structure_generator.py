@@ -123,9 +123,17 @@ def generate(
         "VERSE_TEXT": dc.verse_block or "(no verse text found)",
         "DAY_PLAN": dc.plan_markdown,
         "VERSE_SYNTHESIS": dc.synthesis_text or "(no per-verse commentary available)",
+        "TEACHING_POINTS": dc.teaching_points_text or "(no distilled teaching points available)",
         "CREATOR_NOTES": creator_notes.strip() or "(none provided)",
     }
-    template_name = "structure_creative.md" if idea.get("self_contained") else "structure.md"
+    if idea.get("self_contained"):
+        template_name = "structure_creative.md"
+    elif idea_key == "testimony":
+        # Testimony is built around the creator's own experience (grounded by the
+        # day's teaching points), not the day's general theme — its own template.
+        template_name = "structure_testimony.md"
+    else:
+        template_name = "structure.md"
     prompt = load_prompt(template_name)
     for key, value in tokens.items():
         prompt = prompt.replace("{{" + key + "}}", value)
