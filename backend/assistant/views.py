@@ -16,6 +16,7 @@ from .services import (
     gemini,
     idea_analyzer,
     language as lang_service,
+    overview_simplifier,
     script_generator,
     structure_generator,
     verse_summary,
@@ -89,6 +90,17 @@ def day_detail(request, day: int):
         }
         for i, t in enumerate(dc.verses_text)
     ]
+
+    # Rewrite each verse's "AI Overview" blurb into plainer language (same meaning,
+    # cached per day). Degrades to the original text on any failure, so this never
+    # breaks loading the day.
+    try:
+        simplified = overview_simplifier.simplify(dc)
+        for vid, text in simplified.items():
+            if vid in dc.verse_resources:
+                dc.verse_resources[vid]["concept_overview"] = text
+    except Exception:
+        logger.warning("Overview simplify failed (day=%s)", day, exc_info=True)
 
     # The per-day share link is built from config alone (no network call), so a
     # failure here should never break loading the day — degrade to no link.
