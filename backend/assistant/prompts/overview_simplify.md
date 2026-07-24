@@ -23,10 +23,13 @@ Rules:
   — just say the thing.
 - Plain text. You may keep simple **bold** on one key phrase if the original used
   it; otherwise no markdown, asterisks, or symbols.
-- Do not translate. Write each rewrite in the SAME language as its original blurb.
+- Output language: if a language is specified at the very end of this prompt, write
+  every rewrite in THAT language. Otherwise write each rewrite in the same language
+  as its original blurb.
 
 Return JSON: an "overviews" array, one entry per input block, each with the "id"
-exactly as given and the rewritten "text".
+copied EXACTLY as given (never translate or change the id) and the rewritten
+"text".
 
 --- OVERVIEWS TO REWRITE ---
 {{OVERVIEWS}}

@@ -91,11 +91,11 @@ def day_detail(request, day: int):
         for i, t in enumerate(dc.verses_text)
     ]
 
-    # Rewrite each verse's "AI Overview" blurb into plainer language (same meaning,
-    # cached per day). Degrades to the original text on any failure, so this never
-    # breaks loading the day.
+    # Rewrite each verse's "AI Overview" blurb into plainer language — in the
+    # selected language (Hindi is explained in Hindi), cached per day+language.
+    # Degrades to the original text on any failure, so this never breaks the day.
     try:
-        simplified = overview_simplifier.simplify(dc)
+        simplified = overview_simplifier.simplify(dc, language)
         for vid, text in simplified.items():
             if vid in dc.verse_resources:
                 dc.verse_resources[vid]["concept_overview"] = text
