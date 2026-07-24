@@ -43,7 +43,13 @@ required.
     thinking, a loop back to the opening, a quiet "send this to someone who needs
     it," OR a light call to action only when the idea genuinely asks them to act.
     Vary it — a call to action every time turns the series formulaic; many of the
-    best endings just land a feeling and stop.
+    best endings just land a feeling and stop. **Hard rule for the three End
+    options:** at most ONE of the three may be a call to action ("try this today,"
+    "look for one person," "send this to…"). The other two MUST be non-instruction
+    landings (a lingering line, a reframing question, or a loop-back), so the
+    creator is always offered a real choice — never three variations of "do this
+    today." If the opening set up a strong image or loop, prefer closing that loop
+    over adding homework.
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:

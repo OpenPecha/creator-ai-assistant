@@ -55,14 +55,19 @@ actually means for a viewer's life.
   - End — show the shift, don't only say it: a before/after contrast lands hardest
     (tense face to soft one, cluttered desk to a calm cup of tea). Where it fits,
     end so it loops — cut just before the last beat, or circle back to the opening
-    image — so a rewatch feels natural. Choose the LANDING that fits THIS video —
-    do NOT default to "do this today." Pick whichever is strongest here: a
-    resonant line that lingers with no instruction at all, a reframing question
-    that leaves them thinking, a loop back to the opening image, a quiet "send
-    this to the one person who needs it," OR a gentle, specific call to action
-    when the teaching genuinely asks the viewer to act. Vary it — a call to action
-    on every video turns the series formulaic and preachy, and many of the best
-    endings simply land a feeling and stop.
+    image — so a rewatch feels natural. Choose the LANDING that fits THIS video.
+    A call to action is the EXCEPTION, not the reflex — most videos should simply
+    land a feeling and stop. The strongest endings are usually: a resonant line
+    that lingers with no instruction at all, a reframing question that leaves them
+    thinking, or a loop back to the opening image. Reach for those first.
+    **Hard rule for the three End options:** at most ONE of the three may be a
+    call to action ("try this today," "look for one person," "send this to…").
+    The other two MUST be non-instruction landings (a lingering line, a reframing
+    question, or a loop-back), so the creator is always offered a real choice —
+    never three variations of "do this today." Only use a CTA at all when the
+    teaching genuinely asks the viewer to act; a call to action on every video
+    turns the series formulaic and preachy. If the opening set up a strong image
+    or loop (as most do), prefer closing that loop over adding homework.
 - For each beat, give THREE distinct options — three genuinely different ways to
   shoot that beat (different angle, imagery, or approach, not small rewordings of
   the same idea). Each option has:
