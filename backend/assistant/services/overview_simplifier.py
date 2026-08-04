@@ -1,6 +1,6 @@
 """AI rewrite of the per-verse "AI Overview" blurb into plainer language.
 
-The overview shown in the Concept tab is the "Brief introduction" pulled verbatim
+The overview shown in the Commentary tab is the "Brief introduction" pulled verbatim
 from a verse's Verse Synthesis in the Day-Package (see
 ``content_loader`` / ``day_package._synthesis_intro``). That text is faithful but
 can read dense. This service does a LIGHT rewrite for readability only — same
@@ -54,7 +54,7 @@ def _originals(dc: DayContent) -> dict[str, str]:
     """{verse_id: original overview text} for verses that carry a non-empty one."""
     out: dict[str, str] = {}
     for vid, res in dc.verse_resources.items():
-        text = (res.get("concept_overview") or "").strip()
+        text = (res.get("commentary_overview") or "").strip()
         if text:
             out[vid] = text
     return out

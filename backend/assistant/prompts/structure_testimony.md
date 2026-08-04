@@ -73,7 +73,18 @@ build beats out of it or let it pull the video onto the general theme.
   - Opening — open on the honest, unflattering moment: the mess, the snap, the
     doubt, the thing they'd never post — not the victory. The first frame must grab
     even on mute (the creator's face to the lens, or one plain everyday object that
-    signals the confession).
+    signals the confession). The line itself can be a blunt confession, a
+    mid-action scene, or a rhetorical question — don't default to a question every
+    time. Never use the generic "Have you ever [wondered / felt / noticed /
+    thought]…?" template in ANY option, in WHICHEVER LANGUAGE you write the
+    voiceover in — this includes direct translations of the cliché, such as
+    Hindi's "क्या आपने कभी सोचा / महसूस किया / देखा है…?" — it's the most overused
+    hook in short-form video, no matter which verb fills the blank or which
+    language it's rendered in. If an option is a question, make it sharp and
+    specific to this exact moment, not a fill-in-the-blank frame.
+    **Hard rule for the three Opening options:** they must use three DIFFERENT forms — for example one blunt
+    confession, one mid-scene action, and one question. Never give the creator
+    three rhetorical questions in a row; that's not a real choice.
   - Middle — let the struggle bite and build, THEN turn: the moment the teaching
     landed and something shifted in them. Name the lesson plainly here; keep it in
     their "I" voice ("I realized…", "what changed was…").

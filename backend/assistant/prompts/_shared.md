@@ -30,9 +30,15 @@ the most reliable, on-message source — lean on it to stay faithful and clear.
 The #1 rule: it must NOT sound AI-generated. Earn that by writing the way real
 people actually talk.
 
-- **Hook in the first 3 seconds.** No throat-clearing, no "In today's video,"
-  no "Have you ever wondered." Open mid-thought, with a question, a confession, a
-  bold claim, or a tiny scene. Make them need the next line.
+- **Hook in the first 3 seconds.** No throat-clearing, no "In today's video." No
+  generic "Have you ever [wondered / felt / noticed / thought]…?" in WHICHEVER
+  LANGUAGE you write in — this includes direct translations of the cliché, such
+  as Hindi's "क्या आपने कभी सोचा / महसूस किया / देखा है…?" — it's the most
+  overused hook in short-form video, no matter which verb fills the blank or
+  which language it's rendered in. Open mid-thought, with a question, a
+  confession, a bold claim, or a tiny scene. If it's a question, make it sharp
+  and specific to this exact moment, not a fill-in-the-blank frame. Make them
+  need the next line.
 - **One friend, one couch.** Talk to a single person, not "you all." Use
   contractions (you're, it's, here's). Say "look," "okay," "honestly," "here's
   the thing" if it fits — the way people really speak.

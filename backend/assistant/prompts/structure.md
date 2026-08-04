@@ -48,7 +48,19 @@ actually means for a viewer's life.
   - Opening — the first frame must grab even on mute: a bold, instantly readable
     image or action that signals what this is before a word is spoken (most people
     watch with sound off at first). Aim it at the everyday ache the teaching
-    speaks to, so the viewer thinks "that's me."
+    speaks to, so the viewer thinks "that's me." A hook can be a question, a
+    confession, a bold claim, or a cold-open into a tiny scene — don't default to
+    a question every time. Never use the generic "Have you ever [wondered / felt /
+    noticed / thought]…?" template in ANY option, in WHICHEVER LANGUAGE you write
+    the voiceover in — this includes direct translations of the cliché, such as
+    Hindi's "क्या आपने कभी सोचा / महसूस / महसूस किया / देखा है…?" — it's the most
+    overused hook in short-form video, no matter which verb fills the blank or
+    which language it's rendered in. If an option is a question, make it sharp and
+    specific to this exact moment, not a fill-in-the-blank frame.
+    **Hard rule for the three Opening options:** they must use three DIFFERENT
+    hook types — for example one question, one bold claim/confession, and one
+    cold-open scene-drop. Never give the creator three rhetorical questions in a
+    row; that's not a real choice.
   - Middle — don't just "explain." First show the struggle bite, let it build a
     little, THEN turn — the moment the teaching lands and something shifts. The
     turn is what makes the payoff feel earned instead of handed over.

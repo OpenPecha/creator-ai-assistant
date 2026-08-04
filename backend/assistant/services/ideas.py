@@ -8,9 +8,9 @@ _PROMPTS_DIR = Path(__file__).resolve().parent.parent / "prompts"
 
 # key -> (label, Hindi label, prompt filename, always_available, blurb, Hindi blurb)
 IDEAS: dict[str, dict] = {
-    "concept": {"label": "Concept", "label_hi": "मुख्य विचार", "file": "concept.md", "always": True,
-                "blurb": "Explain the idea behind today's verses.",
-                "blurb_hi": "आज के श्लोक के पीछे का विचार समझाएँ।"},
+    "commentary": {"label": "Commentary", "label_hi": "टीका", "file": "commentary.md", "always": True,
+                   "blurb": "Explain the verse's core idea through one classical commentator's specific reading.",
+                   "blurb_hi": "किसी एक पारंपरिक टीकाकार की विशेष व्याख्या के ज़रिए श्लोक का मूल विचार समझाएँ।"},
     "practice": {"label": "Challenge / Practice", "label_hi": "अभ्यास / चुनौती", "file": "practice.md", "always": True,
                  "blurb": "Invite viewers to do today's practice.",
                  "blurb_hi": "दर्शकों को आज का अभ्यास करने के लिए बुलाएँ।"},
@@ -51,7 +51,7 @@ ALWAYS_IDEAS = [k for k, v in IDEAS.items() if v["always"]]
 
 
 def load_prompt(name: str) -> str:
-    """Read a prompt template file (e.g. 'concept.md', '_shared.md').
+    """Read a prompt template file (e.g. 'commentary.md', '_shared.md').
 
     Not cached, so edits to the prompt "skills" take effect on the next request
     without a server restart.

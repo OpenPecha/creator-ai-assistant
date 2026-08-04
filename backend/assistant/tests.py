@@ -298,9 +298,9 @@ class GetDayContentTests(SimpleTestCase):
         self.assertIn("Begin with humility", dc.teaching_points_text)
         # Per-verse selectable resources, mapped to idea categories.
         self.assertEqual(len(dc.verse_resources["1-1"]["story"]), 1)
-        self.assertEqual(len(dc.verse_resources["1-1"]["concept"]), 1)
+        self.assertEqual(len(dc.verse_resources["1-1"]["commentary"]), 1)
         self.assertEqual(len(dc.verse_resources["1-1"]["extra_info"]), 2)
-        self.assertEqual(dc.verse_resources["1-1"]["concept"][0]["label"],
+        self.assertEqual(dc.verse_resources["1-1"]["commentary"][0]["label"],
                          "Khenpo Kunzang Pelden")
         # Challenge ← "Today's Practice" (day-level, repeated on every verse), split
         # into the action (text, no "Practice:" prefix) and its explanation.
@@ -311,7 +311,7 @@ class GetDayContentTests(SimpleTestCase):
         self.assertIn("Sharing wisdom", practice["explanation"])
         # Verse 1-2 has no per-verse rails, but still carries the day's practice.
         self.assertEqual(dc.verse_resources["1-2"]["story"], [])
-        self.assertEqual(dc.verse_resources["1-2"]["concept"], [])
+        self.assertEqual(dc.verse_resources["1-2"]["commentary"], [])
         self.assertEqual(dc.verse_resources["1-2"]["extra_info"], [])
         self.assertEqual(len(dc.verse_resources["1-2"]["practice"]), 1)
 

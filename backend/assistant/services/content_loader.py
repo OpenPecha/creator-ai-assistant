@@ -71,11 +71,11 @@ class DayContent:
     teaching_points: list[str] = field(default_factory=list)
     stories: list[str] = field(default_factory=list)
     # Per-verse selectable source material, keyed by verse id, then by idea
-    # category: {"1-1": {"story": [{label, text}], "concept": [...], "extra_info": [...]}}.
-    # story ← package stories, concept ← commentaries, extra_info ← metaphors.
+    # category: {"1-1": {"story": [{label, text}], "commentary": [...], "extra_info": [...]}}.
+    # story ← package stories, commentary ← commentaries, extra_info ← metaphors.
     verse_resources: dict[str, dict[str, list[dict]]] = field(default_factory=dict)
     # Per-verse "Brief introduction" from the Verse Synthesis overview — a short
-    # summary shown above the Concept commentary options (not itself pickable).
+    # summary shown above the Commentary options (not itself pickable).
     verse_overviews: dict[str, str] = field(default_factory=dict)
     is_variant: bool = False
 
@@ -474,13 +474,13 @@ def get_day_content(day: int) -> DayContent:
         vr = rails.get(vid)
         verse_resources[vid] = {
             "story": _items(vr.story_items) if vr else [],
-            "concept": _items(vr.commentaries) if vr else [],
+            "commentary": _items(vr.commentaries) if vr else [],
             "extra_info": _items(vr.metaphors) if vr else [],
             "practice": list(practice_items),
             # A short, already-distilled overview of the verse (the synthesis'
-            # "Brief introduction"), shown above the commentaries in the Concept
+            # "Brief introduction"), shown above the commentaries in the Commentary
             # tab — not a selectable option, so it's a plain string, not a list.
-            "concept_overview": (vr.synthesis_intro if vr else ""),
+            "commentary_overview": (vr.synthesis_intro if vr else ""),
         }
 
     return DayContent(
