@@ -999,10 +999,8 @@ body {
   gap: 5px;
 }
 .vcard__option-label {
-  font-size: 0.66rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: #2563eb;
 }
 .vcard__option-text {

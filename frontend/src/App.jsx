@@ -27,7 +27,7 @@ const OUTPUT_TYPE_KEYS = ["script", "structure"];
 
 // Display order for idea tabs. The backend decides which keys are available for
 // a given day; the frontend just shows them in this order.
-const TAB_ORDER = ["story", "commentary", "extra_info", "practice", "creative", "testimony"];
+const TAB_ORDER = ["story", "commentary", "concept", "extra_info", "practice", "creative", "testimony"];
 
 const LANGUAGES = [
   { key: "english", label: "English" },
@@ -51,6 +51,16 @@ const IDEA_ICONS = {
       <path d="M8 2a4 4 0 00-2.12 7.4c.3.18.62.56.62.93V11h3v-.67c0-.37.32-.75.62-.93A4 4 0 008 2z"/>
       <path d="M6.5 11v.5a1.5 1.5 0 003 0V11"/>
       <line x1="6.5" y1="11" x2="9.5" y2="11"/>
+    </svg>
+  ),
+  concept: (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="4" cy="4.5" r="1" fill="currentColor" stroke="none"/>
+      <line x1="7" y1="4.5" x2="14" y2="4.5"/>
+      <circle cx="4" cy="8" r="1" fill="currentColor" stroke="none"/>
+      <line x1="7" y1="8" x2="14" y2="8"/>
+      <circle cx="4" cy="11.5" r="1" fill="currentColor" stroke="none"/>
+      <line x1="7" y1="11.5" x2="14" y2="11.5"/>
     </svg>
   ),
   practice: (
@@ -146,10 +156,11 @@ const UI = {
     verseLabel: "Verse",
     whatType: "What type of video?",
     sections: { story: "Story", commentary: "Commentary", challenge: "Challenge", extraInfo: "Extra info" },
-    tabLabels: { story: "Story", commentary: "Commentary", practice: "Challenge", extra_info: "Extra info", creative: "Creative", testimony: "Testimony" },
+    tabLabels: { story: "Story", commentary: "Commentary", concept: "Concept", practice: "Challenge", extra_info: "Extra info", creative: "Creative", testimony: "Testimony" },
     tabDescriptions: {
       story: "A story from today's teaching — a narrative with characters and a turning point you can retell.",
       commentary: "The classical commentaries' explanation of the verse's core idea.",
+      concept: "One of the verse's core teaching points, distilled from the commentaries.",
       practice: "Today's practice — a simple, doable action to invite viewers to try.",
       extra_info: "A surprising detail — the metaphors and images the commentaries use to explain the verse.",
       creative: "A fun, everyday take on the lesson — secular, for anyone, with no scripture or Buddhist terms.",
@@ -255,10 +266,11 @@ const UI = {
     verseLabel: "श्लोक",
     whatType: "किस तरह का वीडियो?",
     sections: { story: "कहानी", commentary: "टीका", challenge: "चुनौती", extraInfo: "रोचक जानकारी" },
-    tabLabels: { story: "कहानी", commentary: "टीका", practice: "चुनौती", extra_info: "रोचक जानकारी", creative: "क्रिएटिव", testimony: "आपका अनुभव" },
+    tabLabels: { story: "कहानी", commentary: "टीका", concept: "मुख्य विचार", practice: "चुनौती", extra_info: "रोचक जानकारी", creative: "क्रिएटिव", testimony: "आपका अनुभव" },
     tabDescriptions: {
       story: "आज की शिक्षा से एक कहानी — पात्रों और एक मोड़ के साथ, जिसे आप सुना सकें।",
       commentary: "पारंपरिक टीकाओं द्वारा श्लोक के मूल विचार की व्याख्या।",
+      concept: "टीकाओं से निकाला गया श्लोक का एक मुख्य विचार।",
       practice: "आज का अभ्यास — एक सरल काम जिसे करने के लिए आप दर्शकों को कह सकें।",
       extra_info: "एक रोचक बात — टीकाओं में श्लोक समझाने के लिए दिए गए उपमा और उदाहरण।",
       creative: "पाठ का एक रोज़मर्रा, सरल पहलू — सभी के लिए, बिना किसी धार्मिक या बौद्ध शब्द के।",
@@ -894,9 +906,9 @@ export default function App() {
 
 
 // Idea tabs that map to concrete source material the creator can pick from:
-// Story ← package stories, Commentary ← commentaries, Extra-info ← metaphors,
-// Challenge ← "Today's Practice".
-const RESOURCE_TABS = new Set(["story", "commentary", "extra_info", "practice"]);
+// Story ← package stories, Commentary ← commentaries, Concept ← Main Teaching
+// Points, Extra-info ← metaphors, Challenge ← "Today's Practice".
+const RESOURCE_TABS = new Set(["story", "commentary", "concept", "extra_info", "practice"]);
 
 // Categories that only make sense when this specific verse has the material —
 // hidden entirely on verses with no story / no metaphor.

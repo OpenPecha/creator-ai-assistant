@@ -71,8 +71,9 @@ class DayContent:
     teaching_points: list[str] = field(default_factory=list)
     stories: list[str] = field(default_factory=list)
     # Per-verse selectable source material, keyed by verse id, then by idea
-    # category: {"1-1": {"story": [{label, text}], "commentary": [...], "extra_info": [...]}}.
-    # story ← package stories, commentary ← commentaries, extra_info ← metaphors.
+    # category: {"1-1": {"story": [{label, text}], "commentary": [...], "concept": [...], "extra_info": [...]}}.
+    # story ← package stories, commentary ← commentaries, concept ← Main Teaching
+    # Points, extra_info ← metaphors.
     verse_resources: dict[str, dict[str, list[dict]]] = field(default_factory=dict)
     # Per-verse "Brief introduction" from the Verse Synthesis overview — a short
     # summary shown above the Commentary options (not itself pickable).
@@ -441,8 +442,9 @@ def get_day_content(day: int) -> DayContent:
     ]
 
     # Per-verse selectable resources, mapped to the idea categories they feed:
-    # Story ← stories, Concept ← commentaries, Extra-info ← metaphors. Challenge ←
-    # the day's "Today's Practice" (day-level, so repeated on each verse).
+    # Story ← stories, Commentary ← commentaries, Concept ← Main Teaching Points,
+    # Extra-info ← metaphors. Challenge ← the day's "Today's Practice" (day-level,
+    # so repeated on each verse).
     def _items(resources) -> list[dict]:
         return [{"label": r.label, "text": r.text} for r in resources]
 
@@ -475,6 +477,7 @@ def get_day_content(day: int) -> DayContent:
         verse_resources[vid] = {
             "story": _items(vr.story_items) if vr else [],
             "commentary": _items(vr.commentaries) if vr else [],
+            "concept": _items(vr.teaching_point_items) if vr else [],
             "extra_info": _items(vr.metaphors) if vr else [],
             "practice": list(practice_items),
             # A short, already-distilled overview of the verse (the synthesis'

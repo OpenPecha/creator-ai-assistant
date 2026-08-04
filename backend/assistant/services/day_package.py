@@ -32,6 +32,10 @@ _VERSE_MARKER_RE = re.compile(r"^\*\*Verse\s+([\w.-]+)\*\*\s*$", re.MULTILINE)
 _LINK_RE = re.compile(r"\(?\s*!?\[\[[^\]]*\]\]\s*\)?")
 _SOURCE_NOTE_RE = re.compile(r"^\*?\(Source:.*\)\*?$")
 _HEADING_RE = re.compile(r"^#{1,6}\s*(.+?)\s*$")
+# Numbered list markers ("1. ", "2. ", ...) used by "Main Teaching Points".
+_NUMBERED_ITEM_RE = re.compile(r"^\d+\.\s+")
+# Reformatted "Main Teaching Points" heading-per-item style: "###### 1. Title".
+_NUMBERED_HEADING_RE = re.compile(r"^#{1,6}\s*\d+\.\s*(.+?)\s*$")
 
 
 @dataclass
@@ -50,6 +54,7 @@ class VerseRail:
     story_items: list[Resource] = field(default_factory=list)
     commentaries: list[Resource] = field(default_factory=list)
     metaphors: list[Resource] = field(default_factory=list)
+    teaching_point_items: list[Resource] = field(default_factory=list)
     synthesis_intro: str = ""  # "Brief introduction" from the Verse Synthesis overview
     sections: dict[str, str] = field(default_factory=dict)  # sub-anchor -> cleaned text
 
@@ -173,6 +178,64 @@ def _split_bullets(text: str) -> list[Resource]:
     return out
 
 
+def _split_numbered(text: str) -> list[Resource]:
+    """Split "Main Teaching Points" into one Resource per item.
+
+    Packages are mid-migration to a reformatted style, so both are supported:
+    - Newer: each point is its own heading (`###### 1. Title`) followed by a
+      body paragraph, with no bold markup at all. The label is the heading
+      text; the text is just the body (the heading is shown separately by the
+      UI, so it isn't repeated here).
+    - Older: an inline numbered list (`1. **Point.** explanation`), sometimes
+      with a dash before the explanation and sometimes without. The label is
+      the first bold span; the full item (bold marker included) is kept as
+      the text, matching how metaphors are parsed.
+
+    Heading-style items are tried first; if none are found the text is assumed
+    to be the older inline style.
+    """
+    headed = _split_numbered_headings(text)
+    if headed:
+        return headed
+    return _split_numbered_bullets(text)
+
+
+def _split_numbered_headings(text: str) -> list[Resource]:
+    items: list[dict] = []
+    cur: dict | None = None
+    for line in text.splitlines():
+        m = _NUMBERED_HEADING_RE.match(line.strip())
+        if m:
+            cur = {"label": m.group(1).strip(), "body": []}
+            items.append(cur)
+        elif cur is not None:
+            cur["body"].append(line)
+
+    out: list[Resource] = []
+    for item in items:
+        body = "\n".join(item["body"]).strip()
+        out.append(Resource(label=item["label"], text=body or item["label"]))
+    return out
+
+
+def _split_numbered_bullets(text: str) -> list[Resource]:
+    items: list[list[str]] = []
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        if _NUMBERED_ITEM_RE.match(stripped):
+            items.append([line])
+        elif items:
+            items[-1].append(line)
+
+    out: list[Resource] = []
+    for chunk in items:
+        body = "\n".join(chunk).strip()
+        body = _NUMBERED_ITEM_RE.sub("", body, count=1)
+        m = re.search(r"\*\*(.+?)\*\*", body)
+        out.append(Resource(label=(m.group(1).strip() if m else ""), text=body))
+    return out
+
+
 # ── Segmentation ────────────────────────────────────────────────────────────────
 
 def _segments(body: str) -> list[tuple[str, str]]:
@@ -234,6 +297,7 @@ def _parse_rails(rails_segs: list[tuple[str, str]]) -> list[VerseRail]:
             story_items=[_to_resource(s) for s in stories],
             commentaries=[_to_resource(_clean(t)) for t in state["cm_raw"]],
             metaphors=_split_bullets(sections.get("sub:metaphors", "")),
+            teaching_point_items=_split_numbered(sections.get("sub:teaching-points", "")),
             synthesis_intro=_synthesis_intro(sections.get("sub:synthesis", "")),
             sections=sections,
         )

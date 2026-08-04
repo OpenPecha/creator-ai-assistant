@@ -1,6 +1,6 @@
 """Decide which video ideas a given day's content can support.
 
-Commentary / Practice / Testimony are always offered. Story and Extra info are
+Commentary / Concept / Practice / Testimony are always offered. Story and Extra info are
 conditional: a single Gemini call inspects the day's content and flags whether a
 genuine story or fun fact is present, with a one-line teaser per available idea.
 
@@ -22,6 +22,7 @@ _ANALYSIS_SCHEMA = {
         "extra_info": {"type": "boolean"},
         "extra_info_teaser": {"type": "string"},
         "commentary_teaser": {"type": "string"},
+        "concept_teaser": {"type": "string"},
         "practice_teaser": {"type": "string"},
         "creative_teaser": {"type": "string"},
         "testimony_teaser": {"type": "string"},
@@ -69,6 +70,7 @@ Return JSON with:
 - "extra_info_teaser" (string): only if extra_info is true — a "wait, what?"
   teasing line. If extra_info is false, return "".
 - "commentary_teaser" (string): a teaser for the single most powerful idea in the verses.
+- "concept_teaser" (string): a teaser for one of the verse's core teaching points.
 - "practice_teaser" (string): a teaser for today's practice, framed as a tempting dare.
 - "creative_teaser" (string): a teaser for a fun, universal video about the everyday
   life lesson behind the verse — secular, for everyone, with NO mention of Buddhism,
@@ -113,6 +115,7 @@ def _heuristic(dc: DayContent) -> dict:
         "extra_info": has_info,
         "extra_info_teaser": "A surprising detail from the texts." if has_info else "",
         "commentary_teaser": "Explain the verse's core idea through one classical commentator's specific reading.",
+        "concept_teaser": "Make one of the verse's core teaching points unmistakably clear.",
         "practice_teaser": "Invite viewers to today's practice.",
         "creative_teaser": "An everyday take on today's lesson — for everyone.",
     }
@@ -163,6 +166,7 @@ def available_ideas(dc: DayContent, language: str = "english") -> list[dict]:
     analysis = analyze(dc, language)
     teasers = {
         "commentary": analysis.get("commentary_teaser") or idea_blurb("commentary", language),
+        "concept": analysis.get("concept_teaser") or idea_blurb("concept", language),
         "practice": analysis.get("practice_teaser") or idea_blurb("practice", language),
         "creative": analysis.get("creative_teaser") or idea_blurb("creative", language),
         "testimony": analysis.get("testimony_teaser") or idea_blurb("testimony", language),
