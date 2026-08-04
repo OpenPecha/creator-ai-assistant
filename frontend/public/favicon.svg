@@ -1,22 +1,10 @@
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <!-- Seed of Life: fill union of 7 circles with red to create the natural flower boundary -->
-  <g fill="#C41717" stroke="none">
-    <circle cx="50"   cy="50"    r="22"/>
-    <circle cx="72"   cy="50"    r="22"/>
-    <circle cx="61"   cy="30.95" r="22"/>
-    <circle cx="39"   cy="30.95" r="22"/>
-    <circle cx="28"   cy="50"    r="22"/>
-    <circle cx="39"   cy="69.05" r="22"/>
-    <circle cx="61"   cy="69.05" r="22"/>
-  </g>
-  <!-- White strokes creating the mandala line pattern -->
-  <g fill="none" stroke="white" stroke-width="2.2">
-    <circle cx="50"   cy="50"    r="22"/>
-    <circle cx="72"   cy="50"    r="22"/>
-    <circle cx="61"   cy="30.95" r="22"/>
-    <circle cx="39"   cy="30.95" r="22"/>
-    <circle cx="28"   cy="50"    r="22"/>
-    <circle cx="39"   cy="69.05" r="22"/>
-    <circle cx="61"   cy="69.05" r="22"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 7000 7000">
+<defs>
+<g id="c"><circle cx="3502" cy="3506" r="1660"/><circle cx="5162" cy="3506" r="1660"/><circle cx="4676" cy="4680" r="1660"/><circle cx="3502" cy="5166" r="1660"/><circle cx="2328" cy="4680" r="1660"/><circle cx="1842" cy="3506" r="1660"/><circle cx="2328" cy="2332" r="1660"/><circle cx="3502" cy="1846" r="1660"/><circle cx="4676" cy="2332" r="1660"/></g>
+</defs>
+
+<path d="M6336 4680A1413 1413 0 0 1 4676 6340A1413 1413 0 0 1 2328 6340A1413 1413 0 0 1 668 4680A1413 1413 0 0 1 668 2332A1413 1413 0 0 1 2328 672A1413 1413 0 0 1 4676 672A1413 1413 0 0 1 6336 2332A1413 1413 0 0 1 6336 4680Z" fill="#fff"/>
+<use xlink:href="#c" href="#c" fill="#ff0000"/>
+<use xlink:href="#c" href="#c" fill="none" stroke="#fff" stroke-width="40"/>
+<path d="M3502 3506A1660 1660 0 0 0 3988 4680A1660 1660 0 0 0 3502 3506M3502 3506A1660 1660 0 0 0 3016 4680A1660 1660 0 0 0 3502 3506M3502 3506A1660 1660 0 0 0 2328 3992A1660 1660 0 0 0 3502 3506M3502 3506A1660 1660 0 0 0 2328 3020A1660 1660 0 0 0 3502 3506M3502 3506A1660 1660 0 0 0 3016 2332A1660 1660 0 0 0 3502 3506M3502 3506A1660 1660 0 0 0 3988 2332A1660 1660 0 0 0 3502 3506M3502 3506A1660 1660 0 0 0 4676 3020A1660 1660 0 0 0 3502 3506M3502 3506A1660 1660 0 0 0 4676 3992A1660 1660 0 0 0 3502 3506" fill="none" stroke="#fff" stroke-width="90" stroke-linejoin="round"/>
 </svg>
