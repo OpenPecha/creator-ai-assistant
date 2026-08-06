@@ -138,13 +138,33 @@ def generate(
     for key, value in tokens.items():
         prompt = prompt.replace("{{" + key + "}}", value)
     if focus.strip():
-        label = focus_label.strip() or "piece of source material"
+        label = focus_label.strip()
+        heading = f"## Primary focus — build the video around THIS: {label}" if label else \
+            "## Primary focus — build the video around THIS"
+        commentary_note = (
+            "\nThis is ONE classical commentator's specific reading — not a summary "
+            "of everything today's commentaries say. Build every beat around THEIR "
+            "interpretation; don't blend in other commentators or drift to a generic "
+            "take on the verse. Name them once in the voiceover (the Opening or early "
+            "Middle), and fold in the text/book they're drawn from if it adds "
+            "credibility — same as you'd introduce any named teacher.\n"
+        ) if idea_key == "commentary" else ""
+        concept_note = (
+            "\nThis is ONE distilled teaching point — already extracted and clear, not "
+            "one commentator's personal voice (the explanation below may cite several "
+            "commentators agreeing on it). Build every beat around making THIS exact "
+            "lesson unmistakable: a viewer should be able to repeat it back in their "
+            "own words by the End beat. Don't broaden to the day's general theme or "
+            "blend in other teaching points, and don't turn it into a name-drop of the "
+            "commentators cited below — the lesson is the star, not who said it.\n"
+        ) if idea_key == "concept" else ""
         prompt += (
-            "\n\n## Primary focus — build the video around THIS\n"
-            f"The creator chose one specific {label} from today's content. This IS the "
-            "video — build the entire storyboard around it and keep it the subject of "
-            "every beat, from the opening hook to the close. The rest of the day's "
-            "context above exists ONLY to keep you accurate (correct terms, who a "
+            f"\n\n{heading}\n"
+            f"{commentary_note}{concept_note}"
+            "The creator picked this specific piece of source material for the video. "
+            "This IS the video — build the entire storyboard around it and keep it the "
+            "subject of every beat, from the opening hook to the close. The rest of the "
+            "day's context above exists ONLY to keep you accurate (correct terms, who a "
             "teacher is, faithful meaning) — do NOT pull ideas, images, stories, or "
             "angles from it, and do NOT drift onto the day's general theme or other "
             "verses. If a beat isn't drawn from the material below, it does not belong "

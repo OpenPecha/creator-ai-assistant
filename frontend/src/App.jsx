@@ -27,7 +27,7 @@ const OUTPUT_TYPE_KEYS = ["script", "structure"];
 
 // Display order for idea tabs. The backend decides which keys are available for
 // a given day; the frontend just shows them in this order.
-const TAB_ORDER = ["story", "concept", "extra_info", "practice", "creative", "testimony"];
+const TAB_ORDER = ["story", "commentary", "concept", "extra_info", "practice", "creative", "testimony"];
 
 const LANGUAGES = [
   { key: "english", label: "English" },
@@ -46,11 +46,21 @@ const IDEA_ICONS = {
       <path d="M14 4.5A1.5 1.5 0 0012.5 3H8v10h4.5A1.5 1.5 0 0014 11.5V4.5z"/>
     </svg>
   ),
-  concept: (
+  commentary: (
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
       <path d="M8 2a4 4 0 00-2.12 7.4c.3.18.62.56.62.93V11h3v-.67c0-.37.32-.75.62-.93A4 4 0 008 2z"/>
       <path d="M6.5 11v.5a1.5 1.5 0 003 0V11"/>
       <line x1="6.5" y1="11" x2="9.5" y2="11"/>
+    </svg>
+  ),
+  concept: (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="4" cy="4.5" r="1" fill="currentColor" stroke="none"/>
+      <line x1="7" y1="4.5" x2="14" y2="4.5"/>
+      <circle cx="4" cy="8" r="1" fill="currentColor" stroke="none"/>
+      <line x1="7" y1="8" x2="14" y2="8"/>
+      <circle cx="4" cy="11.5" r="1" fill="currentColor" stroke="none"/>
+      <line x1="7" y1="11.5" x2="14" y2="11.5"/>
     </svg>
   ),
   practice: (
@@ -145,11 +155,12 @@ const UI = {
     noBackground: "No background content yet for this verse.",
     verseLabel: "Verse",
     whatType: "What type of video?",
-    sections: { story: "Story", concept: "Concept", challenge: "Challenge", extraInfo: "Extra info" },
-    tabLabels: { story: "Story", concept: "Concept", practice: "Challenge", extra_info: "Extra info", creative: "Creative", testimony: "Testimony" },
+    sections: { story: "Story", commentary: "Commentary", challenge: "Challenge", extraInfo: "Extra info" },
+    tabLabels: { story: "Story", commentary: "Commentary", concept: "Concept", practice: "Challenge", extra_info: "Extra info", creative: "Creative", testimony: "Testimony" },
     tabDescriptions: {
       story: "A story from today's teaching — a narrative with characters and a turning point you can retell.",
-      concept: "The core idea of the verse, drawn from the classical commentaries.",
+      commentary: "The classical commentaries' explanation of the verse's core idea.",
+      concept: "One of the verse's core teaching points, distilled from the commentaries.",
       practice: "Today's practice — a simple, doable action to invite viewers to try.",
       extra_info: "A surprising detail — the metaphors and images the commentaries use to explain the verse.",
       creative: "A fun, everyday take on the lesson — secular, for anyone, with no scripture or Buddhist terms.",
@@ -161,7 +172,7 @@ const UI = {
     readMore: "Read more",
     readLess: "Read less",
     overviewNote: "This overview is AI-generated from the classical commentaries, which are rooted in the source — nothing is invented.",
-    conceptSourceNote: "Each explanation above comes straight from the classical commentaries in the source — nothing here is AI-generated.",
+    commentarySourceNote: "Each explanation above comes straight from the classical commentaries in the source — nothing here is AI-generated.",
     generateThis: "Generate idea",
     generateVideo: "Generate idea",
     // output types
@@ -254,11 +265,12 @@ const UI = {
     noBackground: "इस श्लोक के लिए अभी कोई अतिरिक्त सामग्री नहीं है।",
     verseLabel: "श्लोक",
     whatType: "किस तरह का वीडियो?",
-    sections: { story: "कहानी", concept: "मुख्य विचार", challenge: "चुनौती", extraInfo: "रोचक जानकारी" },
-    tabLabels: { story: "कहानी", concept: "मुख्य विचार", practice: "चुनौती", extra_info: "रोचक जानकारी", creative: "क्रिएटिव", testimony: "आपका अनुभव" },
+    sections: { story: "कहानी", commentary: "टीका", challenge: "चुनौती", extraInfo: "रोचक जानकारी" },
+    tabLabels: { story: "कहानी", commentary: "टीका", concept: "मुख्य विचार", practice: "चुनौती", extra_info: "रोचक जानकारी", creative: "क्रिएटिव", testimony: "आपका अनुभव" },
     tabDescriptions: {
       story: "आज की शिक्षा से एक कहानी — पात्रों और एक मोड़ के साथ, जिसे आप सुना सकें।",
-      concept: "श्लोक का मूल विचार, पारंपरिक टीकाओं (commentaries) से लिया गया।",
+      commentary: "पारंपरिक टीकाओं द्वारा श्लोक के मूल विचार की व्याख्या।",
+      concept: "टीकाओं से निकाला गया श्लोक का एक मुख्य विचार।",
       practice: "आज का अभ्यास — एक सरल काम जिसे करने के लिए आप दर्शकों को कह सकें।",
       extra_info: "एक रोचक बात — टीकाओं में श्लोक समझाने के लिए दिए गए उपमा और उदाहरण।",
       creative: "पाठ का एक रोज़मर्रा, सरल पहलू — सभी के लिए, बिना किसी धार्मिक या बौद्ध शब्द के।",
@@ -270,7 +282,7 @@ const UI = {
     readMore: "और पढ़ें",
     readLess: "कम पढ़ें",
     overviewNote: "यह सारांश पारंपरिक टीकाओं से AI द्वारा तैयार किया गया है, जो स्रोत पर आधारित हैं — कुछ भी मनगढ़ंत नहीं।",
-    conceptSourceNote: "ऊपर दी गई हर व्याख्या सीधे मूल ग्रंथों की पारंपरिक टीकाओं से ली गई है — यहाँ कुछ भी AI द्वारा तैयार नहीं है।",
+    commentarySourceNote: "ऊपर दी गई हर व्याख्या सीधे मूल ग्रंथों की पारंपरिक टीकाओं से ली गई है — यहाँ कुछ भी AI द्वारा तैयार नहीं है।",
     generateThis: "आइडिया जनरेट करें",
     generateVideo: "आइडिया जनरेट करें",
     outputTypes: {
@@ -565,7 +577,7 @@ export default function App() {
     setStage("generating");
     try {
       const focusFields = ideaFocus
-        ? { focus: ideaFocus.text, focusLabel: ideaFocus.typeLabel || ideaFocus.label }
+        ? { focus: ideaFocus.text, focusLabel: ideaFocus.label || ideaFocus.typeLabel }
         : {};
       if (outputType === "structure") {
         const payload = { day, ideaKey, durationSeconds: seconds, creatorNotes, language, ...focusFields };
@@ -894,9 +906,9 @@ export default function App() {
 
 
 // Idea tabs that map to concrete source material the creator can pick from:
-// Story ← package stories, Concept ← commentaries, Extra-info ← metaphors,
-// Challenge ← "Today's Practice".
-const RESOURCE_TABS = new Set(["story", "concept", "extra_info", "practice"]);
+// Story ← package stories, Commentary ← commentaries, Concept ← Main Teaching
+// Points, Extra-info ← metaphors, Challenge ← "Today's Practice".
+const RESOURCE_TABS = new Set(["story", "commentary", "concept", "extra_info", "practice"]);
 
 // Categories that only make sense when this specific verse has the material —
 // hidden entirely on verses with no story / no metaphor.
@@ -918,7 +930,7 @@ function renderRichText(s) {
 // toggle is shown ONLY when the text actually overflows those 2 lines (measured
 // from the DOM), so a short overview never gets a pointless toggle. A character
 // count can't decide this reliably — especially across scripts like Devanagari.
-function ConceptOverview({ text, t }) {
+function CommentaryOverview({ text, t }) {
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
@@ -976,14 +988,14 @@ function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
   // Tabs shown for this verse:
   //  - Story and Extra-info are per-verse: shown ONLY when this verse actually has
   //    a story / metaphor, so they're hidden on verses that lack them.
-  //  - The rest (Concept, Challenge, Creative, Testimony) always show, per the
-  //    day's availableIdeas (Concept/Challenge also carry per-verse material).
+  //  - The rest (Commentary, Challenge, Creative, Testimony) always show, per the
+  //    day's availableIdeas (Commentary/Challenge also carry per-verse material).
   const ideaByKey = Object.fromEntries((ideas || []).map((i) => [i.key, i]));
   const hasResource = (key) => RESOURCE_TABS.has(key) && (resources[key] || []).length > 0;
   const tabs = TAB_ORDER.filter((key) =>
     VERSE_GATED_TABS.has(key) ? hasResource(key) : (!!ideaByKey[key] || hasResource(key))
   );
-  const [activeTab, setActiveTab] = useState(tabs[0] ?? "concept");
+  const [activeTab, setActiveTab] = useState(tabs[0] ?? "commentary");
 
   function handleToggle() {
     if (!open && tabs.length > 0 && !tabs.includes(activeTab)) {
@@ -1043,12 +1055,12 @@ function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
               comes from), instead of an AI-written example line. */}
           <p className="vcard__resource-desc">{t.tabDescriptions?.[activeTab] || ""}</p>
 
-          {/* Concept tab: a short, pre-distilled overview of the verse (the
+          {/* Commentary tab: a short, pre-distilled overview of the verse (the
               synthesis' "Brief introduction") above the commentaries — like an
               at-a-glance summary, not a selectable option. Clamped to 2 lines with
               a Read more toggle when the text runs long. */}
-          {activeTab === "concept" && (resources.concept_overview || "").trim() ? (
-            <ConceptOverview key={(resources.concept_overview || "").trim()} text={(resources.concept_overview || "").trim()} t={t} />
+          {activeTab === "commentary" && (resources.commentary_overview || "").trim() ? (
+            <CommentaryOverview key={(resources.commentary_overview || "").trim()} text={(resources.commentary_overview || "").trim()} t={t} />
           ) : null}
 
           <div className="vcard__options">
@@ -1101,11 +1113,11 @@ function VerseCard({ verse, idx, ideas, resources = {}, onChooseIdea, busy }) {
             )}
           </div>
 
-          {/* Provenance footer for the Concept tab: the commentary cards above are
+          {/* Provenance footer for the Commentary tab: the commentary cards above are
               the genuine classical commentators' words from the source (unlike the
               AI Overview at the top), so reassure the creator they're authentic. */}
-          {activeTab === "concept" && resourceItems.length > 0 ? (
-            <p className="vcard__source-note">{t.conceptSourceNote}</p>
+          {activeTab === "commentary" && resourceItems.length > 0 ? (
+            <p className="vcard__source-note">{t.commentarySourceNote}</p>
           ) : null}
         </div>
       )}

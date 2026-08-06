@@ -98,7 +98,7 @@ def day_detail(request, day: int):
         simplified = overview_simplifier.simplify(dc, language)
         for vid, text in simplified.items():
             if vid in dc.verse_resources:
-                dc.verse_resources[vid]["concept_overview"] = text
+                dc.verse_resources[vid]["commentary_overview"] = text
     except Exception:
         logger.warning("Overview simplify failed (day=%s)", day, exc_info=True)
 

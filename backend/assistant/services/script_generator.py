@@ -44,16 +44,18 @@ def _revision_block(previous: str, feedback: str) -> str:
 
 
 def _focus_block(focus: str, focus_label: str = "") -> str:
-    label = focus_label.strip() or "piece of source material"
+    label = focus_label.strip()
+    heading = f"## Primary focus — build the video around THIS: {label}" if label else \
+        "## Primary focus — build the video around THIS"
     return (
-        "\n\n## Primary focus — build the video around THIS\n"
-        f"The creator chose one specific {label} from today's content. This IS the "
-        "video — build the entire script around it and keep it the subject from the "
-        "first line to the last. The rest of the day's context above exists ONLY to "
-        "keep you accurate (correct terms, who a teacher is, faithful meaning) — do "
-        "not pull in other ideas, stories, or angles from it, and do not let the "
-        "script drift onto the day's general theme. If it isn't about the material "
-        "below, cut it:\n\n"
+        f"\n\n{heading}\n"
+        "The creator picked this specific piece of source material for the video. "
+        "This IS the video — build the entire script around it and keep it the "
+        "subject from the first line to the last. The rest of the day's context "
+        "above exists ONLY to keep you accurate (correct terms, who a teacher is, "
+        "faithful meaning) — do not pull in other ideas, stories, or angles from "
+        "it, and do not let the script drift onto the day's general theme. If it "
+        "isn't about the material below, cut it:\n\n"
         f'"""\n{focus.strip()[:2500]}\n"""\n'
     )
 
