@@ -141,6 +141,7 @@ const UI = {
     testimonyPlaceholder: "Your experience or notes (optional)…",
     refinePlaceholder: `Ask for a change — e.g. "make the hook punchier" or "shorten the opening"…`,
     regenerate: "↻ Regenerate",
+    backToVerses: "Pick a different verse or type",
     makeAnother: "+ Make another video",
     tryAgain: "↻ Try again",
     // Shown for transient failures (5xx / network); retryable → gets a Try-again chip.
@@ -254,6 +255,7 @@ const UI = {
     testimonyPlaceholder: "आपका अनुभव या नोट्स (वैकल्पिक)…",
     refinePlaceholder: `कोई बदलाव बताइए — जैसे "शुरुआत को और दमदार बनाओ" या "ओपनिंग छोटी करो"…`,
     regenerate: "↻ फिर से बनाएँ",
+    backToVerses: "कोई और श्लोक या प्रकार चुनें",
     makeAnother: "+ एक और वीडियो बनाएँ",
     tryAgain: "↻ फिर से कोशिश करें",
     contentUnavailable: "कंटेंट सेवा अभी अस्थायी रूप से उपलब्ध नहीं है। कृपया थोड़ी देर बाद फिर से कोशिश करें।",
@@ -344,6 +346,15 @@ function SendIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="22" y1="2" x2="11" y2="13" />
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
+    </svg>
+  );
+}
+
+function BackIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
     </svg>
   );
 }
@@ -663,6 +674,22 @@ export default function App() {
     addMsg("assistant", t.another);
   }
 
+  // Same-day "back" — unlike restart(), this keeps day/pendingIdeas/
+  // currentVerseLines/currentVerseResources so the verse picker reappears
+  // instantly with no refetch.
+  function backToVerses() {
+    setIdeaKey(null);
+    setIdeaFocus(null);
+    setCreatorNotes("");
+    setOutputType("script");
+    setDuration(null);
+    setLastOutput(null);
+    setRefineInput("");
+    setTestimonyInput("");
+    addMsg("assistant", t.pickVerse);
+    setStage("askVerseIdea");
+  }
+
   return (
    <VoiceContext.Provider value={{ voice, changeVoice }}>
    <LangContext.Provider value={t}>
@@ -763,6 +790,12 @@ export default function App() {
           </div>
         )}
 
+        {!busy && ["askOutputType", "askTestimony", "askDuration"].includes(stage) && (
+          <button type="button" className="back-link" onClick={backToVerses}>
+            <BackIcon />{t.backToVerses}
+          </button>
+        )}
+
         {!busy && stage === "askOutputType" && (
           <div className="ideas">
             {OUTPUT_TYPE_KEYS.map((key) => (
@@ -804,10 +837,15 @@ export default function App() {
         )}
 
         {!busy && stage === "done" && (
-          <div className="choices">
-            <button className="chip" onClick={regenerate}>{t.regenerate}</button>
-            <button className="chip chip--ghost" onClick={restart}>{t.makeAnother}</button>
-          </div>
+          <>
+            <button type="button" className="back-link" onClick={backToVerses}>
+              <BackIcon />{t.backToVerses}
+            </button>
+            <div className="choices">
+              <button className="chip" onClick={regenerate}>{t.regenerate}</button>
+              <button className="chip chip--ghost" onClick={restart}>{t.makeAnother}</button>
+            </div>
+          </>
         )}
       </main>
 
