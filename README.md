@@ -53,7 +53,22 @@ prompt templates ("skills") to generate everything else.
    it** ("make the hook punchier", "shorten the opening"). Scripts can also be
    turned into **narrated audio**. At any point after picking a category, **‹ Pick
    a different verse or type** jumps back to the verse picker for the same day —
-   no reload, no refetch.
+   no reload, no refetch. Once a result looks good, **Send for review** saves it
+   to the team's GitHub review vault (see below).
+
+### Team review vault
+**Send for review** (shown next to Regenerate once a script/structure is ready)
+publishes that one result as a markdown file — with day/idea/focus/duration
+frontmatter — to a separate GitHub repo the team browses as an **Obsidian
+vault**. It's an explicit, creator-triggered save, not an automatic one: every
+`Regenerate` or refine is *not* pushed, only the take someone actually chooses
+to share. Saving the same (day, idea, focus, duration, language) again — e.g.
+after a refine — updates that same file in place, so git's own commit history
+becomes the version/feedback trail; teammates leave feedback by editing the
+note directly (a `## Feedback` section, or Obsidian's `%%hidden comment%%`
+syntax). Configured via `GITHUB_REVIEW_REPO` / `GITHUB_REVIEW_TOKEN` (see Local
+setup) — without them, the button fails with a clear "not configured" message
+rather than silently doing nothing.
 
 ### Video structure — three complete versions, not mix-and-match beats
 A **Video structure** result is three full alternate storyboards (Version 1/2/3),
@@ -100,6 +115,10 @@ Set in `backend/.env`:
   from GitHub, no local clone needed. Defaults to `webuddhist/bodhisattvacharyavatara-rails`.
 - `GITHUB_TOKEN` — optional but recommended (raises the GitHub API rate limit from
   60 to 5000/hour).
+- `GITHUB_REVIEW_REPO` + `GITHUB_REVIEW_TOKEN` — optional; enables **Send for
+  review**. A separate write-scoped token for a separate repo (the team's
+  Obsidian review vault) — leave unset to disable the feature with a clear
+  "not configured" message instead of an error.
 - `GEMINI_API_KEY` — your Google Gemini API key (summary, script, structure, audio).
 
 ```bash
@@ -132,6 +151,7 @@ Open http://localhost:5173 and start with a day number (e.g. `5`).
 | POST | `/api/script/` | `{day, ideaKey, durationSeconds, language, focus?, focusLabel?, creatorNotes?, feedback?, previous?}` → `{script}` |
 | POST | `/api/structure/` | `{day, ideaKey, durationSeconds, language, focus?, focusLabel?, creatorNotes?, feedback?, previous?}` → `{structure}` |
 | POST | `/api/audio/` | `{script, voice?}` → `{audioUrl}` |
+| POST | `/api/save-for-review/` | `{day, ideaKey, durationSeconds, language, outputType, content, focusLabel?}` → `{url}` — publishes to the team review vault |
 
 - `language` — `"english"` or `"hindi"`; passed to all generation endpoints so the
   output is produced in the chosen language end-to-end.

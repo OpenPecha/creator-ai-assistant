@@ -143,6 +143,10 @@ const UI = {
     regenerate: "↻ Regenerate",
     backToVerses: "Pick a different verse or type",
     makeAnother: "+ Make another video",
+    sendForReview: "Send for review",
+    sendingForReview: "Sending…",
+    savedForReview: "✓ Sent — view in vault",
+    reviewSaveError: "Couldn't send — retry",
     tryAgain: "↻ Try again",
     // Shown for transient failures (5xx / network); retryable → gets a Try-again chip.
     contentUnavailable: "The content service is temporarily unavailable. Please try again in a moment.",
@@ -257,6 +261,10 @@ const UI = {
     regenerate: "↻ फिर से बनाएँ",
     backToVerses: "कोई और श्लोक या प्रकार चुनें",
     makeAnother: "+ एक और वीडियो बनाएँ",
+    sendForReview: "समीक्षा के लिए भेजें",
+    sendingForReview: "भेजा जा रहा है…",
+    savedForReview: "✓ भेजा गया — वॉल्ट में देखें",
+    reviewSaveError: "भेज नहीं पाया — फिर कोशिश करें",
     tryAgain: "↻ फिर से कोशिश करें",
     contentUnavailable: "कंटेंट सेवा अभी अस्थायी रूप से उपलब्ध नहीं है। कृपया थोड़ी देर बाद फिर से कोशिश करें।",
     somethingWrong: (m) => `कुछ गड़बड़ हो गई: ${m}`,
@@ -397,6 +405,7 @@ export default function App() {
   const [outputType, setOutputType] = useState("script");
   const [duration, setDuration] = useState(null);
   const [lastOutput, setLastOutput] = useState(null);
+  const [reviewState, setReviewState] = useState({ status: "idle" }); // "idle" | "saving" | "saved" | "error"
   const [refineInput, setRefineInput] = useState("");
   const [currentVerseLines, setCurrentVerseLines] = useState([]);
   const [currentVerseResources, setCurrentVerseResources] = useState({});
@@ -586,6 +595,7 @@ export default function App() {
   async function generate({ seconds, feedback = "", previous = null, onErrorStage }) {
     setBusy(true);
     setStage("generating");
+    setReviewState({ status: "idle" });
     try {
       const focusFields = ideaFocus
         ? { focus: ideaFocus.text, focusLabel: ideaFocus.label || ideaFocus.typeLabel }
@@ -609,6 +619,20 @@ export default function App() {
       setStage(onErrorStage);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function saveForReview() {
+    setReviewState({ status: "saving" });
+    try {
+      const data = await api.saveForReview({
+        day, ideaKey, durationSeconds: duration, language, outputType,
+        content: lastOutput,
+        focusLabel: ideaFocus?.label || ideaFocus?.typeLabel || "",
+      });
+      setReviewState({ status: "saved", url: data.url });
+    } catch (err) {
+      setReviewState({ status: "error", error: err.message });
     }
   }
 
@@ -844,6 +868,24 @@ export default function App() {
             <div className="choices">
               <button className="chip" onClick={regenerate}>{t.regenerate}</button>
               <button className="chip chip--ghost" onClick={restart}>{t.makeAnother}</button>
+              {reviewState.status === "idle" && (
+                <button type="button" className="chip chip--ghost" onClick={saveForReview}>
+                  {t.sendForReview}
+                </button>
+              )}
+              {reviewState.status === "saving" && (
+                <button type="button" className="chip chip--ghost" disabled>{t.sendingForReview}</button>
+              )}
+              {reviewState.status === "saved" && (
+                <a className="chip chip--ghost" href={reviewState.url} target="_blank" rel="noopener noreferrer">
+                  {t.savedForReview}
+                </a>
+              )}
+              {reviewState.status === "error" && (
+                <button type="button" className="chip chip--ghost" onClick={saveForReview} title={reviewState.error}>
+                  {t.reviewSaveError}
+                </button>
+              )}
             </div>
           </>
         )}

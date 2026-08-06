@@ -44,6 +44,13 @@ GITHUB_TOKEN = env("GITHUB_TOKEN", default="")
 # pushes; 0 disables caching (always fetch fresh).
 GITHUB_CACHE_TTL = env.int("GITHUB_CACHE_TTL", default=300)
 
+# Separate GitHub repo the team reviews generated video ideas in, as an
+# Obsidian vault ("owner/repo-name"). Deliberately its own repo/token (write
+# access), never the read-only source-content repo/token above.
+GITHUB_REVIEW_REPO = env("GITHUB_REVIEW_REPO", default="")
+GITHUB_REVIEW_BRANCH = env("GITHUB_REVIEW_BRANCH", default="main")
+GITHUB_REVIEW_TOKEN = env("GITHUB_REVIEW_TOKEN", default="")
+
 # WeBuddhist plan integration — the public plan API supplies the "today's
 # challenge" shareable image, and the share site hosts the per-day plan link.
 # Each CHAPTER is published as its own separate WeBuddhist "plan" (its own plan

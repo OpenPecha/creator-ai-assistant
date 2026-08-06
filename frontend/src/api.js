@@ -38,4 +38,6 @@ export const api = {
     request("/structure/", { method: "POST", body: JSON.stringify(payload) }),
   generateAudio: (payload) =>
     request("/audio/", { method: "POST", body: JSON.stringify(payload) }),
+  saveForReview: (payload) =>
+    request("/save-for-review/", { method: "POST", body: JSON.stringify(payload) }),
 };
