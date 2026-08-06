@@ -1175,6 +1175,26 @@ body {
 /* ── Duration chips ── */
 .choices { display: flex; gap: 8px; flex-wrap: wrap; align-self: flex-start; margin-top: 4px; }
 
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  margin: 2px 0 8px;
+  padding: 8px 14px;
+  margin-left: -14px;
+  background: none;
+  border: 1px dashed transparent;
+  border-radius: 999px;
+  color: #2563eb;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.12s var(--ease), border-color 0.12s var(--ease);
+}
+.back-link:hover { background: #eff6ff; border-color: #93c5fd; }
+
 .chip {
   background: var(--surface);
   color: var(--ink-soft);
@@ -1449,6 +1469,7 @@ body {
 }
 .beat__opt:hover { border-color: #2563eb; color: #2563eb; }
 .beat__opt--active { background: #2563eb; border-color: #2563eb; color: #fff; }
+.beat__opt--active:hover { color: #fff; }
 
 .structure__hint {
   font-size: 0.8rem;
@@ -1459,6 +1480,7 @@ body {
   padding: 9px 13px;
   margin-bottom: 14px;
 }
+.structure__versions { margin-bottom: 20px; }
 .beat__block { margin-top: 8px; }
 .beat__tag {
   display: block;

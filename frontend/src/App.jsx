@@ -141,6 +141,7 @@ const UI = {
     testimonyPlaceholder: "Your experience or notes (optional)…",
     refinePlaceholder: `Ask for a change — e.g. "make the hook punchier" or "shorten the opening"…`,
     regenerate: "↻ Regenerate",
+    backToVerses: "Pick a different verse or type",
     makeAnother: "+ Make another video",
     tryAgain: "↻ Try again",
     // Shown for transient failures (5xx / network); retryable → gets a Try-again chip.
@@ -183,8 +184,8 @@ const UI = {
     // structure view
     coreTheme: "Core theme",
     concept: "Concept",
-    optionsHint: "Each part has a few options — tap the numbers to compare and mix.",
-    option: "Option",
+    optionsHint: "This video has a few full versions, start to finish — tap a number to switch between them.",
+    option: "Version",
     onScreen: "On screen",
     voiceover: "Voiceover",
     generateAudio: "Generate audio",
@@ -254,6 +255,7 @@ const UI = {
     testimonyPlaceholder: "आपका अनुभव या नोट्स (वैकल्पिक)…",
     refinePlaceholder: `कोई बदलाव बताइए — जैसे "शुरुआत को और दमदार बनाओ" या "ओपनिंग छोटी करो"…`,
     regenerate: "↻ फिर से बनाएँ",
+    backToVerses: "कोई और श्लोक या प्रकार चुनें",
     makeAnother: "+ एक और वीडियो बनाएँ",
     tryAgain: "↻ फिर से कोशिश करें",
     contentUnavailable: "कंटेंट सेवा अभी अस्थायी रूप से उपलब्ध नहीं है। कृपया थोड़ी देर बाद फिर से कोशिश करें।",
@@ -291,8 +293,8 @@ const UI = {
     },
     coreTheme: "मुख्य थीम",
     concept: "मुख्य विचार",
-    optionsHint: "हर हिस्से के कुछ विकल्प हैं — तुलना और मिलान के लिए नंबरों पर टैप करें।",
-    option: "विकल्प",
+    optionsHint: "इस वीडियो के कुछ पूरे वर्शन हैं, शुरू से अंत तक — बदलने के लिए किसी नंबर पर टैप करें।",
+    option: "वर्शन",
     onScreen: "स्क्रीन पर",
     voiceover: "वॉयसओवर",
     generateAudio: "ऑडियो बनाएँ",
@@ -344,6 +346,15 @@ function SendIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <line x1="22" y1="2" x2="11" y2="13" />
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
+    </svg>
+  );
+}
+
+function BackIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 14 4 9l5-5" />
+      <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
     </svg>
   );
 }
@@ -663,6 +674,22 @@ export default function App() {
     addMsg("assistant", t.another);
   }
 
+  // Same-day "back" — unlike restart(), this keeps day/pendingIdeas/
+  // currentVerseLines/currentVerseResources so the verse picker reappears
+  // instantly with no refetch.
+  function backToVerses() {
+    setIdeaKey(null);
+    setIdeaFocus(null);
+    setCreatorNotes("");
+    setOutputType("script");
+    setDuration(null);
+    setLastOutput(null);
+    setRefineInput("");
+    setTestimonyInput("");
+    addMsg("assistant", t.pickVerse);
+    setStage("askVerseIdea");
+  }
+
   return (
    <VoiceContext.Provider value={{ voice, changeVoice }}>
    <LangContext.Provider value={t}>
@@ -763,6 +790,12 @@ export default function App() {
           </div>
         )}
 
+        {!busy && ["askOutputType", "askTestimony", "askDuration"].includes(stage) && (
+          <button type="button" className="back-link" onClick={backToVerses}>
+            <BackIcon />{t.backToVerses}
+          </button>
+        )}
+
         {!busy && stage === "askOutputType" && (
           <div className="ideas">
             {OUTPUT_TYPE_KEYS.map((key) => (
@@ -804,10 +837,15 @@ export default function App() {
         )}
 
         {!busy && stage === "done" && (
-          <div className="choices">
-            <button className="chip" onClick={regenerate}>{t.regenerate}</button>
-            <button className="chip chip--ghost" onClick={restart}>{t.makeAnother}</button>
-          </div>
+          <>
+            <button type="button" className="back-link" onClick={backToVerses}>
+              <BackIcon />{t.backToVerses}
+            </button>
+            <div className="choices">
+              <button className="chip" onClick={regenerate}>{t.regenerate}</button>
+              <button className="chip chip--ghost" onClick={restart}>{t.makeAnother}</button>
+            </div>
+          </>
         )}
       </main>
 
@@ -1235,11 +1273,11 @@ function formatTimeRange(timeRange) {
   return /sec|min|:/i.test(timeRange) ? timeRange : `${timeRange} sec`;
 }
 
-function structureToText(s, sel = {}) {
+function structureToText(s, trackIdx = 0) {
   const lines = [`Core theme: ${s.coreTheme}`, `Concept: "${s.concept}"`, ""];
-  (s.sections || []).forEach((sec, i) => {
+  (s.sections || []).forEach((sec) => {
     const options = sectionOptions(sec);
-    const opt = options[Math.min(sel[i] || 0, options.length - 1)];
+    const opt = options[Math.min(trackIdx, options.length - 1)];
     lines.push(`[${sec.label} · ${sec.timeRange}]`);
     lines.push("On screen:");
     (opt.visuals || []).forEach((v) => lines.push(`  - ${v}`));
@@ -1253,11 +1291,11 @@ function StructureView({ structure }) {
   const t = useUI();
   const { voice: voiceKey, changeVoice } = useVoice();
   const [copied, setCopied] = useState(false);
-  const [sel, setSel] = useState({});   // section index -> chosen option index
+  const [trackIdx, setTrackIdx] = useState(0);   // which of the 3 full versions is showing
   const [vo, setVo] = useState({});      // "beat:option" -> { url, loading, error }
 
   const copy = () => {
-    navigator.clipboard.writeText(structureToText(structure, sel));
+    navigator.clipboard.writeText(structureToText(structure, trackIdx));
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
   };
@@ -1294,13 +1332,36 @@ function StructureView({ structure }) {
         </div>
       </div>
 
-      {(structure.sections || []).some((s) => sectionOptions(s).length > 1) && (
-        <p className="structure__hint">{t.optionsHint}</p>
-      )}
+      {(() => {
+        const versionCount = Math.max(
+          1, ...(structure.sections || []).map((s) => sectionOptions(s).length)
+        );
+        if (versionCount <= 1) return null;
+        return (
+          <>
+            <p className="structure__hint">{t.optionsHint}</p>
+            <div className="beat__options structure__versions">
+              <span className="beat__options-label">{t.option}</span>
+              <div className="beat__opts">
+                {Array.from({ length: versionCount }, (_, k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    className={`beat__opt ${k === trackIdx ? "beat__opt--active" : ""}`}
+                    onClick={() => setTrackIdx(k)}
+                  >
+                    {k + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {(structure.sections || []).map((sec, i) => {
         const options = sectionOptions(sec);
-        const idx = Math.min(sel[i] || 0, options.length - 1);
+        const idx = Math.min(trackIdx, options.length - 1);
         const opt = options[idx];
 
         return (
@@ -1309,23 +1370,6 @@ function StructureView({ structure }) {
               <span className="beat__label">{sec.label}</span>
               <span className="beat__time">{formatTimeRange(sec.timeRange)}</span>
             </div>
-            {options.length > 1 && (
-              <div className="beat__options">
-                <span className="beat__options-label">{t.option}</span>
-                <div className="beat__opts">
-                  {options.map((_, k) => (
-                    <button
-                      key={k}
-                      type="button"
-                      className={`beat__opt ${k === idx ? "beat__opt--active" : ""}`}
-                      onClick={() => setSel((s) => ({ ...s, [i]: k }))}
-                    >
-                      {k + 1}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
             <div className="beat__block">
               <span className="beat__tag">{t.onScreen}</span>
               <ul className="beat__visuals">

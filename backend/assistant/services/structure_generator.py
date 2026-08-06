@@ -54,31 +54,51 @@ def _length_budget(duration_seconds: int, *, self_contained: bool = False) -> st
     longer durations are absorbed by giving each beat MORE voiceover — the Middle
     carrying most of it — rather than by adding beats. Without this the model
     produces the same three short beats at every length.
+
+    Spells out a per-beat word RANGE (not just a single target) and asks the
+    model to literally count words and rewrite before returning, since a bare
+    "aim for ~N words" target is easy for the model to drift from — the
+    self-check turns it into something the model actually verifies rather than
+    estimates.
     """
     target = length_service.target_words(duration_seconds)
     low, high = length_service.word_range(duration_seconds)
     opening, middle, end = length_service.section_words(duration_seconds)
     op_s, mid_s, end_s = length_service.section_seconds(duration_seconds)
+    (op_lo, op_hi), (mid_lo, mid_hi), (end_lo, end_hi) = length_service.section_word_range(duration_seconds)
 
     if self_contained:
         return (
             f"This is a {duration_seconds}-second video in the three beats — Opening "
-            f"(~{op_s}s), Middle (~{mid_s}s), End (~{end_s}s). Keep every voiceover a "
+            f"(~{op_s}s, {op_lo}–{op_hi} words), Middle (~{mid_s}s, {mid_lo}–{mid_hi} "
+            f"words), End (~{end_s}s, {end_lo}–{end_hi} words). Keep every voiceover a "
             "crisp one-liner. For a longer video, the Middle can hold two or three "
             "short lines and the visuals fill the rest of the seconds — never stuff "
             "a single line with extra words. Hold each beat's option voiceovers to a "
-            "similar, punchy length so the total holds whichever the creator picks."
+            "similar, punchy length so the total holds whichever the creator picks.\n"
+            "**Before you finalize, literally count the words in every voiceover "
+            "line and rewrite any that fall outside its beat's word range above.** "
+            "The creator times the shoot to these seconds exactly — a line that runs "
+            "short or long throws off the whole take, so hitting the count matters "
+            "as much as what the line says."
         )
 
     return (
         f"At a natural speaking pace a {duration_seconds}-second video is about "
         f"{target} spoken words. Keep the three fixed beats and fit the whole "
-        f"{target} words ({low}–{high}) INTO them — do not add beats. Aim for roughly "
-        f"{opening} words in the Opening, {middle} in the Middle (it carries most of "
-        f"it), and {end} to land the End. The creator picks ONE option per beat, so "
-        "size every option within a beat to about the same length. A longer video "
-        "means fuller lines in each beat — especially the Middle — not extra beats; a "
-        "shorter one stays tight."
+        f"{target} words ({low}–{high}) INTO them — do not add beats. This is a HARD "
+        f"requirement, not a rough guide: Opening {op_lo}–{op_hi} words, Middle "
+        f"{mid_lo}–{mid_hi} words (it carries most of it), End {end_lo}–{end_hi} "
+        "words. The creator picks ONE option per beat, so every option within a beat "
+        "must land in that SAME beat's range — not just one of the three. A longer "
+        "video means fuller lines in each beat — especially the Middle — not extra "
+        "beats; a shorter one stays tight.\n"
+        "**Before you finalize your answer, literally count the words in every "
+        "voiceover option you wrote (all beats, all versions) and rewrite any that "
+        "fall outside its beat's word range above — do not skip this check.** The "
+        "creator times their shoot to the seconds they picked; a voiceover that reads "
+        "noticeably faster or slower than that breaks the take, so hitting the word "
+        "count matters as much as what the line says."
     )
 
 
@@ -145,9 +165,15 @@ def generate(
             "\nThis is ONE classical commentator's specific reading — not a summary "
             "of everything today's commentaries say. Build every beat around THEIR "
             "interpretation; don't blend in other commentators or drift to a generic "
-            "take on the verse. Name them once in the voiceover (the Opening or early "
-            "Middle), and fold in the text/book they're drawn from if it adds "
-            "credibility — same as you'd introduce any named teacher.\n"
+            "take on the verse. **Name them by name only ONCE across this version's "
+            "three beats** (the Opening or early Middle), and fold in the text/book "
+            "they're drawn from there if it adds credibility — same as you'd introduce "
+            "any named teacher on camera. In the OTHER two beats of this same version, "
+            "do NOT say their name or title again — refer to them with a pronoun "
+            "('he,' 'his teaching') or drop the reference entirely and just carry the "
+            "idea forward. A real creator introduces their source once, not in every "
+            "beat — three separate re-introductions of the same teacher in one video "
+            "reads as a scripting mistake, not a style choice.\n"
         ) if idea_key == "commentary" else ""
         concept_note = (
             "\nThis is ONE distilled teaching point — already extracted and clear, not "
