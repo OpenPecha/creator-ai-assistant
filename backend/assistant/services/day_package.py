@@ -158,8 +158,9 @@ def _split_bullets(text: str) -> list[Resource]:
     """Split a bulleted section (e.g. metaphors) into one Resource per bullet.
 
     Each item's label is its leading bold term (`**A well-filled vase**`); the
-    text is the full bullet. Non-bullet lines (e.g. the section heading) are
-    ignored until the first bullet.
+    term is stripped from the text so it isn't shown twice (once as the label,
+    once repeated inline) — only the rest of the bullet is kept. Non-bullet
+    lines (e.g. the section heading) are ignored until the first bullet.
     """
     items: list[list[str]] = []
     for line in text.splitlines():
@@ -173,8 +174,11 @@ def _split_bullets(text: str) -> list[Resource]:
     for chunk in items:
         body = "\n".join(chunk).strip()
         body = re.sub(r"^[-*]\s+", "", body)
-        m = re.search(r"\*\*(.+?)\*\*", body)
-        out.append(Resource(label=(m.group(1).strip() if m else ""), text=body))
+        m = re.match(r"\*\*(.+?)\*\*\s*", body)
+        label = m.group(1).strip() if m else ""
+        if m:
+            body = body[m.end():].strip()
+        out.append(Resource(label=label, text=body or label))
     return out
 
 

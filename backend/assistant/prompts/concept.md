@@ -1,4 +1,4 @@
-# Idea: Concept — make the lesson unmistakably click
+cl# Idea: Concept — make the lesson unmistakably click
 
 You've been given ONE specific teaching point from today's verse (see "Primary
 focus" below — the bold line is the lesson itself; what follows it is the
