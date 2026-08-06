@@ -38,56 +38,74 @@ actually means for a viewer's life.
 ## How to build it
 - coreTheme: one short line naming what the video is really about.
 - concept: one punchy, spoken-style hook line — the heart of the video.
-- Break the {{DURATION_SECONDS}} seconds into three beats: Opening (a strong hook,
-  about the first fifth), Middle (develop the idea, about three fifths), End (land
-  the idea, about the last fifth). Give each beat a
-  timeRange in seconds that adds up to the total — for example "0–8 sec". Size each
+- **Plan THREE complete, independent versions of the whole video first — Version
+  1, Version 2, Version 3 — before writing anything down.** Each version is its
+  own full Opening → Middle → End arc: its own hook style, its own way of
+  building the idea, its own ending, written together as one connected piece so
+  every beat inside a version reinforces the others (an End can safely call back
+  to details from ITS OWN Opening — the exact image, an object, a line — because
+  the two were planned as one story). The creator will shoot ONE version
+  start-to-finish, never a beat from Version 1 stitched to a beat from Version 2
+  — so each version must stand alone as a genuinely good, complete video, and
+  must NOT depend on anything set up in a different version.
+- Make the three versions genuinely different from each other — different hook,
+  different angle, different imagery, different ending style — not small
+  rewordings of the same version.
+- Break each version's {{DURATION_SECONDS}} seconds into three beats: Opening (a
+  strong hook, about the first fifth), Middle (develop the idea, about three
+  fifths), End (land the idea, about the last fifth). Give each beat a
+  timeRange in seconds that adds up to the total — for example "0–8 sec" — the
+  same timeRange split applies across all three versions. Size each
   beat's voiceover to the seconds it covers, so the spoken content fills the whole
   duration (see the length budget above).
-- **Shape each beat with intent:**
+- **Shape each version's beats with intent:**
   - Opening — the first frame must grab even on mute: a bold, instantly readable
     image or action that signals what this is before a word is spoken (most people
     watch with sound off at first). Aim it at the everyday ache the teaching
     speaks to, so the viewer thinks "that's me." A hook can be a question, a
     confession, a bold claim, or a cold-open into a tiny scene — don't default to
     a question every time. Never use the generic "Have you ever [wondered / felt /
-    noticed / thought]…?" template in ANY option, in WHICHEVER LANGUAGE you write
+    noticed / thought]…?" template in ANY version, in WHICHEVER LANGUAGE you write
     the voiceover in — this includes direct translations of the cliché, such as
     Hindi's "क्या आपने कभी सोचा / महसूस / महसूस किया / देखा है…?" — it's the most
     overused hook in short-form video, no matter which verb fills the blank or
-    which language it's rendered in. If an option is a question, make it sharp and
-    specific to this exact moment, not a fill-in-the-blank frame.
-    **Hard rule for the three Opening options:** they must use three DIFFERENT
-    hook types — for example one question, one bold claim/confession, and one
-    cold-open scene-drop. Never give the creator three rhetorical questions in a
-    row; that's not a real choice.
+    which language it's rendered in. If a version's Opening is a question, make it
+    sharp and specific to this exact moment, not a fill-in-the-blank frame.
+    **Hard rule across the three versions' Openings:** they must use three
+    DIFFERENT hook types — for example one question, one bold claim/confession,
+    and one cold-open scene-drop. Never give the creator three rhetorical
+    questions in a row; that's not a real choice.
   - Middle — don't just "explain." First show the struggle bite, let it build a
     little, THEN turn — the moment the teaching lands and something shifts. The
     turn is what makes the payoff feel earned instead of handed over.
   - End — show the shift, don't only say it: a before/after contrast lands hardest
     (tense face to soft one, cluttered desk to a calm cup of tea). Where it fits,
-    end so it loops — cut just before the last beat, or circle back to the opening
-    image — so a rewatch feels natural. Choose the LANDING that fits THIS video.
-    A call to action is the EXCEPTION, not the reflex — most videos should simply
-    land a feeling and stop. The strongest endings are usually: a resonant line
-    that lingers with no instruction at all, a reframing question that leaves them
-    thinking, or a loop back to the opening image. Reach for those first.
-    **Hard rule for the three End options:** at most ONE of the three may be a
-    call to action ("try this today," "look for one person," "send this to…").
-    The other two MUST be non-instruction landings (a lingering line, a reframing
-    question, or a loop-back), so the creator is always offered a real choice —
-    never three variations of "do this today." Only use a CTA at all when the
-    teaching genuinely asks the viewer to act; a call to action on every video
-    turns the series formulaic and preachy. If the opening set up a strong image
-    or loop (as most do), prefer closing that loop over adding homework.
-- For each beat, give THREE distinct options — three genuinely different ways to
-  shoot that beat (different angle, imagery, or approach, not small rewordings of
-  the same idea). Each option has:
+    end so it loops — cut just before the last beat, or circle back to THIS
+    version's own opening image — so a rewatch feels natural. Choose the LANDING
+    that fits THIS version. A call to action is the EXCEPTION, not the reflex —
+    most videos should simply land a feeling and stop. The strongest endings are
+    usually: a resonant line that lingers with no instruction at all, a reframing
+    question that leaves them thinking, or a loop back to this version's own
+    opening image. Reach for those first.
+    **Hard rule across the three versions' Endings:** at most ONE of the three
+    may be a call to action ("try this today," "look for one person," "send this
+    to…"). The other two MUST be non-instruction landings (a lingering line, a
+    reframing question, or a loop-back), so the creator is always offered a real
+    choice — never three variations of "do this today." Only use a CTA at all
+    when the teaching genuinely asks the viewer to act; a call to action on
+    every version turns the series formulaic and preachy. If a version's opening
+    set up a strong image or loop (as most do), prefer closing that loop over
+    adding homework.
+- Output each beat's three versions as its three "options," in the SAME version
+  order in every beat — Version 1's Opening, Middle, and End must all be at
+  index 0 of their beat's options array, Version 2's at index 1, Version 3's at
+  index 2 — so option index lines up to the same version across all three
+  beats. Each option has:
   - visuals: concrete, filmable things (people, places, actions), not abstract
-    concepts. Offer BOTH formats across the three options — at least one as a
+    concepts. Offer BOTH formats across the three versions — at least one as a
     single continuous scene (one shot or scenario that just plays out) and at
     least one as a montage (several quick shots cut together) — so the creator can
-    pick whichever they prefer. Neither is the default; choose per option whatever
+    pick whichever they prefer. Neither is the default; choose per version whatever
     serves that beat best. When the shot is just the creator talking to the lens,
     add one small delivery cue where it helps — open hands, a warm look, or a
     two-second pause right after the key line so it lands (a held pause carries

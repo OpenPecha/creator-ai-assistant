@@ -64,27 +64,40 @@ build beats out of it or let it pull the video onto the general theme.
   (their lived lesson, not the abstract doctrine).
 - concept: one punchy, spoken-style first-person hook — the honest line that makes
   someone stop scrolling.
-- Break the {{DURATION_SECONDS}} seconds into three beats: Opening (a strong hook,
-  about the first fifth), Middle (the story and the turn, about three fifths), End
-  (where they are now, about the last fifth). Give each beat a timeRange
-  in seconds that adds up to the total — for example "0–8 sec". Size each beat's
+- **Plan THREE complete, independent versions of the whole testimony first —
+  Version 1, Version 2, Version 3 — before writing anything down.** Each version
+  is its own full Opening → Middle → End arc: its own opening form, its own way
+  of telling the story, its own landing, written together as one connected piece
+  so every beat inside a version reinforces the others (an End can safely call
+  back to details from ITS OWN Opening — the exact object, the exact moment —
+  because the two were planned as one story). The creator will shoot ONE version
+  start-to-finish, never a beat from Version 1 stitched to a beat from Version 2
+  — so each version must stand alone as a genuinely good, complete testimony, and
+  must NOT depend on anything set up in a different version. Make the three
+  versions genuinely different — different opening form, angle, ending style.
+- Break each version's {{DURATION_SECONDS}} seconds into three beats: Opening (a
+  strong hook, about the first fifth), Middle (the story and the turn, about
+  three fifths), End (where they are now, about the last fifth). Give each beat
+  a timeRange in seconds that adds up to the total — for example "0–8 sec" — the
+  same timeRange split applies across all three versions. Size each beat's
   voiceover to the seconds it covers (see the length budget above).
-- **Shape each beat with intent:**
+- **Shape each version's beats with intent:**
   - Opening — open on the honest, unflattering moment: the mess, the snap, the
     doubt, the thing they'd never post — not the victory. The first frame must grab
     even on mute (the creator's face to the lens, or one plain everyday object that
     signals the confession). The line itself can be a blunt confession, a
     mid-action scene, or a rhetorical question — don't default to a question every
     time. Never use the generic "Have you ever [wondered / felt / noticed /
-    thought]…?" template in ANY option, in WHICHEVER LANGUAGE you write the
+    thought]…?" template in ANY version, in WHICHEVER LANGUAGE you write the
     voiceover in — this includes direct translations of the cliché, such as
     Hindi's "क्या आपने कभी सोचा / महसूस किया / देखा है…?" — it's the most overused
     hook in short-form video, no matter which verb fills the blank or which
-    language it's rendered in. If an option is a question, make it sharp and
-    specific to this exact moment, not a fill-in-the-blank frame.
-    **Hard rule for the three Opening options:** they must use three DIFFERENT forms — for example one blunt
-    confession, one mid-scene action, and one question. Never give the creator
-    three rhetorical questions in a row; that's not a real choice.
+    language it's rendered in. If a version's Opening is a question, make it sharp
+    and specific to this exact moment, not a fill-in-the-blank frame.
+    **Hard rule across the three versions' Openings:** they must use three
+    DIFFERENT forms — for example one blunt confession, one mid-scene action, and
+    one question. Never give the creator three rhetorical questions in a row;
+    that's not a real choice.
   - Middle — let the struggle bite and build, THEN turn: the moment the teaching
     landed and something shifted in them. Name the lesson plainly here; keep it in
     their "I" voice ("I realized…", "what changed was…").
@@ -96,12 +109,13 @@ build beats out of it or let it pull the video onto the general theme.
     natural, never as a formula — a preachy "you should try this" instruction at
     the end of someone's real story breaks the trust the story just built. Never
     "like and subscribe," never a religious sign-off from another tradition.
-- For each beat, give THREE distinct options — three genuinely different ways to
-  shoot it (different angle, imagery, or approach, not small rewordings). Each
-  option has:
+- Output each beat's three versions as its three "options," in the SAME version
+  order in every beat — Version 1's Opening, Middle, and End must all be at
+  index 0 of their beat's options array, Version 2's at index 1, Version 3's at
+  index 2. Each option has:
   - visuals: concrete, filmable things (the creator to the lens, one room, simple
     everyday objects), not abstract concepts. Offer BOTH formats across the three
-    options — at least one as a single continuous talking-to-camera scene and at
+    versions — at least one as a single continuous talking-to-camera scene and at
     least one as a small montage of simple shots. Where the shot is just them
     talking, add one small delivery cue where it helps — open hands, a warm look,
     or a two-second pause right after the honest line so it lands.

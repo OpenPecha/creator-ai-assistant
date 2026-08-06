@@ -38,6 +38,15 @@ def section_words(duration_seconds: int) -> tuple[int, int, int]:
     return opening, middle, end
 
 
+def section_word_range(duration_seconds: int) -> tuple[tuple[int, int], tuple[int, int], tuple[int, int]]:
+    """Tight (low, high) word band per beat (~±15%), for a per-beat self-check."""
+    def _rng(n: int) -> tuple[int, int]:
+        return max(4, round(n * 0.85)), round(n * 1.15)
+
+    opening, middle, end = section_words(duration_seconds)
+    return _rng(opening), _rng(middle), _rng(end)
+
+
 def section_seconds(duration_seconds: int) -> tuple[int, int, int]:
     """Time budget in seconds for (Opening, Middle, End)."""
     op, mid, _end = _SECTION_SPLIT

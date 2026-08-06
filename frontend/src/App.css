@@ -1449,6 +1449,7 @@ body {
 }
 .beat__opt:hover { border-color: #2563eb; color: #2563eb; }
 .beat__opt--active { background: #2563eb; border-color: #2563eb; color: #fff; }
+.beat__opt--active:hover { color: #fff; }
 
 .structure__hint {
   font-size: 0.8rem;
@@ -1459,6 +1460,7 @@ body {
   padding: 9px 13px;
   margin-bottom: 14px;
 }
+.structure__versions { margin-bottom: 20px; }
 .beat__block { margin-top: 8px; }
 .beat__tag {
   display: block;
