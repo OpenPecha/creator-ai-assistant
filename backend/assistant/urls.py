@@ -10,4 +10,5 @@ urlpatterns = [
     path("script/", views.generate_script, name="generate-script"),
     path("structure/", views.generate_structure, name="generate-structure"),
     path("audio/", views.generate_audio, name="generate-audio"),
+    path("publish/", views.publish_generated, name="publish"),
 ]

@@ -53,7 +53,41 @@ prompt templates ("skills") to generate everything else.
    it** ("make the hook punchier", "shorten the opening"). Scripts can also be
    turned into **narrated audio**. At any point after picking a category, **‹ Pick
    a different verse or type** jumps back to the verse picker for the same day —
-   no reload, no refetch.
+   no reload, no refetch. Every result is also **auto-published to rails** as
+   it's generated (see below).
+
+### Publishing to rails
+Every generated script/structure is **pushed to rails automatically**, as soon
+as it's generated — no button to press. This is a permanent record of
+everything the assistant has produced: an archive the team can track, browse,
+and annotate in Obsidian, not just a review queue.
+
+Each result lands as a markdown file (with day/idea/focus/duration frontmatter)
+in `3-TRANSFORMATIONS/Creator-assistant-generated-video-idea/{en,hi}/Day-NNN/`,
+split by output language — by default in the same `bodhisattvacharyavatara-rails`
+repo the app already reads from, but a sibling of `Plans/` and never that path
+itself, so a push can never collide with a real day-package file. The UI just
+shows a passive "✓ Saved to rails" line with a link.
+
+The file path is keyed by (day, idea, focus, duration, language), so a
+`Regenerate` or chat-refine **overwrites the same file** rather than piling up
+near-duplicates — git's commit history becomes the version trail.
+
+**Human notes survive republishing.** Teammates write under the file's
+`## Feedback` heading; every republish replaces only the generated content
+*above* that heading and carries everything below it across verbatim. Without
+this, auto-publishing would silently wipe those notes the next time the creator
+hit Regenerate.
+
+Publishing is **best-effort and never blocks generation**: if GitHub is down,
+rate-limited, or `GITHUB_PUBLISH_TOKEN` is unset, the script/structure is still
+returned normally and the UI offers a manual retry (via `POST /api/publish/`)
+instead of failing the creator's work.
+
+Configured via `GITHUB_PUBLISH_REPO` / `GITHUB_PUBLISH_TOKEN` (see Local setup).
+`GITHUB_PUBLISH_TOKEN` is always its own credential, kept separate from the
+read-only `GITHUB_TOKEN` used on every day-load, even though they point at the
+same repo.
 
 ### Video structure — three complete versions, not mix-and-match beats
 A **Video structure** result is three full alternate storyboards (Version 1/2/3),
@@ -100,6 +134,12 @@ Set in `backend/.env`:
   from GitHub, no local clone needed. Defaults to `webuddhist/bodhisattvacharyavatara-rails`.
 - `GITHUB_TOKEN` — optional but recommended (raises the GitHub API rate limit from
   60 to 5000/hour).
+- `GITHUB_PUBLISH_REPO` + `GITHUB_PUBLISH_TOKEN` — optional; enables
+  auto-publishing to rails. Defaults to the same repo/vault as `GITHUB_REPO`,
+  written under `3-TRANSFORMATIONS/Creator-assistant-generated-video-idea/{en,hi}/`,
+  but always its own write-scoped `GITHUB_PUBLISH_TOKEN` (a classic token with
+  the `public_repo` scope) — never reuse the read-only `GITHUB_TOKEN`. Leave
+  unset to disable publishing entirely; generation still works normally.
 - `GEMINI_API_KEY` — your Google Gemini API key (summary, script, structure, audio).
 
 ```bash
@@ -132,6 +172,7 @@ Open http://localhost:5173 and start with a day number (e.g. `5`).
 | POST | `/api/script/` | `{day, ideaKey, durationSeconds, language, focus?, focusLabel?, creatorNotes?, feedback?, previous?}` → `{script}` |
 | POST | `/api/structure/` | `{day, ideaKey, durationSeconds, language, focus?, focusLabel?, creatorNotes?, feedback?, previous?}` → `{structure}` |
 | POST | `/api/audio/` | `{script, voice?}` → `{audioUrl}` |
+| POST | `/api/publish/` | `{day, ideaKey, durationSeconds, language, outputType, content, focusLabel?}` → `{url}` — manual retry only; `/script/` and `/structure/` already auto-publish |
 
 - `language` — `"english"` or `"hindi"`; passed to all generation endpoints so the
   output is produced in the chosen language end-to-end.
@@ -140,6 +181,9 @@ Open http://localhost:5173 and start with a day number (e.g. `5`).
   Commentary/Concept offers several; `focus` is the full text, `focusLabel` the
   short title. Omit both for the day's general material.
 - `feedback` + `previous` — power the chat-to-refine step; omit for a fresh generation.
+- `railsUrl` — returned by `/script/` and `/structure/`: the vault URL the result
+  was auto-published to, or `null` if publishing is unconfigured or failed (the
+  generation itself still succeeds either way).
 - `structure`'s response holds three fully-planned alternate versions per beat
   (see "Video structure" above) — `sections[].options[]`, index-aligned across beats.
 
