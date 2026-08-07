@@ -256,22 +256,44 @@ class DayPackageParseTests(SimpleTestCase):
         self.assertNotIn("sub:teaching-points", second.sections)
 
 
+_DAYS_MD = """## Opening
+
+Open quietly.
+
+## Today's Practice
+
+**Practice:** Share a quote with someone.
+
+**Explanation:** Sharing wisdom strengthens your own faith.
+"""
+
+
 class GetDayContentTests(SimpleTestCase):
-    def _fake_fetch(self, package_md):
+    def _fake_fetch(self, package_md, days_md=_DAYS_MD):
         pkg_path = f"{content_loader._PACKAGES_DIR}/Chapter-1 D1-D14/1-en.md"
+        days_path = f"{content_loader._DAYS_DIR}/Chapter-1 D1-D14/1.md"
 
         def fetch(path):
             if path == content_loader._SCHEDULE:
                 return _SCHEDULE_MD
             if path == pkg_path:
                 return package_md
+            if path == days_path:
+                return days_md
             return None
 
         return fetch
 
+    def _fake_list_dir(self, path):
+        if path in (content_loader._PACKAGES_DIR, content_loader._DAYS_DIR):
+            return ["Chapter-1 D1-D14"]
+        if path == f"{content_loader._DAYS_DIR}/Chapter-1 D1-D14":
+            return ["1.md"]
+        return []
+
     def test_populates_day_content_from_package(self):
         with mock.patch.object(content_loader, "_list_github_dir",
-                               return_value=["Chapter-1 D1-D14"]), \
+                               side_effect=self._fake_list_dir), \
              mock.patch.object(content_loader, "_fetch_raw",
                                side_effect=self._fake_fetch(_PACKAGE_MD)):
             dc = get_day_content(1)
@@ -317,8 +339,16 @@ class GetDayContentTests(SimpleTestCase):
 
     def test_missing_package_raises(self):
         with mock.patch.object(content_loader, "_list_github_dir",
-                               return_value=["Chapter-1 D1-D14"]), \
+                               side_effect=self._fake_list_dir), \
              mock.patch.object(content_loader, "_fetch_raw",
                                side_effect=self._fake_fetch(None)):
+            with self.assertRaises(ContentError):
+                get_day_content(1)
+
+    def test_missing_days_file_raises(self):
+        with mock.patch.object(content_loader, "_list_github_dir",
+                               side_effect=self._fake_list_dir), \
+             mock.patch.object(content_loader, "_fetch_raw",
+                               side_effect=self._fake_fetch(_PACKAGE_MD, days_md=None)):
             with self.assertRaises(ContentError):
                 get_day_content(1)

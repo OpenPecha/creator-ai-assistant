@@ -35,6 +35,11 @@ _SCHEDULE = f"{_PLAN_ROOT}/assets/schedule-hhdl-birthday.md"
 # living under a chapter subdirectory (e.g. "Chapter-1 D1-D14"). See day_package.py
 # for its structure. A day with no package is unavailable (get_day_content raises).
 _PACKAGES_DIR = f"{_PLAN_ROOT}/Day-Packages-EN"
+# The per-day authoring source for "Today's Practice" (the Challenge tab). Kept
+# separate from Day-Packages-EN because it's edited more frequently; filenames
+# vary per chapter (e.g. "1.md" vs "15-ch2-v1-3-eng.md"), so the day file is
+# resolved by prefix match rather than assumed. See _find_days_practice_path.
+_DAYS_DIR = f"{_PLAN_ROOT}/Days"
 
 _DASHES = "–—-"
 _RANGE_RE = re.compile(rf"(\d+)\.(\d+)\s*[{_DASHES}]\s*(?:(\d+)\.)?(\d+)")
@@ -401,6 +406,72 @@ def _find_package_path(day: int, verses: list[str]) -> str:
     return f"{_PACKAGES_DIR}/{chapter_dir}/{day}-en.md"
 
 
+# ── "Today's Practice" lookup (Days/) ────────────────────────────────────────
+
+_PRACTICE_HEADING_RE = re.compile(r"^##\s*(?:\d+\)\s*)?Today[’']s Practice\s*$", re.IGNORECASE)
+_ACTION_LABEL_RE = re.compile(r"^\*\*[^*]{0,40}?(?:Practice|Challenge):\*\*\s*", re.IGNORECASE)
+
+
+def _find_days_practice_path(day: int, verses: list[str]) -> str:
+    """Return the GitHub path to a day's file under Days/.
+
+    Mirrors `_find_package_path`'s chapter-folder resolution, but the day
+    filename itself also varies by chapter (plain `{day}.md` in Chapter 1,
+    `{day}-ch2-v...-eng.md` in Chapter 2), so the chapter folder is listed too
+    and the file is matched by a `{day}` prefix.
+    """
+    chapter = _chapter_of_verses(verses)
+
+    all_dirs = _list_github_dir(_DAYS_DIR)
+    chapter_dir = next(
+        (d for d in all_dirs if d.startswith(f"Chapter-{chapter}")),
+        None,
+    )
+    if chapter_dir is None:
+        raise ContentError(f"No Chapter-{chapter} directory found under Days/ in the repo.")
+
+    chapter_path = f"{_DAYS_DIR}/{chapter_dir}"
+    files = _list_github_dir(chapter_path)
+    day_file = next(
+        (f for f in files if re.match(rf"^{day}(\.md|-.*\.md)$", f)),
+        None,
+    )
+    if day_file is None:
+        raise ContentError(f"No Day {day} file found under {chapter_path}/ in the repo.")
+
+    return f"{chapter_path}/{day_file}"
+
+
+def _extract_practice_section(markdown: str) -> str:
+    """Pull the body under the "## Today's Practice" (or "## N) Today's
+    Practice") heading out of a Days/ file, up to the next level-2 heading.
+    """
+    lines = markdown.splitlines()
+    start = next(
+        (i + 1 for i, line in enumerate(lines) if _PRACTICE_HEADING_RE.match(line.strip())),
+        None,
+    )
+    if start is None:
+        return ""
+    end = next((j for j in range(start, len(lines)) if lines[j].startswith("## ")), len(lines))
+    return "\n".join(lines[start:end]).strip()
+
+
+def _parse_practice_block(body: str) -> dict | None:
+    """Split a "**Practice/Challenge:** <action>\\n\\n**Explanation:** <why>"
+    block into the {label, text, explanation} shape the frontend expects.
+    """
+    if not body:
+        return None
+    action_part, _, expl_part = body.partition("**Explanation:**")
+    action = _ACTION_LABEL_RE.sub("", action_part.strip()).strip()
+    explanation = expl_part.strip()
+    item = {"label": "Today's Practice", "text": action or body.strip()}
+    if explanation:
+        item["explanation"] = explanation
+    return item
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def get_day_content(day: int) -> DayContent:
@@ -448,21 +519,14 @@ def get_day_content(day: int) -> DayContent:
     def _items(resources) -> list[dict]:
         return [{"label": r.label, "text": r.text} for r in resources]
 
-    # "Today's Practice" is "**Practice:** <action>\n\n**Explanation:** <why>".
-    # Split it so the UI can show the action under the "Today's Practice" title and
-    # the explanation under its own heading. Degrades gracefully if a day omits the
-    # Explanation part.
-    practice_items = []
-    if parsed.practice:
-        action_part, _, expl_part = parsed.practice.text.partition("**Explanation:**")
-        action = action_part.strip()
-        if action.startswith("**Practice:**"):
-            action = action[len("**Practice:**"):].strip()
-        explanation = expl_part.strip()
-        item = {"label": parsed.practice.label, "text": action or parsed.practice.text.strip()}
-        if explanation:
-            item["explanation"] = explanation
-        practice_items = [item]
+    # "Today's Practice" (the Challenge tab) is sourced live from Days/, not the
+    # Day-Package — Days/ is the more frequently edited authoring copy.
+    days_path = _find_days_practice_path(day, entry["verses"])
+    days_markdown = _fetch_raw(days_path)
+    if days_markdown is None:
+        raise ContentError(f"No Day {day} file found at {days_path} in the GitHub repo.")
+    practice_item = _parse_practice_block(_extract_practice_section(days_markdown))
+    practice_items = [practice_item] if practice_item else []
 
     # Per-verse "Main Teaching Points" (<!-- sub:teaching-points -->), aligned to
     # entry["verses"] so it pairs positionally with `verses` in DayContent.
