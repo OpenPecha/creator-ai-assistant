@@ -1,11 +1,22 @@
-"""Publish a generated video idea to the team's GitHub review vault.
+"""Publish a generated video idea to the rails repo.
 
-The review vault is a separate repo (an Obsidian vault) the team browses,
-annotates, and comments on directly — distinct from the read-only source
-content repo `content_loader` pulls from. A save is keyed by
-(day, idea, focus, duration, language): saving the same piece again (e.g.
-after a chat-refine) updates that same file in place, so git's own commit
-history becomes the version trail instead of the vault filling up with
+Every generated script/structure is pushed to rails as a permanent record of
+what the assistant produced — a durable archive the team can browse, track,
+and annotate in Obsidian, not just a review queue.
+
+Files land under `3-TRANSFORMATIONS/Creator-assistant-generated-video-idea/
+{en,hi}/` — by default in the SAME repo/Obsidian vault `content_loader` reads
+source content from, kept under its own folder (a sibling of
+`3-TRANSFORMATIONS/Plans/...`, never that path itself) so a push can never
+collide with or overwrite an actual day-package path (`content_loader` only
+ever lists/reads specific known subpaths, never the repo root, so this folder
+is invisible to it either way). Point GITHUB_PUBLISH_REPO at a different repo
+instead if the team later wants full separation. Git has no notion of an empty
+folder — the `en`/`hi` folders come into existence automatically the first
+time something is saved into them, no separate setup step needed. A push is
+keyed by (day, idea, focus, duration, language): publishing the same piece
+again (e.g. after a chat-refine) updates that same file in place, so git's own
+commit history becomes the version trail instead of the folder filling up with
 near-duplicate files.
 """
 
@@ -22,17 +33,24 @@ from .ideas import idea_label
 
 _http = ipv4.requests_session()
 
+# Folder generated ideas are published under — a sibling of 3-TRANSFORMATIONS/Plans/,
+# never touches the actual day-package paths content_loader reads from.
+_PUBLISH_ROOT = "3-TRANSFORMATIONS/Creator-assistant-generated-video-idea"
 
-class ReviewNotConfigured(Exception):
-    """Raised when GITHUB_REVIEW_TOKEN/GITHUB_REVIEW_REPO aren't set."""
+# Everything below this heading is human-written and survives re-saves.
+_FEEDBACK_HEADING = "## Feedback"
 
 
-class ReviewPublishError(Exception):
+class PublishNotConfigured(Exception):
+    """Raised when GITHUB_PUBLISH_TOKEN/GITHUB_PUBLISH_REPO aren't set."""
+
+
+class PublishError(Exception):
     """Raised when the GitHub write itself fails."""
 
 
 def is_configured() -> bool:
-    return bool(settings.GITHUB_REVIEW_TOKEN and settings.GITHUB_REVIEW_REPO)
+    return bool(settings.GITHUB_PUBLISH_TOKEN and settings.GITHUB_PUBLISH_REPO)
 
 
 def _slug(text: str) -> str:
@@ -49,7 +67,7 @@ def _yaml_str(value: str) -> str:
 def _path_for(day: int, idea_key: str, focus_label: str, duration_seconds: int, language: str) -> str:
     ident = _slug(focus_label) if focus_label else "general"
     lang_code = "hi" if language == "hindi" else "en"
-    return f"Day-{day:03d}/{idea_key}-{ident}-{duration_seconds}s-{lang_code}.md"
+    return f"{_PUBLISH_ROOT}/{lang_code}/Day-{day:03d}/{idea_key}-{ident}-{duration_seconds}s.md"
 
 
 def _structure_to_markdown(structure: dict) -> str:
@@ -108,22 +126,39 @@ def _build_markdown(
         f"durationSeconds: {duration_seconds}",
         f"language: {language}",
         f"generatedAt: {date.today().isoformat()}",
-        "status: needs-review",
+        "status: draft",
         "---",
     ]
 
-    markdown = "\n".join(fm) + f"\n\n# {title}\n\n{body}\n\n## Feedback\n"
+    markdown = "\n".join(fm) + f"\n\n# {title}\n\n{body}\n\n{_FEEDBACK_HEADING}\n"
     return markdown, title
+
+
+def _carry_over_feedback(new_markdown: str, existing_markdown: str) -> str:
+    """Preserve whatever reviewers wrote under `## Feedback` in the old file.
+
+    Every save rewrites the whole file, so without this a re-save (and with
+    auto-publish, every single regenerate) would silently wipe a reviewer's
+    notes. The generated part above the heading is always replaced; everything
+    from the heading down is human-owned and carried across verbatim.
+    """
+    idx = existing_markdown.find(_FEEDBACK_HEADING)
+    if idx == -1:
+        return new_markdown
+    kept = existing_markdown[idx + len(_FEEDBACK_HEADING):].strip()
+    if not kept:
+        return new_markdown
+    return new_markdown.rstrip("\n") + f"\n\n{kept}\n"
 
 
 def publish(
     *, day: int, verses_label: str, idea_key: str, focus_label: str,
     duration_seconds: int, language: str, output_type: str, content,
 ) -> dict:
-    """Create or update the review file for this piece. Returns {url, path}."""
+    """Create or update this piece's file in rails. Returns {url, path}."""
     if not is_configured():
-        raise ReviewNotConfigured(
-            "GITHUB_REVIEW_TOKEN and GITHUB_REVIEW_REPO must both be set to save for review."
+        raise PublishNotConfigured(
+            "GITHUB_PUBLISH_TOKEN and GITHUB_PUBLISH_REPO must both be set to publish to rails."
         )
 
     markdown, title = _build_markdown(
@@ -132,23 +167,35 @@ def publish(
         content=content,
     )
     path = _path_for(day, idea_key, focus_label, duration_seconds, language)
-    repo = settings.GITHUB_REVIEW_REPO
-    branch = settings.GITHUB_REVIEW_BRANCH
+    repo = settings.GITHUB_PUBLISH_REPO
+    branch = settings.GITHUB_PUBLISH_BRANCH
     base = f"https://api.github.com/repos/{repo}/contents/{path}"
     headers = {
-        "Authorization": f"Bearer {settings.GITHUB_REVIEW_TOKEN}",
+        "Authorization": f"Bearer {settings.GITHUB_PUBLISH_TOKEN}",
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
 
     # Look up the existing file's blob sha (if any) so we update it in place
     # rather than creating a sibling — GitHub requires the current sha to
-    # overwrite an existing path.
+    # overwrite an existing path. The same response carries the current
+    # contents, which is where any reviewer feedback lives.
     get_resp = _http.get(base, headers=headers, params={"ref": branch}, timeout=15)
-    sha = get_resp.json().get("sha") if get_resp.status_code == 200 else None
+    sha = None
+    if get_resp.status_code == 200:
+        existing = get_resp.json()
+        sha = existing.get("sha")
+        if existing.get("encoding") == "base64" and existing.get("content"):
+            try:
+                previous = base64.b64decode(existing["content"]).decode("utf-8")
+                markdown = _carry_over_feedback(markdown, previous)
+            except (ValueError, UnicodeDecodeError):
+                # Unreadable previous file — publish the fresh copy rather than
+                # failing the save outright.
+                pass
 
     payload = {
-        "message": f"{'Update' if sha else 'Save'} {title} (review)",
+        "message": f"{'Update' if sha else 'Add'} {title} (creator assistant)",
         "content": base64.b64encode(markdown.encode("utf-8")).decode("ascii"),
         "branch": branch,
     }
@@ -157,7 +204,7 @@ def publish(
 
     put_resp = _http.put(base, headers=headers, json=payload, timeout=20)
     if put_resp.status_code not in (200, 201):
-        raise ReviewPublishError(
+        raise PublishError(
             f"GitHub write failed ({put_resp.status_code}): {put_resp.text[:300]}"
         )
 

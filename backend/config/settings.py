@@ -44,12 +44,16 @@ GITHUB_TOKEN = env("GITHUB_TOKEN", default="")
 # pushes; 0 disables caching (always fetch fresh).
 GITHUB_CACHE_TTL = env.int("GITHUB_CACHE_TTL", default=300)
 
-# Separate GitHub repo the team reviews generated video ideas in, as an
-# Obsidian vault ("owner/repo-name"). Deliberately its own repo/token (write
-# access), never the read-only source-content repo/token above.
-GITHUB_REVIEW_REPO = env("GITHUB_REVIEW_REPO", default="")
-GITHUB_REVIEW_BRANCH = env("GITHUB_REVIEW_BRANCH", default="main")
-GITHUB_REVIEW_TOKEN = env("GITHUB_REVIEW_TOKEN", default="")
+# Where generated video ideas are published as a permanent record
+# ("owner/repo-name") — by default the SAME repo as GITHUB_REPO above, written
+# under 3-TRANSFORMATIONS/Creator-assistant-generated-video-idea/{en,hi}/ (see
+# rails_publish.py) — a sibling of Plans/, never that path itself. Always
+# uses its own TOKEN, though, kept separate from the read-only GITHUB_TOKEN
+# above on purpose: that one is used on every single day-load and must never
+# gain write power, while this one only fires after a generation completes.
+GITHUB_PUBLISH_REPO = env("GITHUB_PUBLISH_REPO", default="")
+GITHUB_PUBLISH_BRANCH = env("GITHUB_PUBLISH_BRANCH", default="main")
+GITHUB_PUBLISH_TOKEN = env("GITHUB_PUBLISH_TOKEN", default="")
 
 # WeBuddhist plan integration — the public plan API supplies the "today's
 # challenge" shareable image, and the share site hosts the per-day plan link.

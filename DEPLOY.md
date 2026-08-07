@@ -9,12 +9,13 @@ frontend as static files.
 - A domain (optional but recommended for HTTPS).
 - Python 3.12+, Node 20+, nginx installed.
 
-## 1. Get the code + source content
+## 1. Get the code
 ```bash
 git clone <this-repo> /opt/creator-ai-assistant
-git clone <bodhisattvacharyavatara-rails> /opt/bodhisattvacharyavatara-rails
 ```
-Keep the rails clone updated with `git pull` whenever the source content changes.
+No local clone of the content repo is needed — the backend fetches
+`bodhisattvacharyavatara-rails` directly from GitHub at request time (see
+`GITHUB_REPO` below).
 
 ## 2. Backend
 ```bash
@@ -23,16 +24,27 @@ python3 -m venv venv
 venv/bin/pip install -r requirements.txt
 cp .env.example .env
 ```
-Edit `.env` for production:
+Edit `.env` for production — this is where **every secret/API key goes**,
+including the Gemini key and both GitHub tokens. It's git-ignored and lives
+only on the server; nothing here is ever committed:
 ```
 ENV=production
 DJANGO_SECRET_KEY=<long-random-string>
 DJANGO_DEBUG=false
 ALLOWED_HOSTS=your-domain.com,<ec2-public-dns>
 CORS_ALLOWED_ORIGINS=https://your-domain.com
-RAILS_REPO_PATH=/opt/bodhisattvacharyavatara-rails
+
+GITHUB_REPO=webuddhist/bodhisattvacharyavatara-rails
+GITHUB_TOKEN=<read-only fine-grained PAT, public_repo read access>
+
+GITHUB_PUBLISH_REPO=webuddhist/bodhisattvacharyavatara-rails
+GITHUB_PUBLISH_TOKEN=<classic PAT, public_repo scope — write access>
+
 GEMINI_API_KEY=<your-key>
 ```
+`GITHUB_TOKEN` and `GITHUB_PUBLISH_TOKEN` are deliberately two different
+tokens even though they point at the same repo (see `.env.example` for why) —
+don't collapse them into one.
 Then:
 ```bash
 venv/bin/python manage.py migrate
@@ -107,5 +119,6 @@ Django trust nginx's `X-Forwarded-Proto`.
 ## Notes / future
 - Generated audio is written to `backend/media/audio/` and served by nginx. For
   scale, move to S3 + a storage backend later.
-- Restart the backend (`systemctl restart creator-ai`) after pulling new source
-  content to clear the in-memory day cache, or add a cache-bust endpoint.
+- Source content updates on GitHub show up on their own once `GITHUB_CACHE_TTL`
+  (default 300s) expires — no restart or manual pull needed. Restart the
+  backend only if you want a change to appear immediately.

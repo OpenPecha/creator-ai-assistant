@@ -143,10 +143,10 @@ const UI = {
     regenerate: "↻ Regenerate",
     backToVerses: "Pick a different verse or type",
     makeAnother: "+ Make another video",
-    sendForReview: "Send for review",
-    sendingForReview: "Sending…",
-    savedForReview: "✓ Sent — view in vault",
-    reviewSaveError: "Couldn't send — retry",
+    publishing: "Saving to rails…",
+    publishedToRails: "✓ Saved to rails.",
+    viewInVault: "Open it",
+    publishError: "Couldn't save to rails — retry",
     tryAgain: "↻ Try again",
     // Shown for transient failures (5xx / network); retryable → gets a Try-again chip.
     contentUnavailable: "The content service is temporarily unavailable. Please try again in a moment.",
@@ -261,10 +261,10 @@ const UI = {
     regenerate: "↻ फिर से बनाएँ",
     backToVerses: "कोई और श्लोक या प्रकार चुनें",
     makeAnother: "+ एक और वीडियो बनाएँ",
-    sendForReview: "समीक्षा के लिए भेजें",
-    sendingForReview: "भेजा जा रहा है…",
-    savedForReview: "✓ भेजा गया — वॉल्ट में देखें",
-    reviewSaveError: "भेज नहीं पाया — फिर कोशिश करें",
+    publishing: "rails में सहेजा जा रहा है…",
+    publishedToRails: "✓ rails में सहेज दिया गया।",
+    viewInVault: "इसे खोलें",
+    publishError: "rails में सहेज नहीं पाया — फिर कोशिश करें",
     tryAgain: "↻ फिर से कोशिश करें",
     contentUnavailable: "कंटेंट सेवा अभी अस्थायी रूप से उपलब्ध नहीं है। कृपया थोड़ी देर बाद फिर से कोशिश करें।",
     somethingWrong: (m) => `कुछ गड़बड़ हो गई: ${m}`,
@@ -405,7 +405,7 @@ export default function App() {
   const [outputType, setOutputType] = useState("script");
   const [duration, setDuration] = useState(null);
   const [lastOutput, setLastOutput] = useState(null);
-  const [reviewState, setReviewState] = useState({ status: "idle" }); // "idle" | "saving" | "saved" | "error"
+  const [publishState, setPublishState] = useState({ status: "idle" }); // "idle" | "saving" | "saved" | "error"
   const [refineInput, setRefineInput] = useState("");
   const [currentVerseLines, setCurrentVerseLines] = useState([]);
   const [currentVerseResources, setCurrentVerseResources] = useState({});
@@ -595,7 +595,7 @@ export default function App() {
   async function generate({ seconds, feedback = "", previous = null, onErrorStage }) {
     setBusy(true);
     setStage("generating");
-    setReviewState({ status: "idle" });
+    setPublishState({ status: "idle" });
     try {
       const focusFields = ideaFocus
         ? { focus: ideaFocus.text, focusLabel: ideaFocus.label || ideaFocus.typeLabel }
@@ -606,12 +606,14 @@ export default function App() {
         const data = await api.generateStructure(payload);
         addMsg("assistant", feedback ? t.updatedStructure : t.yourStructure, { structure: data.structure });
         setLastOutput(data.structure);
+        setPublishState(data.railsUrl ? { status: "saved", url: data.railsUrl } : { status: "error" });
       } else {
         const payload = { day, ideaKey, durationSeconds: seconds, creatorNotes, language, ...focusFields };
         if (feedback) { payload.feedback = feedback; payload.previous = previous; }
         const data = await api.generateScript(payload);
         addMsg("assistant", feedback ? t.updatedScript : t.yourScript, { scriptText: data.script });
         setLastOutput(data.script);
+        setPublishState(data.railsUrl ? { status: "saved", url: data.railsUrl } : { status: "error" });
       }
       setStage("done");
     } catch (err) {
@@ -622,17 +624,17 @@ export default function App() {
     }
   }
 
-  async function saveForReview() {
-    setReviewState({ status: "saving" });
+  async function publishToRails() {
+    setPublishState({ status: "saving" });
     try {
-      const data = await api.saveForReview({
+      const data = await api.publishToRails({
         day, ideaKey, durationSeconds: duration, language, outputType,
         content: lastOutput,
         focusLabel: ideaFocus?.label || ideaFocus?.typeLabel || "",
       });
-      setReviewState({ status: "saved", url: data.url });
+      setPublishState({ status: "saved", url: data.url });
     } catch (err) {
-      setReviewState({ status: "error", error: err.message });
+      setPublishState({ status: "error", error: err.message });
     }
   }
 
@@ -862,28 +864,24 @@ export default function App() {
 
         {!busy && stage === "done" && (
           <>
+            {publishState.status === "saved" && (
+              <p className="publish-note">
+                {t.publishedToRails}{" "}
+                <a href={publishState.url} target="_blank" rel="noopener noreferrer">{t.viewInVault}</a>
+              </p>
+            )}
             <button type="button" className="back-link" onClick={backToVerses}>
               <BackIcon />{t.backToVerses}
             </button>
             <div className="choices">
               <button className="chip" onClick={regenerate}>{t.regenerate}</button>
               <button className="chip chip--ghost" onClick={restart}>{t.makeAnother}</button>
-              {reviewState.status === "idle" && (
-                <button type="button" className="chip chip--ghost" onClick={saveForReview}>
-                  {t.sendForReview}
-                </button>
+              {publishState.status === "saving" && (
+                <button type="button" className="chip chip--ghost" disabled>{t.publishing}</button>
               )}
-              {reviewState.status === "saving" && (
-                <button type="button" className="chip chip--ghost" disabled>{t.sendingForReview}</button>
-              )}
-              {reviewState.status === "saved" && (
-                <a className="chip chip--ghost" href={reviewState.url} target="_blank" rel="noopener noreferrer">
-                  {t.savedForReview}
-                </a>
-              )}
-              {reviewState.status === "error" && (
-                <button type="button" className="chip chip--ghost" onClick={saveForReview} title={reviewState.error}>
-                  {t.reviewSaveError}
+              {publishState.status === "error" && (
+                <button type="button" className="chip chip--ghost" onClick={publishToRails} title={publishState.error}>
+                  {t.publishError}
                 </button>
               )}
             </div>
