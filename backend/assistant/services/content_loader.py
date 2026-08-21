@@ -34,9 +34,9 @@ _SCHEDULE = f"{_PLAN_ROOT}/assets/schedule-hhdl-birthday.md"
 # Each day's content is a single consolidated "Day-Package" file, `{day}-en.md`,
 # living under a chapter subdirectory (e.g. "Chapter-1 D1-D14"). See day_package.py
 # for its structure. A day with no package is unavailable (get_day_content raises).
-_PACKAGES_DIR = f"{_PLAN_ROOT}/Day-Packages-EN"
+_PACKAGES_DIR = "3-TRANSFORMATIONS/Day-Packages/en"
 # The per-day authoring source for "Today's Practice" (the Challenge tab). Kept
-# separate from Day-Packages-EN because it's edited more frequently; filenames
+# separate from Day-Packages/ because it's edited more frequently; filenames
 # vary per chapter (e.g. "1.md" vs "15-ch2-v1-3-eng.md"), so the day file is
 # resolved by prefix match rather than assumed. See _find_days_practice_path.
 _DAYS_DIR = f"{_PLAN_ROOT}/Days"
@@ -386,7 +386,7 @@ def day_offset_in_chapter(day: int) -> int:
 def _find_package_path(day: int, verses: list[str]) -> str:
     """Return the GitHub path to a day's Day-Package file (`{day}-en.md`).
 
-    Lists the Day-Packages-EN directory once to find the chapter folder (which may
+    Lists the Day-Packages directory once to find the chapter folder (which may
     carry a suffix like 'Chapter-1 D1-D14'), then returns the `{day}-en.md` path
     inside it. Raises ContentError if the chapter directory is absent; the file's
     own existence is checked by the caller's fetch.
@@ -400,7 +400,7 @@ def _find_package_path(day: int, verses: list[str]) -> str:
     )
     if chapter_dir is None:
         raise ContentError(
-            f"No Chapter-{chapter} directory found under Day-Packages-EN/ in the repo."
+            f"No Chapter-{chapter} directory found under {_PACKAGES_DIR}/ in the repo."
         )
 
     return f"{_PACKAGES_DIR}/{chapter_dir}/{day}-en.md"
